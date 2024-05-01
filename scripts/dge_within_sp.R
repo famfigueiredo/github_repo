@@ -22,7 +22,7 @@ suppressPackageStartupMessages({
   MulticoreParam(10)
 })
 
-
+## NEED TO TRY STRING FOR PATHWAY ENRICHMENT AND GSEA ##
 # 1wpc ----
 ### Loading results files ----
 setwd(
