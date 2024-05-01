@@ -1,0 +1,152 @@
+GO:1905072	biological_process	cardiac jelly development
+GO:0060419	biological_process	heart growth
+GO:0060914	biological_process	heart formation
+GO:0060976	biological_process	coronary vasculature development
+GO:0060973	biological_process	cell migration involved in heart development
+GO:0060039	biological_process	pericardium development
+GO:0035051	biological_process	cardiocyte differentiation
+GO:0035054	biological_process	embryonic heart tube anterior/posterior pattern specification
+GO:0035050	biological_process	embryonic heart tube development
+GO:0060317	biological_process	cardiac epithelial to mesenchymal transition
+GO:0003142	biological_process	cardiogenic plate morphogenesis
+GO:0003143	biological_process	embryonic heart tube morphogenesis
+GO:0003170	biological_process	heart valve development
+GO:0003151	biological_process	outflow tract morphogenesis
+GO:0003157	biological_process	endocardium development
+GO:0003197	biological_process	endocardial cushion development
+GO:0003007	biological_process	heart morphogenesis
+GO:0140969	biological_process	determination of lung left/right asymmetry
+GO:0003306	biological_process	Wnt signaling pathway involved in heart development
+GO:0003203	biological_process	endocardial cushion morphogenesis
+GO:0003204	biological_process	cardiac skeleton development
+GO:0003205	biological_process	cardiac chamber development
+GO:0003206	biological_process	cardiac chamber morphogenesis
+GO:0003241	biological_process	growth involved in heart morphogenesis
+GO:0003245	biological_process	cardiac muscle tissue growth involved in heart morphogenesis
+GO:0003294	biological_process	atrial ventricular junction remodeling
+GO:0003297	biological_process	heart wedging
+GO:0003278	biological_process	apoptotic process involved in heart morphogenesis
+GO:0055008	biological_process	cardiac muscle tissue morphogenesis
+GO:2000826	biological_process	regulation of heart morphogenesis
+GO:0036302	biological_process	atrioventricular canal development
+GO:0061323	biological_process	cell proliferation involved in heart morphogenesis
+GO:0061343	biological_process	cell adhesion involved in heart morphogenesis
+GO:0061341	biological_process	non-canonical Wnt signaling pathway involved in heart development
+GO:0061346	biological_process	planar cell polarity pathway involved in heart morphogenesis
+GO:0061311	biological_process	cell surface receptor signaling pathway involved in heart development
+GO:0061313	biological_process	fibroblast growth factor receptor signaling pathway involved in heart development
+GO:0061314	biological_process	Notch signaling involved in heart development
+GO:0061316	biological_process	canonical Wnt signaling pathway involved in heart development
+GO:0061307	biological_process	cardiac neural crest cell differentiation involved in heart development
+GO:0061308	biological_process	cardiac neural crest cell development involved in heart development
+GO:0061371	biological_process	determination of heart left/right asymmetry
+GO:0061385	biological_process	fibroblast proliferation involved in heart morphogenesis
+GO:0048738	biological_process	cardiac muscle tissue development
+GO:0007512	biological_process	adult heart development
+GO:0007508	biological_process	larval heart development
+GO:1905222	biological_process	atrioventricular canal morphogenesis
+GO:0061049	biological_process	cell growth involved in cardiac muscle cell development
+GO:0099625	biological_process	ventricular cardiac muscle cell membrane repolarization
+GO:2000149	biological_process	negative regulation of planar cell polarity pathway involved in ventricular septum morphogenesis
+GO:1903762	biological_process	positive regulation of voltage-gated potassium channel activity involved in ventricular cardiac muscle cell action potential repolarization
+GO:1903760	biological_process	regulation of voltage-gated potassium channel activity involved in ventricular cardiac muscle cell action potential repolarization
+GO:1903761	biological_process	negative regulation of voltage-gated potassium channel activity involved in ventricular cardiac muscle cell action potential repolarization
+GO:1905024	biological_process	regulation of membrane repolarization during ventricular cardiac muscle cell action potential
+GO:1905026	biological_process	positive regulation of membrane repolarization during ventricular cardiac muscle cell action potential
+GO:1905025	biological_process	negative regulation of membrane repolarization during ventricular cardiac muscle cell action potential
+GO:1905072	biological_process	cardiac jelly development
+GO:1903946	biological_process	negative regulation of ventricular cardiac muscle cell action potential
+GO:1903947	biological_process	positive regulation of ventricular cardiac muscle cell action potential
+GO:0060412	biological_process	ventricular septum morphogenesis
+GO:0060419	biological_process	heart growth
+GO:0060925	biological_process	ventricular cardiac muscle cell fate commitment
+GO:0060926	biological_process	cardiac pacemaker cell development
+GO:0060914	biological_process	heart formation
+GO:0060976	biological_process	coronary vasculature development
+GO:0060973	biological_process	cell migration involved in heart development
+GO:0021804	biological_process	negative regulation of cell adhesion in ventricular zone
+GO:0021869	biological_process	forebrain ventricular zone progenitor cell division
+GO:0021847	biological_process	ventricular zone neuroblast division
+GO:0060039	biological_process	pericardium development
+GO:0035051	biological_process	cardiocyte differentiation
+GO:0035054	biological_process	embryonic heart tube anterior/posterior pattern specification
+GO:0035050	biological_process	embryonic heart tube development
+GO:0060317	biological_process	cardiac epithelial to mesenchymal transition
+GO:0098913	biological_process	membrane depolarization during ventricular cardiac muscle cell action potential
+GO:0098911	biological_process	regulation of ventricular cardiac muscle cell action potential
+GO:0098915	biological_process	membrane repolarization during ventricular cardiac muscle cell action potential
+GO:0060307	biological_process	regulation of ventricular cardiac muscle cell membrane repolarization
+GO:0106135	biological_process	negative regulation of cardiac muscle cell contraction
+GO:0106134	biological_process	positive regulation of cardiac muscle cell contraction
+GO:0060373	biological_process	regulation of ventricular cardiac muscle cell membrane depolarization
+GO:0003142	biological_process	cardiogenic plate morphogenesis
+GO:0003143	biological_process	embryonic heart tube morphogenesis
+GO:0003170	biological_process	heart valve development
+GO:0003151	biological_process	outflow tract morphogenesis
+GO:0003157	biological_process	endocardium development
+GO:0003197	biological_process	endocardial cushion development
+GO:0021900	biological_process	ventricular zone cell fate commitment
+GO:0021923	biological_process	cell proliferation in hindbrain ventricular zone
+GO:0086002	biological_process	cardiac muscle cell action potential involved in contraction
+GO:0086004	biological_process	regulation of cardiac muscle cell contraction
+GO:0086005	biological_process	ventricular cardiac muscle cell action potential
+GO:0003007	biological_process	heart morphogenesis
+GO:0140969	biological_process	determination of lung left/right asymmetry
+GO:0021591	biological_process	ventricular system development
+GO:0003306	biological_process	Wnt signaling pathway involved in heart development
+GO:0003203	biological_process	endocardial cushion morphogenesis
+GO:0003204	biological_process	cardiac skeleton development
+GO:0003205	biological_process	cardiac chamber development
+GO:0003206	biological_process	cardiac chamber morphogenesis
+GO:0003220	biological_process	left ventricular cardiac muscle tissue morphogenesis
+GO:0003221	biological_process	right ventricular cardiac muscle tissue morphogenesis
+GO:0003222	biological_process	ventricular trabecula myocardium morphogenesis
+GO:0003223	biological_process	ventricular compact myocardium morphogenesis
+GO:0003224	biological_process	left ventricular compact myocardium morphogenesis
+GO:0003225	biological_process	left ventricular trabecular myocardium morphogenesis
+GO:0003226	biological_process	right ventricular compact myocardium morphogenesis
+GO:0003227	biological_process	right ventricular trabecular myocardium morphogenesis
+GO:0003229	biological_process	ventricular cardiac muscle tissue development
+GO:0003241	biological_process	growth involved in heart morphogenesis
+GO:0003245	biological_process	cardiac muscle tissue growth involved in heart morphogenesis
+GO:0003294	biological_process	atrial ventricular junction remodeling
+GO:0003295	biological_process	cell proliferation involved in atrial ventricular junction remodeling
+GO:0003296	biological_process	apoptotic process involved in atrial ventricular junction remodeling
+GO:0003297	biological_process	heart wedging
+GO:0003278	biological_process	apoptotic process involved in heart morphogenesis
+GO:0003281	biological_process	ventricular septum development
+GO:0003282	biological_process	ventricular septum intermedium development
+GO:0003288	biological_process	ventricular septum intermedium morphogenesis
+GO:0055010	biological_process	ventricular cardiac muscle tissue morphogenesis
+GO:0055012	biological_process	ventricular cardiac muscle cell differentiation
+GO:0055003	biological_process	cardiac myofibril assembly
+GO:0055005	biological_process	ventricular cardiac myofibril assembly
+GO:0055008	biological_process	cardiac muscle tissue morphogenesis
+GO:0055020	biological_process	positive regulation of cardiac muscle fiber development
+GO:0055014	biological_process	atrial cardiac muscle cell development
+GO:0055015	biological_process	ventricular cardiac muscle cell development
+GO:0055018	biological_process	regulation of cardiac muscle fiber development
+GO:0055019	biological_process	negative regulation of cardiac muscle fiber development
+GO:0086055	biological_process	Purkinje myocyte to ventricular cardiac muscle cell communication by electrical coupling
+GO:0086068	biological_process	Purkinje myocyte to ventricular cardiac muscle cell communication
+GO:0086069	biological_process	bundle of His cell to Purkinje myocyte communication
+GO:2000826	biological_process	regulation of heart morphogenesis
+GO:0086074	biological_process	Purkinje myocyte-ventricular cardiac muscle cell adhesion involved in cell communication
+GO:0086029	biological_process	Purkinje myocyte to ventricular cardiac muscle cell signaling
+GO:0036302	biological_process	atrioventricular canal development
+GO:0061323	biological_process	cell proliferation involved in heart morphogenesis
+GO:0061343	biological_process	cell adhesion involved in heart morphogenesis
+GO:0061341	biological_process	non-canonical Wnt signaling pathway involved in heart development
+GO:0061346	biological_process	planar cell polarity pathway involved in heart morphogenesis
+GO:0061348	biological_process	planar cell polarity pathway involved in ventricular septum morphogenesis
+GO:0061311	biological_process	cell surface receptor signaling pathway involved in heart development
+GO:0061313	biological_process	fibroblast growth factor receptor signaling pathway involved in heart development
+GO:0061314	biological_process	Notch signaling involved in heart development
+GO:0061316	biological_process	canonical Wnt signaling pathway involved in heart development
+GO:0061307	biological_process	cardiac neural crest cell differentiation involved in heart development
+GO:0061308	biological_process	cardiac neural crest cell development involved in heart development
+GO:0061371	biological_process	determination of heart left/right asymmetry
+GO:0061385	biological_process	fibroblast proliferation involved in heart morphogenesis
+GO:0048738	biological_process	cardiac muscle tissue development
+GO:0007512	biological_process	adult heart development
+GO:0007508	biological_process	larval heart development

@@ -1,0 +1,2606 @@
+---
+title: "Data analysis across treatments at 4 weeks post-challenge, CONU as reference"
+author: Filipe Figueiredo
+format:
+  html:
+    theme: flatly
+    fig-width: 10
+    fig-align: center
+    fig-height: 10
+    fontsize: 1.2rem
+    linestretch: 1.2
+    page-layout: full
+    embed-resources: true
+    toc: true
+    toc-depth: 4
+    toc-expand: true
+    toc-location: body
+    number-sections: false
+code-fold: true
+code-block-bg: true
+code-block-border-left: "#31BAE9"
+highlight-style: arrow
+execute: 
+  echo: true
+  warning: false
+  cache: true
+editor: visual
+mainfont: 'Ubuntu'
+df-print: kable
+code-overflow: wrap
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r r setup}
+#| cache: false
+#| code-summary: R setup
+require("knitr")
+opts_knit$set(root.dir = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_4wpc')
+```
+
+```{css css setup}
+
+#| echo: false
+p {
+  text-align: justify
+}
+
+figcaption {
+  text-align: center;
+}
+
+h1 {
+text-align: center;
+}
+
+h2 {
+text-align: center;
+}
+
+h3 {
+text-align: center;
+}
+
+h4 {
+text-align: center;
+}
+
+div {
+  text-indent: 50px;
+}
+
+/* Add space between figures and text */
+<!-- figure { -->
+<!--     margin-bottom: 60px; /* Adjust the value as needed */ -->
+<!--     margin-top: 60px; -->
+<!-- } -->
+```
+```{r packages, functions, results}
+#| label: loading-packages-functions-results
+#| warning: false
+#| cache: false
+#| code-summary: Loading packages, functions, and results tables
+
+suppressPackageStartupMessages({
+  library('tidyverse')
+  library('VennDiagram')
+  library('clusterProfiler')
+  library('gprofiler2')
+  library('org.Hs.eg.db')
+})
+
+## Loading functions ----
+source(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/functions_data-wrangling_march24.R'
+)
+
+immune_related_GOterms <-
+  read.table(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/immune_related_GOterms.tsv',
+    header = T,
+    sep = '\t'
+  )  # loading dataframe containing immune related GO terms
+
+## Loading results ----
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_4wpc'
+)
+
+results_files <-
+  list.files(pattern = 'res_.*')  # regex matching results files
+list.data <- list()
+for (i in 1:length(results_files)) {
+  list.data[[i]] <- load(results_files[i])
+}
+```
+
+# Differentially expressed genes (DEG) summary
+
+To create this document, raw sequencing data was: <br>
+
+- Demultiplexed
+  
+- Trimmed
+  
+- Mapped to [Ssal_v3.1](https://www.ensembl.org/Salmo_salar/Info/Index), which is the current reference assembly for *Atlantic salmon* (released in 2021)
+  
+- Run through a feature count, which assigns sequencing reads to the mapped genes
+
+- Gene counts were modelled using *DESeq2's* negative binomial distribution
+
+- Results tables were extracted based on the desired contrasts/comparisons, as displayed in the example below:
+```{r}
+#| label: code example
+#| echo: true
+#| eval: false
+#| code-fold: false
+#| output: false
+#| warning: false
+#| error: false
+
+res_ivld_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast=c("group","ivld.4wpc","conu.4wpc"))
+res_ivhd_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast=c("group","ivhd.4wpc","conu.4wpc"))
+res_gata3_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast=c("group","gata3.4wpc","conu.4wpc"))
+res_eomes_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast=c("group","eomes.4wpc","conu.4wpc"))
+res_dnavaccine_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.4wpc","conu.4wpc"))
+```
+
+
+```{r dge summary conu}
+#| label: dge-summary-4wpc-conu
+#| warning: false
+#| output: false
+#| code-summary: DEG summary with CONU as reference
+
+## For loop, significant genes ----
+results_files <-
+  ls(pattern = '^res_.*conu.4wpc')  # listing Global Environment files matching regex pattern, to be used in the for loop. In this case, starting with res, containing conu, and 1wpc
+
+# Create an empty list to store results
+all_significant_genes <- list()
+
+# Assuming results_files is a list of object names
+for (name in results_files) {
+  # Remove the file extension ".RData" if present
+  name <- sub(".RData$", "", name)
+
+  # Retrieve the object from the global environment
+  results <- get(name, envir = .GlobalEnv)
+
+  # Call the significant_genes function and store the result
+  result_genes <- significant_genes(results)
+
+  # Store the result in the list
+  all_significant_genes[[name]] <- result_genes
+}
+
+### Renaming dataframes ----
+names(all_significant_genes) <-
+  c('DNA vaccine',
+    'EOMES',
+    'GATA3',
+    'IV-HD',
+    'IV-LD')
+
+### Delisting dataframes ----
+list2env(all_significant_genes, envir = .GlobalEnv)  # splitting the dataframes to summarize their contents
+
+### Summarizing differentially expressed genes ----
+deg_regulation_summary <-
+  lapply(mget(c(
+    'DNA vaccine',
+    'EOMES',
+    'GATA3',
+    'IV-HD',
+    'IV-LD'
+  )), sig_genes_metrics)
+
+### Transforming summary into a tibble ----
+deg_regulation_summary <-
+  as_tibble(bind_rows(deg_regulation_summary, .id = 'Treatment'))
+
+### Reordering factors to plot ----
+deg_regulation_summary$Treatment <-
+  factor(
+    deg_regulation_summary$Treatment,
+    levels = c('IV-LD',
+               'IV-HD',
+               'DNA vaccine',
+               'EOMES',
+               'GATA3')
+  )
+```
+
+```{r dge summary plot conu}
+#| label: fig-dge-summary-4wpc-conu
+#| fig-cap: Summary of differentially expressed genes in the heart at 4 WPC with CONU as reference
+#| code-summary: DEG summary plot with CONU as reference
+
+
+deg_regulation_summary %>%
+  ggplot(aes(x = Treatment, y = n, fill = Regulation)) +
+  geom_bar(
+    stat = 'identity',
+    position = 'dodge',
+    colour = 'black',
+    linewidth = .2
+  ) +
+  scale_fill_manual(values = c('#BAFFC9',
+                               '#FFDFBA')) +
+  ylab('Number of genes') +
+  geom_text(
+    aes(label = n),
+    position = position_dodge(width = 0.9),
+    vjust = -0.5,
+    size = 4
+  ) +
+  # ggtitle(label = 'Differentially Expressed Genes',
+  #         subtitle = 'Cardiac tissue at 1 WPC, CONU as reference') +
+  theme_light() +
+  theme(panel.grid = element_blank()) +
+  theme(text = element_text(size = 14, family = 'serif')) +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5)) +
+  geom_vline(
+    xintercept = c(1.5, 2.5, 3.5, 4.5, 6.5, 7.5, 8.5),
+    linetype = 'dotted',
+    linewidth = 0.2
+  ) +
+  geom_hline(yintercept = 0, size = 0.2)
+
+```
+
+```{r dge summary ptag/ivld}
+#| label: dge-summary-1wpc-ptag-ivld
+#| warning: false
+#| output: false
+#| echo: true
+#| code-summary: DEG summary with pTagRFP/IV-LD as reference
+
+### For loop, significant genes ----
+results_files <-
+  ls(pattern = '^res_.*(ptag|ivld).4wpc')  # listing Global Environment files matching regex pattern, to be used in the for loop. In this case, starting with res, and containing conu or ivld, and 4wpc
+
+# Create an empty list to store results
+all_significant_genes <- list()
+
+# Assuming results_files is a list of object names
+for (name in results_files) {
+  # Remove the file extension ".RData" if present
+  name <- sub(".RData$", "", name)
+  
+  # Retrieve the object from the global environment
+  results <- get(name, envir = .GlobalEnv)
+  
+  # Call the significant_genes function and store the result
+  result_genes <- significant_genes(results)
+  
+  # Store the result in the list
+  all_significant_genes[[name]] <- result_genes
+}
+
+### Renaming dataframes ----
+names(all_significant_genes) <-
+  c(
+    'DNA vaccine vs IV-LD',
+    'DNA vaccine vs pTagRFP',
+    'EOMES vs IV-LD',
+    'EOMES vs pTagRFP',
+    'GATA3 vs IV-LD',
+    'GATA3 vs pTagRFP',
+    'IV-HD vs IV-LD',
+    'IV-HD vs pTagRFP',
+    'IV-LD vs pTagRFP'
+  )
+
+### Delisting dataframes ----
+list2env(all_significant_genes, envir = .GlobalEnv)  # splitting the dataframes to summarize their contents
+
+### Summarizing differentially expressed genes ----
+deg_regulation_summary <-
+  lapply(mget(
+    c(
+      'DNA vaccine vs IV-LD',
+      'DNA vaccine vs pTagRFP',
+      'EOMES vs IV-LD',
+      'EOMES vs pTagRFP',
+      'GATA3 vs IV-LD',
+      'GATA3 vs pTagRFP',
+      'IV-HD vs IV-LD',
+      'IV-HD vs pTagRFP',
+      'IV-LD vs pTagRFP'
+    )
+  ), sig_genes_metrics)
+
+### Transforming summary into a tibble ----
+deg_regulation_summary <-
+  as_tibble(bind_rows(deg_regulation_summary, .id = 'Contrast'))
+
+deg_regulation_summary <-
+  deg_regulation_summary %>% add_row(Contrast = 'DNA vaccine vs IV-LD',
+                                     Regulation = 'downregulated',
+                                     n = 0)
+
+
+### Reordering factors to plot ----
+deg_regulation_summary$Contrast <-
+  factor(
+    deg_regulation_summary$Contrast,
+    levels = c(
+      'IV-LD vs pTagRFP',
+      'IV-HD vs pTagRFP',
+      'DNA vaccine vs pTagRFP',
+      'EOMES vs pTagRFP',
+      'GATA3 vs pTagRFP',
+      'IV-HD vs IV-LD',
+      'DNA vaccine vs IV-LD',
+      'EOMES vs IV-LD',
+      'GATA3 vs IV-LD'
+    )
+  )
+
+
+```
+
+```{r dge summary plot ptag/ivld}
+#| label: fig-dge-summary-4wpc-conu-ivld
+#| fig-cap: Summary of differentially expressed genes in the heart at 4 WPC with pTagRFP or IV-LD as reference
+#| code-summary: DEG summary plot with pTagRFP/IV-LD as reference
+
+deg_regulation_summary %>%
+  ggplot(aes(x = Contrast, y = n, fill = Regulation)) +
+  geom_bar(
+    stat = 'identity',
+    position = 'dodge',
+    colour = 'black',
+    linewidth = .2
+  ) +
+  scale_fill_brewer(palette = 'Dark2') +
+  ylab('Number of genes') +
+  geom_text(
+    aes(label = n),
+    position = position_dodge(width = 0.9),
+    vjust = -0.5,
+    size = 4
+  ) +
+  # ggtitle(label = 'Differentially Expressed Genes',
+  #         subtitle = 'Cardiac tissue at 4 WPC') +
+  theme_light() +
+  theme(panel.grid = element_blank()) +
+  theme(text = element_text(size = 14, family = 'serif')) +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5)) +
+  geom_vline(
+    xintercept = c(1.5, 2.5, 3.5, 4.5, 6.5, 7.5, 8.5),
+    linetype = 'dotted',
+    linewidth = 0.2
+  ) +
+  geom_vline(xintercept = 5.5,
+             linetype = 'solid',
+             linewidth = 0.3) +
+  geom_hline(yintercept = 0, size = 0.2) +
+  annotate(
+    'text',
+    x = 3,
+    y = 550,
+    label = 'vs pTagRFP',
+    size = 4,
+    family = 'serif'
+  ) +
+  annotate(
+    'text',
+    x = 7.5,
+    y = 550,
+    label = 'vs IV-LD',
+    size = 4,
+    family = 'serif'
+  )
+
+```
+<br>
+<br>
+```{r extracting significant genes conu}
+#| label: extracting-significantly-regulated-genes
+#| warning: false
+#| code-summary: Extracting signiticantly regulated genes
+
+# Get names of all objects in global environment with a regex pattern matching 'res_.*_conu_4wpc'
+res_objects <- ls(pattern = "res_.*_conu_4wpc")
+
+# Apply significant_genes function to each res object
+for (res_object in res_objects) {
+  # Get the object from the global environment
+  result <- get(res_object)
+  
+  # Apply significant_genes function
+  significant_result <- significant_genes(result)
+  
+  # Assign the result back to the global environment
+  assign(paste0("significant_", res_object), significant_result, envir = .GlobalEnv)
+}
+
+rm(list.data, result, i, res_object, res_objects, results_files, significant_result)
+```
+
+<br>
+
+# Venn diagrams and ortholog over-representation analysis
+
+<br>
+
+<div>
+
+The results tables used in these Venn diagrams and ORA were extracted <span style='color: red;'> **using CONU as reference**</span>.
+
+</div>
+
+## Downregulated
+
+```{r significantly downregulated genes}
+#| label: significantly-downregulated-genes-list
+#| warning: false
+#| code-summary: Significantly downregulated genes
+
+# create list of downregulated geneIDs
+b <- list(
+  A = significant_res_dnavaccine_vs_conu_4wpc[significant_res_dnavaccine_vs_conu_4wpc$log2FC < 0, ]$ID,
+  B = significant_res_eomes_vs_conu_4wpc[significant_res_eomes_vs_conu_4wpc$log2FC < 0, ]$ID,
+  C = significant_res_gata3_vs_conu_4wpc[significant_res_gata3_vs_conu_4wpc$log2FC < 0, ]$ID,
+  D = significant_res_ivhd_vs_conu_4wpc[significant_res_ivhd_vs_conu_4wpc$log2FC < 0, ]$ID,
+  E = significant_res_ivld_vs_conu_4wpc[significant_res_ivld_vs_conu_4wpc$log2FC < 0, ]$ID
+)
+
+# add treatment names
+names(b) <-
+  c('DNA vaccine', 'EOMES', 'GATA3', 'IVHD', 'IVLD')
+
+# check gene counts per treatment
+kable((sapply(b, length)), col.names = c('count'))
+```
+
+<br>
+
+```{r downregulated venn diagram}
+#| label: fig-plot-venn-diagram-downregulated
+#| warning: false
+#| fig-cap: Downregulated genes, per treatment, at 4 WPC. CONU as reference
+#| code-summary: Downregulated Venn diagram
+
+venn1 <- display_venn(
+  b,
+  fill = c('#cdb4db', '#bde0fe', '#ccd5ae', '#d4a373', '#f08080'),
+  lwd = 1,
+  cex = 1,
+  cat.cex = 1,
+  cat.fontfamily = 'serif',
+  # cat.fontface = 'bold',
+  cat.default.pos = 'outer',
+  cat.dist = c(0.20, 0.20, 0.22, 0.20,.20),
+  cat.pos = c(360, 360, 250, 90, 360)
+)
+```
+
+<br>
+
+<div>
+
+From the Venn diagram, I gathered the genes that are common to all treatments, and converted them to *h. sapiens* orthologs. They are listed in @tbl-common-downregulated-genes-4wpc.
+
+</div>
+
+```{r common downregulated genes}
+#| label: tbl-common-downregulated-genes-4wpc
+#| tbl-cap: Common downregulated orthologs at 4WPC
+#| code-summary: Common downregulated genes
+
+common_genes_downregulated_4wpc <-
+  Reduce(
+    intersect,
+    list(
+      significant_res_dnavaccine_vs_conu_4wpc[significant_res_dnavaccine_vs_conu_4wpc$log2FC < 0,]$ID,
+      significant_res_gata3_vs_conu_4wpc[significant_res_gata3_vs_conu_4wpc$log2FC < 0,]$ID,
+      significant_res_eomes_vs_conu_4wpc[significant_res_eomes_vs_conu_4wpc$log2FC < 0,]$ID,
+      significant_res_ivhd_vs_conu_4wpc[significant_res_ivhd_vs_conu_4wpc$log2FC  < 0,]$ID,
+      significant_res_ivld_vs_conu_4wpc[significant_res_ivld_vs_conu_4wpc$log2FC < 0,]$ID
+    )
+  )
+
+common_downregulated_orthologs_4wpc <- gorth(
+  query = common_genes_downregulated_4wpc,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+common_downregulated_orthologs_tbl_4wpc <-
+  as_tibble(common_downregulated_orthologs_4wpc) %>% dplyr::select(.,
+                                                                   input,
+                                                                   ortholog_name,
+                                                                   ortholog_ensg,
+                                                                   description) %>% dplyr::rename(
+                                                                     .,
+                                                                     ssalar_ensembl = input,
+                                                                     hsapiens_ortholog = ortholog_name,
+                                                                     hsapiens_ensembl = ortholog_ensg,
+                                                                     description = description
+                                                                   )
+
+common_downregulated_orthologs_tbl_4wpc %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+<div>
+
+From an input of `r length(common_downregulated_orthologs_tbl_4wpc$ssalar_ensembl)` salmon **ENSEMBL** gene IDs, `r common_downregulated_orthologs_tbl_4wpc %>% dplyr::filter(!str_detect(hsapiens_ortholog, 'N/A')) %>% pull(., hsapiens_ortholog) %>% length()` genes were converted to human orthologs.
+
+</div>
+
+<br>
+
+### Over-representation analysis of common **DOWNREGULATED** genes
+
+```{r ora common downregulated genes}
+#| label: ora-common-downregulated-genes-4wpc
+#| warning: false
+#| cache: true
+#| code-summary: ORA on common downregulated genes
+
+common_ora_downreg_4wpc <-
+  enrichGO(
+    gene = common_downregulated_orthologs_tbl_4wpc$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+# common_downregulated_orthologs_tbl_4wpc %>% dplyr::filter(!str_detect(hsapiens_ortholog, 'N/A')) %>% pull(., hsapiens_ortholog) %>% length()
+```
+
+```{r ora common downregulated pathways plot}
+#| label: fig-common-downregulated-pathways-4wpc
+#| fig-cap: Enriched pathways from common downregulated genes at 4 WPC
+#| code-summary: Common downregulated pathways plot
+
+as_tibble(common_ora_downreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  dplyr::slice(1:20) %>%
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value') +
+                       # guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+```{r common pathways term translation}
+#| label: tbl-common-term-translation
+#| tbl-cap: Common genes downregulated pathways GO Term translation
+#| warning: false
+#| code-summary: Common pathways term translation
+
+as_tibble(common_ora_downreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  dplyr::slice(1:20) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>%
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+```{r common downregulated immune pathways plot}
+#| label: fig-common-downregulated-immune-pathways-4wpc
+#| fig-cap: Enriched immune pathways from common downregulated genes at 4 WPC
+
+downregulated_immune_common_4wpc <-
+  filter_rows_by_GO_term(common_ora_downreg_4wpc, immune_related_GOterms, 'goterms')
+
+as_tibble(downregulated_immune_common_4wpc) %>%
+  dplyr::slice(1:10) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(
+    stat = "identity",
+    colour = 'black',
+    linewidth = 0.3,
+    width = 0.8,
+    show.legend = TRUE
+  ) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Purples',
+                       name = 'Adjusted \n p-value') +
+                       # guide = guide_colorbar(reverse = FALSE)) +
+  scale_y_continuous() +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+```{r common downregulated immune pathways term translation}
+#| label: tbl-common-immune-term-translation
+#| tbl-cap: Common genes downregulated immune pathways GO Term translation
+#| warning: false
+
+as_tibble(downregulated_immune_common_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  dplyr::slice(1:10) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c('GO Term',
+                  'Description'),
+    align = 'l'
+  ) %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+<br>
+
+<div>
+
+Because there were five groups with more than 100 genes in the Venn diagram on @fig-plot-venn-diagram-downregulated, I analyzed them all separately:<br>
+
+-   EOMES exclusive (382 genes)
+
+-   GATA3 exclusive (456 genes)
+
+-   GATA3-EOMES intersection (249 genes)
+
+-   GATA3-EOMES-DNA vaccine intersection (148 genes)
+
+-   GATA3-EOMES-DNA vaccine-IVHD intersection (176 genes)
+
+<br>
+
+### Over-representation analysis of GATA3 exclusive **DOWNREGULATED** genes
+
+```{r gata3 exclusive downregulated orthologs}
+#| tbl-cap: GATA3 exclusive downregulated orthologs at 4WPC (first 20 rows)
+#| label: tbl-gata3-downregulated-genes-4wpc
+#| warning: false
+
+dnavaccine_4wpc_down <-
+  significant_res_dnavaccine_vs_conu_4wpc[significant_res_dnavaccine_vs_conu_4wpc$log2FC < 0,]$ID
+eomes_4wpc_down <-
+  significant_res_eomes_vs_conu_4wpc[significant_res_eomes_vs_conu_4wpc$log2FC < 0,]$ID
+ivhd_4wpc_down <-
+  significant_res_ivhd_vs_conu_4wpc[significant_res_ivhd_vs_conu_4wpc$log2FC < 0, ]$ID
+gata3_4wpc_down <-
+  significant_res_gata3_vs_conu_4wpc[significant_res_gata3_vs_conu_4wpc$log2FC < 0, ]$ID
+ivld_4wpc_down <-
+  significant_res_ivld_vs_conu_4wpc[significant_res_ivld_vs_conu_4wpc$log2FC < 0, ]$ID
+
+
+gata3_exclusive_down_genes_4wpc <-
+  setdiff(gata3_4wpc_down,
+          c(dnavaccine_4wpc_down, eomes_4wpc_down, ivhd_4wpc_down, ivld_4wpc_down))
+
+
+gata3_downregulated_orthologs_4wpc <- gorth(
+  query = gata3_exclusive_down_genes_4wpc,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+gata3_downregulated_orthologs_tbl_4wpc <-
+  as_tibble(gata3_downregulated_orthologs_4wpc) %>% dplyr::select(.,
+                                                                 input,
+                                                                 ortholog_name,
+                                                                 ortholog_ensg,
+                                                                 description) %>% dplyr::rename(
+                                                                     .,
+                                                                     ssalar_ensembl = input,
+                                                                     hsapiens_ortholog = ortholog_name,
+                                                                     hsapiens_ensembl = ortholog_ensg,
+                                                                     description = description
+                                                                   )
+
+
+gata3_downregulated_orthologs_tbl_4wpc %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+```
+
+```{r ora gata3 downregulated genes}
+#| label: ora-gata3-downregulated-genes-4wpc
+#| warning: false
+
+gata3_ora_downreg_4wpc <-
+  enrichGO(
+    gene = gata3_downregulated_orthologs_tbl_4wpc$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+<div>
+
+From an input of `r length(gata3_downregulated_orthologs_tbl_4wpc$ssalar_ensembl)` salmon **ENSEMBL** gene IDs exclusive to GATA3, `r gata3_downregulated_orthologs_tbl_4wpc %>% dplyr::filter(!str_detect(hsapiens_ortholog, 'N/A')) %>% pull(., hsapiens_ortholog) %>% length()` genes were converted to human orthologs, and used for over-representation analysis (@fig-gata3-downregulated-pathways-4wpc). The terms enriched in @fig-gata3-downregulated-pathways-4wpc were then filtered through the immune-related term list to plot @fig-gata3-downregulated-immune-pathways-4wpc.
+
+</div>
+
+```{r ora gata3 downregulated pathways plot}
+#| label: fig-gata3-downregulated-pathways-4wpc
+#| fig-cap: Enriched pathways from GATA3 exclusive downregulated genes at 4 WPC (top 20 pathways by adjusted p-value)
+
+as_tibble(gata3_ora_downreg_4wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value') +
+                       # guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+<br>
+
+```{r ora gata3 term translation}
+#| label: tbl-gata3-term-translation
+#| tbl-cap: GATA3 exclusive downregulated pathways GO Term translation
+#| warning: false
+
+as_tibble(gata3_ora_downreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:20) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c('GO Term',
+                  'Description'),
+    align = 'l'
+  ) %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+```{r ora gata3 downregulated immune pathways plot}
+#| label: fig-gata3-downregulated-immune-pathways-4wpc
+#| fig-cap: Enriched immune pathways from GATA3 exclusive downregulated genes at 4 WPC (top 10 pathways by adjusted p-value)
+
+downregulated_immune_gata3_4wpc <-
+  filter_rows_by_GO_term(gata3_ora_downreg_4wpc, immune_related_GOterms, 'goterms')
+
+as_tibble(downregulated_immune_gata3_4wpc) %>%
+  dplyr::slice(1:10) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(
+    stat = "identity",
+    colour = 'black',
+    linewidth = 0.3,
+    width = 0.8,
+    show.legend = TRUE
+  ) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Purples',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = FALSE)) +
+  scale_y_continuous() +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+```{r ora gata3 downregulated pathways term translation}
+#| label: tbl-gata3-immune-term-translation
+#| tbl-cap: GATA3 exclusive downregulated immune pathways GO Term translation
+#| warning: false
+
+as_tibble(downregulated_immune_gata3_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:10) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c('GO Term',
+                  'Description'),
+    align = 'l'
+  ) %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+### Over-representation analysis of EOMES exclusive **DOWNREGULATED** genes
+
+<br>
+
+```{r eomes exclusive downregulated genes}
+#| label: tbl-eomes-downregulated-genes-4wpc
+#| tbl-cap: EOMES exclusive downregulated orthologs at 4WPC (first 20 rows)
+#| warning: false
+
+eomes_exclusive_down_genes_4wpc <-
+  setdiff(eomes_4wpc_down,
+          c(dnavaccine_4wpc_down, ivhd_4wpc_down, gata3_4wpc_down, ivld_4wpc_down))
+
+eomes_down_orthologs_4wpc <- gorth(
+  query = eomes_exclusive_down_genes_4wpc,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+eomes_down_orthologs_tbl_4wpc <-
+  as_tibble(eomes_down_orthologs_4wpc) %>% dplyr::select(.,
+                                                                 input,
+                                                                 ortholog_name,
+                                                                 ortholog_ensg,
+                                                                 description) %>% dplyr::rename(
+                                                                     .,
+                                                                     ssalar_ensembl = input,
+                                                                     hsapiens_ortholog = ortholog_name,
+                                                                     hsapiens_ensembl = ortholog_ensg,
+                                                                     description = description
+                                                                   )
+
+
+eomes_down_orthologs_tbl_4wpc %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+```{r ora eomes downregulated genes}
+#| label: ora-eomes-downregulated-genes-4wpc
+#| warning: false
+
+eomes_ora_downreg_4wpc <-
+  enrichGO(
+    gene = eomes_down_orthologs_tbl_4wpc$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+<div>
+
+From an input of `r length(eomes_down_orthologs_tbl_4wpc$ssalar_ensembl)` salmon **ENSEMBL** gene IDs exclusive to EOMES, `r eomes_down_orthologs_tbl_4wpc %>% dplyr::filter(!str_detect(hsapiens_ortholog, 'N/A')) %>% pull(., hsapiens_ortholog) %>% length()` genes were converted to human orthologs.
+
+</div>
+
+<div>
+
+These 278 genes were used for over-representation analysis @fig-eomes-downregulated-pathways-4wpc, and filtered by immune-related term in @fig-eomes-downregulated-immune-pathways-4wpc.
+
+</div>
+
+```{r ora eomes downregulated pathways plot}
+#| label: fig-eomes-downregulated-pathways-4wpc
+#| fig-cap: Enriched pathways from EOMES exclusive downregulated genes at 4 WPC
+
+as_tibble(eomes_ora_downreg_4wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+```{r ora eomes downregulated pathways term translation}
+#| label: tbl-eomes-term-translation
+#| tbl-cap: EOMES exclusive downregulated pathways GO Term translation
+#| warning: false
+
+as_tibble(eomes_ora_downreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:20) %>%
+  map_df(., rev) %>%
+  dplyr::select(ID, Description) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c('GO Term',
+                  'Description'),
+    align = 'l'
+  ) %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+```{r ora eomes downregulated immune pathways plot}
+#| label: fig-eomes-downregulated-immune-pathways-4wpc
+#| fig-cap: Enriched immune pathways from EOMES exclusive downregulated genes at 4 WPC
+
+downregulated_immune_eomes_4wpc <-
+  filter_rows_by_GO_term(eomes_ora_downreg_4wpc, immune_related_GOterms, 'goterms')
+
+as_tibble(downregulated_immune_eomes_4wpc) %>%
+  dplyr::slice(1:10) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Purples',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+```{r ora eomes downregulated immune pathways term translation}
+#| label: tbl-eomes-immune-term-translation
+#| tbl-cap: EOMES exclusive downregulated pathways GO Term translation
+#| warning: false
+
+as_tibble(downregulated_immune_eomes_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:10) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+### Over-representation analysis of GATA3-EOMES intersection **DOWNREGULATED** genes
+
+```{r gata3-eomes intersection downregulated genes}
+#| label: tbl-gata3-eomes-intersection-downregulated-4wpc
+#| tbl-cap: GATA3-EOMES intersection downregulated orthologs at 4WPC (first 20 rows)
+#| warning: false
+
+intersection <- intersect(gata3_4wpc_down, eomes_4wpc_down)
+
+# length(intersection)
+
+gata3EOMES_exclusive_genes_down <- setdiff(intersection,
+                                           c(dnavaccine_4wpc_down, ivhd_4wpc_down, ivld_4wpc_down))
+
+# length(gata3EOMES_exclusive_genes_down)
+
+gata3EOMES_down_orthologs_4wpc <- gorth(
+  query = gata3EOMES_exclusive_genes_down,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+# head(gata3EOMES_down_orthologs_4wpc)
+# nrow(gata3EOMES_down_orthologs_4wpc)
+
+gata3EOMES_intersection_down_orthologs_tbl_4wpc <-
+  as_tibble(gata3EOMES_down_orthologs_4wpc) %>% dplyr::select(.,
+                                                              input,
+                                                              ortholog_name,
+                                                              ortholog_ensg,
+                                                              description) %>% dplyr::rename(
+                                                                .,
+                                                                ssalar_ensembl = input,
+                                                                hsapiens_ortholog = ortholog_name,
+                                                                hsapiens_ensembl = ortholog_ensg,
+                                                                description = description
+                                                                )
+
+
+gata3EOMES_intersection_down_orthologs_tbl_4wpc %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+```
+
+```{r ora gata3-eomes intersection downregulated genes}
+#| label: ora-GATA3eomes-intersection-down-genes-4wpc
+#| warning: false
+#| cache: true
+
+GATA3eomes_intersection_ora_downreg_4wpc <-
+  enrichGO(
+    gene = gata3EOMES_intersection_down_orthologs_tbl_4wpc$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+<div>
+
+From an input of `r length(gata3EOMES_intersection_down_orthologs_tbl_4wpc$ssalar_ensembl)` salmon **ENSEMBL** gene IDs exclusive to EOMES, `r gata3EOMES_intersection_down_orthologs_tbl_4wpc %>% dplyr::filter(!str_detect(hsapiens_ortholog, 'N/A')) %>% pull(., hsapiens_ortholog) %>% length()` genes were converted to human orthologs.
+
+</div>
+
+<div>
+
+These 184 genes were used for over-representation analysis @fig-GATA3eomes-intersection-down-pathways-4wpc, and filtered by immune-related term in @fig-GATA3eomes-intersection-down-immune-pathways-4wpc.
+
+</div>
+
+```{r ora gata3-eomes intersection downregulated pathways plot}
+#| label: fig-GATA3eomes-intersection-down-pathways-4wpc
+#| fig-cap: Enriched pathways from GATA3-EOMES intersection downregulated genes at 4 WPC (top 20 pathways by adjusted p-value)
+
+as_tibble(GATA3eomes_intersection_ora_downreg_4wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+```{r ora gata3-eomes intersection downregulated pathways term translation}
+#| label: tbl-GATA3eomes-term-translation
+#| tbl-cap: GATA3-EOMES intersection downregulated pathways GO Term translation
+#| warning: false
+
+as_tibble(GATA3eomes_intersection_ora_downreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:20) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+```{r ora gata3-eomes downregulated immune pathways plot}
+#| label: fig-GATA3eomes-intersection-down-immune-pathways-4wpc
+#| fig-cap: Enriched immune pathways from GATA3-EOMES intersection downregulated genes at 4 WPC (top 10 pathways by adjusted p-value)
+
+downregulated_immune_GATA3eomes_4wpc <-
+  filter_rows_by_GO_term(GATA3eomes_intersection_ora_downreg_4wpc, immune_related_GOterms, 'goterms')
+
+as_tibble(downregulated_immune_GATA3eomes_4wpc) %>%
+  dplyr::slice(1:10) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Purples',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+```{r ora gata3-eomes downregulated immune pathways term translation}
+#| label: tbl-GATA3eomes-immune-term-translation
+#| tbl-cap: GATA3-EOMES intersection downregulated pathways immune GO Term translation
+#| warning: false
+
+as_tibble(downregulated_immune_GATA3eomes_4wpc) %>%
+  dplyr::slice(1:10) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+### Over-representation analysis of GATA3-EOMES-DNA vaccine intersection **DOWNREGULATED** genes
+
+```{r gata3-eomes-dnavaccine intersection downregulated genes}
+#| label: tbl-gata3-eomes-dnavaccine-intersection-downregulated-4wpc
+#| tbl-cap: GATA3-EOMES-DNA vaccine intersection downregulated orthologs at 4WPC (first 20 rows)
+#| warning: false
+
+gata3_eomes_dnavaccine_intersection <- setdiff(Reduce(
+  intersect,
+  list(gata3_4wpc_down, eomes_4wpc_down, dnavaccine_4wpc_down)
+),
+union(ivhd_4wpc_down, ivld_4wpc_down))
+
+
+gata3_eomes_dnavaccine_intersection_orthologs <- gorth(
+  query = gata3_eomes_dnavaccine_intersection,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+# head(gata3EOMES_down_orthologs_4wpc)
+# nrow(gata3EOMES_down_orthologs_4wpc)
+
+gata3_eomes_dnavaccine_intersection_tbl_orthologs <-
+  as_tibble(gata3_eomes_dnavaccine_intersection_orthologs) %>% dplyr::select(.,
+                                                              input,
+                                                              ortholog_name,
+                                                              ortholog_ensg,
+                                                              description) %>% dplyr::rename(
+                                                                .,
+                                                                ssalar_ensembl = input,
+                                                                hsapiens_ortholog = ortholog_name,
+                                                                hsapiens_ensembl = ortholog_ensg,
+                                                                description = description
+                                                                )
+
+
+gata3_eomes_dnavaccine_intersection_tbl_orthologs %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+```
+
+```{r ora gata3-eomes-dnavaccine intersection downregulated genes}
+#| label: ora-gata3-eomes-dnavaccine-intersection-down-genes-4wpc
+#| warning: false
+
+GATA3eomesDNAVACCINE_intersection_ora_downreg_4wpc <-
+  enrichGO(
+    gene = gata3_eomes_dnavaccine_intersection_tbl_orthologs$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+<div>
+
+The `r length(gata3_eomes_dnavaccine_intersection_tbl_orthologs$ssalar_ensembl)` salmon **ENSEMBL** gene IDs from the intersection between GATA3, EOMES, and DNA vaccine, were converted to `r gata3_eomes_dnavaccine_intersection_tbl_orthologs %>% dplyr::filter(!str_detect(hsapiens_ortholog, 'N/A')) %>% pull(., hsapiens_ortholog) %>% length()` human orthologs.
+
+</div>
+
+<div>
+
+These 112 genes were used for over-representation analysis @fig-gata3-eomes-dnavaccine-intersection-down-pathways-4wpc, and filtered by immune-related term in @fig-gata3-eomes-dnavaccine-intersection-down-immune-pathways-4wpc.
+
+</div>
+
+```{r ora gata3-eomes-dnavaccine intersection downregulated pathways plot}
+#| label: fig-gata3-eomes-dnavaccine-intersection-down-pathways-4wpc
+#| fig-cap: Enriched pathways from GATA3-EOMES-DNA vaccine intersection downregulated genes at 4 WPC (top 20 pathways by adjusted p-value)
+
+as_tibble(GATA3eomesDNAVACCINE_intersection_ora_downreg_4wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+
+```
+
+```{r ora gata3-eomes-dnavaccine intersection downregulated pathways term translation}
+#| label: tbl-gata3-eomes-dnavaccine-term-translation
+#| tbl-cap: GATA3-EOMES-DNA vaccine intersection GO Term translation
+#| warning: false
+
+
+as_tibble(GATA3eomesDNAVACCINE_intersection_ora_downreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:20) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+```{r ora gata3-eomes-dnavaccine intersection downregulated immune pathways plot}
+#| label: fig-gata3-eomes-dnavaccine-intersection-down-immune-pathways-4wpc
+#| fig-cap: Enriched immune pathways from GATA3-EOMES-DNA vaccine intersection downregulated genes at 4 WPC (top 10 pathways by adjusted p-value)
+
+downregulated_immune_GATA3eomesDNAVACCINE_4wpc <-
+  filter_rows_by_GO_term(GATA3eomesDNAVACCINE_intersection_ora_downreg_4wpc, immune_related_GOterms, 'goterms')
+
+as_tibble(downregulated_immune_GATA3eomesDNAVACCINE_4wpc) %>%
+  dplyr::slice(1:10) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Purples',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+```{r ora gata3-eomes-dnavaccine intersection downregulated immune pathways term translation}
+#| label: tbl-gata3-eomes-dnavaccine-immune-term-translation
+#| tbl-cap: GATA3-EOMES-DNA vaccine intersection (immune) GO Term translation
+#| warning: false
+
+as_tibble(downregulated_immune_GATA3eomesDNAVACCINE_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:10) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+### Over-representation analysis of GATA3-EOMES-DNA vaccine-IVHD intersection **DOWNREGULATED** genes
+
+```{r gata3-eomes-dnavaccine-ivhd intersection downregulated genes}
+#| label: tbl-gata3-eomes-dnavaccine-ivhd-intersection-downregulated-4wpc
+#| tbl-cap: GATA3-EOMES-DNA vaccine-IVHD intersection downregulated orthologs at 4WPC (first 20 rows)
+#| warning: false
+
+
+intersectionGEDI <- Reduce(intersect, list(gata3_4wpc_down, eomes_4wpc_down, dnavaccine_4wpc_down, ivhd_4wpc_down))
+gata3_eomes_dnavaccine_ivhd_intersection <- setdiff(intersectionGEDI, ivld_4wpc_down)
+
+
+gata3_eomes_dnavaccine_ivhd_intersection_orthologs <- gorth(
+  query = gata3_eomes_dnavaccine_ivhd_intersection,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+gata3_eomes_dnavaccine_ivhd_intersection_tbl_orthologs <-
+  as_tibble(gata3_eomes_dnavaccine_ivhd_intersection_orthologs) %>% dplyr::select(.,
+                                                              input,
+                                                              ortholog_name,
+                                                              ortholog_ensg,
+                                                              description) %>% dplyr::rename(
+                                                                .,
+                                                                ssalar_ensembl = input,
+                                                                hsapiens_ortholog = ortholog_name,
+                                                                hsapiens_ensembl = ortholog_ensg,
+                                                                description = description
+                                                                )
+
+
+gata3_eomes_dnavaccine_ivhd_intersection_tbl_orthologs %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+```
+
+```{r ora gata3-eomes-dnavaccine-ivhd intersection downregulated genes}
+#| label: ora-gata3-eomes-dnavaccine-ivhd-intersection-down-genes-4wpc
+#| warning: false
+
+GATA3eomesDNAVACCINEivhd_intersection_ora_downreg_4wpc <-
+  enrichGO(
+    gene = gata3_eomes_dnavaccine_ivhd_intersection_tbl_orthologs$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+<div>
+
+The `r length(gata3_eomes_dnavaccine_ivhd_intersection_tbl_orthologs$ssalar_ensembl)` salmon **ENSEMBL** gene IDs from the intersection between GATA3, EOMES, DNA vaccine, and IV-HD were converted to `r gata3_eomes_dnavaccine_ivhd_intersection_tbl_orthologs %>% dplyr::filter(!str_detect(hsapiens_ortholog, 'N/A')) %>% pull(., hsapiens_ortholog) %>% length()` human orthologs.
+
+</div>
+
+<div>
+
+These 142 genes were used for over-representation analysis @fig-gata3-eomes-dnavaccine-ivhd-intersection-down-pathways-4wpc, and filtered by immune-related term in @fig-gata3-eomes-dnavaccine-intersection-ivhd-down-immune-pathways-4wpc.
+
+</div>
+
+```{r gata3-eomes-dnavaccine-ivhd intersection downregulated pathways plot}
+#| label: fig-gata3-eomes-dnavaccine-ivhd-intersection-down-pathways-4wpc
+#| fig-cap: Enriched pathways from GATA3-EOMES-DNA vaccine-IVHD intersection downregulated genes at 4 WPC (top 20 pathways by adjusted p-value)
+
+as_tibble(GATA3eomesDNAVACCINEivhd_intersection_ora_downreg_4wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+
+```
+
+```{r gata3-eomes-dnavaccine-ivhd intersection downregulated pathways term translation}
+#| label: tbl-gata3-eomes-dnavaccine-ivhd-term-translation
+#| tbl-cap: GATA3-EOMES-DNA vaccine intersection GO Term translation
+#| warning: false
+
+
+as_tibble(GATA3eomesDNAVACCINEivhd_intersection_ora_downreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:20) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+```{r gata3-eomes-dnavaccine-ivhd intersection downregulated immune pathways plot}
+#| label: fig-gata3-eomes-dnavaccine-intersection-ivhd-down-immune-pathways-4wpc
+#| fig-cap: Enriched immune pathways from GATA3-EOMES-DNA vaccine intersection downregulated genes at 4 WPC (top 10 pathways by adjusted p-value)
+
+downregulated_immune_GATA3eomesDNAVACCINEivhd_4wpc <-
+  filter_rows_by_GO_term(GATA3eomesDNAVACCINEivhd_intersection_ora_downreg_4wpc, immune_related_GOterms, 'goterms')
+
+as_tibble(downregulated_immune_GATA3eomesDNAVACCINEivhd_4wpc) %>%
+  dplyr::slice(1:10) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Purples',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+```{r gata3-eomes-dnavaccine-ivhd intersection downregulated immune pathways term translation}
+#| label: tbl-gata3-eomes-dnavaccine-ivhd-immune-term-translation
+#| tbl-cap: GATA3-EOMES-DNA vaccine intersection (immune) GO Term translation
+#| warning: false
+
+as_tibble(downregulated_immune_GATA3eomesDNAVACCINEivhd_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:10) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+## Upregulated
+
+```{r significantly upregulated genes}
+#| label: significantly-upregulated-genes-list
+#| warning: false
+
+# create list of upregulated geneIDs
+a <- list(
+  A = significant_res_dnavaccine_vs_conu_4wpc[significant_res_dnavaccine_vs_conu_4wpc$log2FC > 0, ]$ID,
+  B = significant_res_eomes_vs_conu_4wpc[significant_res_eomes_vs_conu_4wpc$log2FC > 0, ]$ID,
+  C = significant_res_gata3_vs_conu_4wpc[significant_res_gata3_vs_conu_4wpc$log2FC > 0, ]$ID,
+  D = significant_res_ivhd_vs_conu_4wpc[significant_res_ivhd_vs_conu_4wpc$log2FC > 0, ]$ID,
+  E = significant_res_ivld_vs_conu_4wpc[significant_res_ivld_vs_conu_4wpc$log2FC > 0, ]$ID
+)
+
+# add treatment names
+names(a) <-
+  c('DNA vaccine', 'EOMES', 'GATA3', 'IVHD', 'IVLD')
+
+# check gene counts per treatment
+kable((sapply(a, length)), col.names = c('count'))
+
+# remove treatments with low counts from the list
+# a$IVLD <- NULL
+```
+
+<br>
+
+```{r significantly upregulated genes venn diagram}
+#| label: fig-plot-venn-diagram-upregulated
+#| warning: false
+#| fig-cap: Upregulated genes, per treatment, at 4 WPC. pTagRFP as reference
+
+# plot Venn diagram
+display_venn(
+  a,
+  fill = c('#cdb4db', '#bde0fe', '#ccd5ae', '#d4a373', '#f08080'),
+  lwd = 1,
+  cex = 1,
+  cat.cex = 1,
+  cat.fontfamily = 'serif',
+  # cat.fontface = 'bold',
+  cat.default.pos = 'outer',
+  cat.dist = c(0.20, 0.20, 0.22, 0.20,.20),
+  cat.pos = c(360, 360, 250, 90, 360))
+
+```
+
+<br>
+
+<div>
+
+From the Venn diagram, I gathered the genes that are common to all treatments, and converted them to *h. sapiens* orthologs. They are listed on @tbl-common-upregulated-genes-4wpc.
+
+</div>
+
+<div>
+
+I also did over-representation analysis on the following gene lists: <br>
+
+-   EOMES (255 genes)
+
+-   GATA3 (346 genes)
+
+-   EOMES-GATA3 intersection (174 genes)
+
+-   GATA3-DNA vaccine-IVHD intersection (174 genes) <br>
+
+</div>
+
+### Over-representation analysis of common **UPREGULATED** genes at 4 WPC
+
+```{r common upregulated genes}
+#| label: tbl-common-upregulated-genes-4wpc
+#| tbl-cap: Common upregulated orthologs at 4 WPC
+#| warning: false
+#| echo: true
+
+common_genes_upregulated_4WPC <-
+  Reduce(
+    intersect,
+    list(
+      significant_res_dnavaccine_vs_conu_4wpc[significant_res_dnavaccine_vs_conu_4wpc$log2FC > 0, ]$ID,
+      significant_res_gata3_vs_conu_4wpc[significant_res_gata3_vs_conu_4wpc$log2FC > 0, ]$ID,
+      significant_res_eomes_vs_conu_4wpc[significant_res_eomes_vs_conu_4wpc$log2FC > 0, ]$ID,
+      significant_res_ivhd_vs_conu_4wpc[significant_res_ivhd_vs_conu_4wpc$log2FC > 0, ]$ID,
+      significant_res_ivld_vs_conu_4wpc[significant_res_ivld_vs_conu_4wpc$log2FC > 0, ]$ID
+    )
+  )
+
+# length(common_genes_upregulated_4WPC)
+
+common_upregulated_orthologs_4wpc <- gorth(
+  query = common_genes_upregulated_4WPC,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+common_upregulated_orthologs_tbl_4wpc <-
+  as_tibble(common_upregulated_orthologs_4wpc) %>% dplyr::select(.,
+                                                                   input,
+                                                                   ortholog_name,
+                                                                   ortholog_ensg,
+                                                                   description) %>% dplyr::rename(
+                                                                     .,
+                                                                     ssalar_ensembl = input,
+                                                                     hsapiens_ortholog = ortholog_name,
+                                                                     hsapiens_ensembl = ortholog_ensg,
+                                                                     description = description
+                                                                   )
+
+common_upregulated_orthologs_tbl_4wpc %>% head(., n = 20) %>% 
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c',
+  ) %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+<div>
+
+From an input of `r length(common_upregulated_orthologs_tbl_4wpc$ssalar_ensembl)` salmon **ENSEMBL** gene IDs, `r common_upregulated_orthologs_tbl_4wpc %>% dplyr::filter(!str_detect(hsapiens_ortholog, 'N/A')) %>% pull(., hsapiens_ortholog) %>% length()` genes were converted to human orthologs.
+
+</div>
+
+```{r ora common upregulated genes}
+#| label: ora-common-upregulated-genes-4wpc
+#| warning: false
+
+common_genes_ora_downreg_4wpc <-
+  enrichGO(
+    gene = common_upregulated_orthologs_tbl_4wpc$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+```{r ora common upregulated pathways plot}
+#| label: fig-common-upregulated-pathways-4wpc
+#| fig-cap: Enriched pathways from common upregulated genes at 4 WPC (top 20 pathways by adjusted p-value)
+
+as_tibble(common_genes_ora_downreg_4wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           ) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+```{r common upregulated pathways term translation}
+#| label: tbl-common-upregulated-term-translation
+#| tbl-cap: Common upregulated genes GO Term translation
+#| warning: false
+
+as_tibble(common_genes_ora_downreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:20) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+<div>
+
+The upregulated genes common to all treatments enriched a total of `r length(common_genes_ora_downreg_4wpc$ID)` pathways, but only the top 20 by *adjusted p-value* are displayed in @fig-common-upregulated-pathways-4wpc.
+
+</div>
+
+### Over-representation analysis of GATA3 exclusive **UPREGULATED** genes at 4 WPC
+
+```{r gata3 exclusive upregulated genes}
+#| label: tbl-gata3-upregulated-genes-4wpc
+#| tbl-cap: GATA3 exclusive upregulated orthologs at 4 WPC, first 20 rows
+#| warning: false
+#| echo: true
+
+dnavaccine_4wpc_up <-
+  significant_res_dnavaccine_vs_conu_4wpc[significant_res_dnavaccine_vs_conu_4wpc$log2FC > 0,]$ID
+eomes_4wpc_up <-
+  significant_res_eomes_vs_conu_4wpc[significant_res_eomes_vs_conu_4wpc$log2FC > 0,]$ID
+gata3_4wpc_up <-
+  significant_res_gata3_vs_conu_4wpc[significant_res_gata3_vs_conu_4wpc$log2FC > 0,]$ID
+ivhd_4wpc_up <-
+  significant_res_ivhd_vs_conu_4wpc[significant_res_ivhd_vs_conu_4wpc$log2FC > 0,]$ID
+ivld_4wpc_up <-
+  significant_res_ivld_vs_conu_4wpc[significant_res_ivld_vs_conu_4wpc$log2FC > 0,]$ID
+
+
+gata3_exclusive_up_genes_4wpc <-
+  setdiff(gata3_4wpc_up,
+          c(dnavaccine_4wpc_up, eomes_4wpc_up, ivhd_4wpc_up, ivld_4wpc_up))
+
+# length(gata3_exclusive_up_genes_4wpc)
+
+gata3_upregulated_orthologs_4wpc <- gorth(
+  query = gata3_exclusive_up_genes_4wpc,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+gata3_upregulated_orthologs_tbl_4wpc <-
+  as_tibble(gata3_upregulated_orthologs_4wpc) %>% dplyr::select(.,
+                                                                   input,
+                                                                   ortholog_name,
+                                                                   ortholog_ensg,
+                                                                   description) %>% dplyr::rename(
+                                                                     .,
+                                                                     ssalar_ensembl = input,
+                                                                     hsapiens_ortholog = ortholog_name,
+                                                                     hsapiens_ensembl = ortholog_ensg,
+                                                                     description = description
+                                                                   )
+
+gata3_upregulated_orthologs_tbl_4wpc %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+<div>
+
+`r length(gata3_upregulated_orthologs_tbl_4wpc$ssalar_ensembl)` genes were upregulated exclusively in GATA3 and `r gata3_upregulated_orthologs_tbl_4wpc %>% dplyr::filter(!str_detect(hsapiens_ortholog, 'N/A')) %>% pull(., hsapiens_ortholog) %>% length()` were converted to human orthologs.
+
+</div>
+
+<div>
+
+These 256 genes were used for over-representation analysis @fig-gata3-upregulated-pathways-4wpc. Only 4 pathways were enriched in these upregulated genes. None of them was immune related.
+
+</div>
+
+```{r ora gata3 exclusive upregulated genes}
+#| label: ora-gata3-upregulated-genes-4wpc
+#| warning: false
+
+gata3_ora_upreg_4wpc <-
+  enrichGO(
+    gene = gata3_upregulated_orthologs_tbl_4wpc$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+```{r gata3 exclusive upregulated pathways plot}
+#| label: fig-gata3-upregulated-pathways-4wpc
+#| fig-cap: Enriched pathways from GATA3 exclusive upregulated genes at 4 WPC (top 20 pathways by adjusted p-value)
+
+as_tibble(gata3_ora_upreg_4wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           ) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+```{r gata3 exclusive upregulated pathways term translation}
+#| label: tbl-gata3-upregulated-term-translation
+#| tbl-cap: GATA3 exclusive genes GO Term translation
+#| warning: false
+
+as_tibble(gata3_ora_upreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:20) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+### Over-representation analysis of EOMES exclusive **UPREGULATED** genes at 4 WPC
+
+```{r eomes exclusive upregulated genes}
+#| label: tbl-eomes-upregulated-genes-4wpc
+#| tbl-cap: EOMES exclusive upregulated orthologs at 4 WPC, first 20 rows
+#| warning: false
+#| echo: true
+
+eomes_exclusive_up_genes_4wpc <-
+  setdiff(eomes_4wpc_up,
+          c(dnavaccine_4wpc_up, gata3_4wpc_up, ivhd_4wpc_up, ivld_4wpc_up))
+
+# length(eomes_exclusive_up_genes_4wpc)
+
+eomes_upregulated_orthologs_4wpc <- gorth(
+  query = eomes_exclusive_up_genes_4wpc,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+eomes_upregulated_orthologs_tbl_4wpc <-
+  as_tibble(eomes_upregulated_orthologs_4wpc) %>% dplyr::select(.,
+                                                                   input,
+                                                                   ortholog_name,
+                                                                   ortholog_ensg,
+                                                                   description) %>% dplyr::rename(
+                                                                     .,
+                                                                     ssalar_ensembl = input,
+                                                                     hsapiens_ortholog = ortholog_name,
+                                                                     hsapiens_ensembl = ortholog_ensg,
+                                                                     description = description
+                                                                   )
+
+eomes_upregulated_orthologs_tbl_4wpc %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+```{r ora eomes exclusive upregulated genes}
+#| label: ora-eomes-upregulated-genes-4wpc
+#| warning: false
+#| eval: false
+
+eomes_ora_upreg_4wpc <-
+  enrichGO(
+    gene = eomes_upregulated_orthologs_tbl_4wpc$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+```{r eomes exclusive pathways plot}
+#| label: fig-eomes-upregulated-pathways-4wpc
+#| fig-cap: Enriched pathways from EOMES exclusive upregulated genes at 4 WPC (top 20 pathways by adjusted p-value)
+#| eval: false
+
+as_tibble(eomes_ora_upreg_4wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           ) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+<div>
+
+Out of `r length(eomes_upregulated_orthologs_tbl_4wpc$hsapiens_ensembl)` (upregulated) genes used in over-representation analysis, 0 pathways were over-represented.
+
+### Over-representation analysis of EOMES-GATA3 intersection **UPREGULATED** genes at 4 WPC
+
+```{r gata3-eomes intersection upregulated genes}
+#| label: tbl-gata3EOMES-upregulated-genes-4wpc
+#| tbl-cap: EOMES-GATA3 intersection upregulated orthologs at 4 WPC, first 20 rows
+#| warning: false
+#| echo: true
+
+intersectionGE <- intersect(gata3_4wpc_up, eomes_4wpc_up)
+
+# length(intersection2)
+
+gata3EOMES_exclusive_genes_up <- setdiff(intersectionGE,
+                                           c(dnavaccine_4wpc_up, ivhd_4wpc_up, ivld_4wpc_up))
+
+# length(gata3EOMES_exclusive_genes_up)
+
+gata3EOMES_upregulated_orthologs_4wpc <- gorth(
+  query = gata3EOMES_exclusive_genes_up,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+gata3EOMES_upregulated_orthologs_tbl_4wpc <-
+  as_tibble(gata3EOMES_upregulated_orthologs_4wpc) %>% dplyr::select(.,
+                                                                   input,
+                                                                   ortholog_name,
+                                                                   ortholog_ensg,
+                                                                   description) %>% dplyr::rename(
+                                                                     .,
+                                                                     ssalar_ensembl = input,
+                                                                     hsapiens_ortholog = ortholog_name,
+                                                                     hsapiens_ensembl = ortholog_ensg,
+                                                                     description = description
+                                                                   )
+
+gata3EOMES_upregulated_orthologs_tbl_4wpc %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+```{r ora gata3-eomes intersection upregulated genes}
+#| label: ora-gata3EOMES-upregulated-genes-4wpc
+#| warning: false
+
+gata3EOMES_ora_upreg_4wpc <-
+  enrichGO(
+    gene = gata3EOMES_upregulated_orthologs_tbl_4wpc$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+```{r gata3-eomes intersection upregulated pathways plot}
+#| label: fig-gata3EOMES-upregulated-pathways-4wpc
+#| fig-cap: Enriched pathways from EOMES-GATA3 intersection upregulated genes at 4 WPC
+
+as_tibble(gata3EOMES_ora_upreg_4wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           ) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+```{r gata3-eomes intersection upregulated pathways term translation}
+#| label: tbl-gata3EOMES-upregulated-term-translation
+#| tbl-cap: EOMES-GATA3 intersection genes GO Term translation
+#| warning: false
+
+as_tibble(gata3EOMES_ora_upreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:20) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+The `r length(gata3EOMES_upregulated_orthologs_tbl_4wpc$hsapiens_ortholog)` orthologs upregulated in the EOMES-GATA3 intersection were over-represented in only `r length(gata3EOMES_ora_upreg_4wpc$ID)` pathways, none of them immune-related.
+
+### Over-representation analysis of GATA3-EOMES-DNA vaccine-IVHD intersection **UPREGULATED** genes at 4 WPC
+
+```{r gata3-eomes-dnavaccine-ivhd intersection upregulated genes}
+#| label: tbl-gata3-eomes-dnavaccine-ivhd-intersection-upregulated-4wpc
+#| tbl-cap: GATA3-EOMES-DNA vaccine-IVHD intersection upregulated orthologs at 4WPC (first 20 rows)
+#| warning: false
+
+
+intersectionGEDI_up <- Reduce(intersect, list(gata3_4wpc_up, eomes_4wpc_up, dnavaccine_4wpc_up, ivhd_4wpc_up))
+gata3_eomes_dnavaccine_ivhd_intersection <- setdiff(intersectionGEDI, ivld_4wpc_up)
+
+
+gata3_eomes_dnavaccine_ivhd_intersection_orthologs <- gorth(
+  query = gata3_eomes_dnavaccine_ivhd_intersection,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+gata3_eomes_dnavaccine_ivhd_intersection_tbl_orthologs <-
+  as_tibble(gata3_eomes_dnavaccine_ivhd_intersection_orthologs) %>% dplyr::select(.,
+                                                              input,
+                                                              ortholog_name,
+                                                              ortholog_ensg,
+                                                              description) %>% dplyr::rename(
+                                                                .,
+                                                                ssalar_ensembl = input,
+                                                                hsapiens_ortholog = ortholog_name,
+                                                                hsapiens_ensembl = ortholog_ensg,
+                                                                description = description
+                                                                )
+
+
+gata3_eomes_dnavaccine_ivhd_intersection_tbl_orthologs %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+```
+
+```{r ora gata3-eomes-dnavaccine-ivhd intersection upregulated genes}
+#| label: ora-gata3-eomes-dnavaccine-ivhd-intersection-up-genes-4wpc
+#| warning: false
+
+GATA3eomesDNAVACCINEivhd_intersection_ora_upreg_4wpc <-
+  enrichGO(
+    gene = gata3_eomes_dnavaccine_ivhd_intersection_tbl_orthologs$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+<div>
+
+The `r length(gata3_eomes_dnavaccine_ivhd_intersection_tbl_orthologs$ssalar_ensembl)` salmon **ENSEMBL** gene IDs from the intersection between GATA3, EOMES, DNA vaccine, and IV-HD were converted to `r gata3_eomes_dnavaccine_ivhd_intersection_tbl_orthologs %>% dplyr::filter(!str_detect(hsapiens_ortholog, 'N/A')) %>% pull(., hsapiens_ortholog) %>% length()` human orthologs. These 268 genes were used for over-representation analysis @fig-gata3-eomes-dnavaccine-ivhd-intersection-up-pathways-4wpc, and filtered by immune-related term in @fig-gata3-eomes-dnavaccine-intersection-ivhd-up-immune-pathways-4wpc.
+
+</div>
+
+```{r gata3-eomes-dnavaccine-ivhd intersection upregulated pathways plot}
+#| label: fig-gata3-eomes-dnavaccine-ivhd-intersection-up-pathways-4wpc
+#| fig-cap: Enriched pathways from GATA3-EOMES-DNA vaccine-IVHD intersection upregulated genes at 4 WPC (top 20 pathways by adjusted p-value)
+
+as_tibble(GATA3eomesDNAVACCINEivhd_intersection_ora_upreg_4wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Reds',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+
+```
+
+```{r gata3-eomes-dnavaccine-ivhd intersection upregulated pathways term translation}
+#| label: tbl-gata3-eomes-dnavaccine-ivhd-upregulated-term-translation
+#| tbl-cap: GATA3-EOMES-DNA-IVHD vaccine intersection upregulated GO Term translation
+#| warning: false
+
+
+as_tibble(GATA3eomesDNAVACCINEivhd_intersection_ora_upreg_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:20) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+```{r gata3-eomes-dnavaccine-ivhd intersection upregulated immune pathways}
+#| label: fig-gata3-eomes-dnavaccine-intersection-ivhd-up-immune-pathways-4wpc
+#| fig-cap: Enriched immune pathways from GATA3-EOMES-DNA vaccine-IVHD intersection upregulated genes at 4 WPC (top 10 pathways by adjusted p-value)
+
+upregulated_immune_GATA3eomesDNAVACCINEivhd_4wpc <-
+  filter_rows_by_GO_term(GATA3eomesDNAVACCINEivhd_intersection_ora_upreg_4wpc, immune_related_GOterms, 'goterms')
+
+as_tibble(upregulated_immune_GATA3eomesDNAVACCINEivhd_4wpc) %>%
+  dplyr::slice(1:10) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  ggplot(aes(x = ID, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Purples',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+```{r gata3-eomes-dnavaccine-ivhd intersection upregulated immune pathways term translation}
+#| label: tbl-gata3-eomes-dnavaccine-ivhd-upregulated-immune-term-translation
+#| tbl-cap: GATA3-EOMES-DNA vaccine-IVHD intersection (immune) GO Term translation
+#| warning: false
+
+as_tibble(upregulated_immune_GATA3eomesDNAVACCINEivhd_4wpc) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%
+  dplyr::slice(1:10) %>%
+  dplyr::select(ID, Description) %>%
+  map_df(., rev) %>% 
+  kable(
+    booktabs = TRUE,
+        col.names = c(
+      'GO Term',
+      'Description'
+    ),
+    align = 'l') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+<div>
+
+The number of enriched (over-represented) pathways was `r length(GATA3eomesDNAVACCINEivhd_intersection_ora_upreg_4wpc$ID)`, of which `r length(upregulated_immune_GATA3eomesDNAVACCINEivhd_4wpc$ID)` were immune-related pathways.
+
+</div>

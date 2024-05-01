@@ -1,0 +1,1626 @@
+---
+title: "Over-representation Analysis"
+subtitle: '4 weeks post-challenge vs 10 weeks post-immunization'
+author: 'Filipe Figueiredo'
+date: 'April 2024'
+format:
+  # docx:
+  #   fig-width: 16
+  #   fig-align: center
+  #   fig-height: 12
+  html:
+    fig-width: 15
+    fig-align: center
+    fig-height: 10
+    fontsize: 2rem
+    linestretch: 1.7
+    page-layout: full
+code-fold: true
+execute: 
+  echo: false
+  warning: false
+editor: visual
+mainfont: 'Arial'
+highlight-style: 'github'
+df-print: kable
+code-overflow: wrap
+include-in-header:
+  - text: |
+      <style>figure { padding: 1em 0 1em 0; }</style
+---
+
+<h1 style="text-align: center;">
+
+Differential gene expression between 4 weeks post-challenge (WPC) and 10 weeks post-immunization (WPI)
+
+</h1>
+
+To compare differences between non-challenged and challenged salmon, 10 weeks post-immunization was used as a baseline. This means that I considered the fish at 10 WPI to be *naive*. The comparisons are solely within treatment, *e.g.*, CONU at 4WPC contrasted against CONU at 10WPI.
+
+I did that for all treatments, for three different time-points: 1WPC, 4WPC, and 10WPC.
+
+<h2 style="text-align: center;">
+
+Non-immunized control (CONU)
+
+</h2>
+
+```{r setup, include=FALSE, echo=FALSE}
+require("knitr")
+opts_knit$set(root.dir = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_1wpc_vs_10wpi')
+```
+
+```{r}
+#| label: loading-packages-functions-results
+
+suppressPackageStartupMessages({
+  library('tidyverse')
+  library('clusterProfiler')
+  library('gprofiler2')
+  library('org.Hs.eg.db')
+  library('patchwork')
+})
+
+## Loading functions ----
+source(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/functions_data-wrangling_march24.R'
+)
+
+immune_related_GOterms <-
+  read.table(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/immune_related_GOterms.tsv',
+    header = T,
+    sep = '\t'
+  )  # loading dataframe containing immune related GO terms
+
+heart_related_GOterms <-
+  read.table(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/heart_development_GOterms.tsv',
+    header = F,
+    sep = '\t'
+  )  # loading dataframe containing immune related GO terms
+
+colnames(heart_related_GOterms) <-
+  c('goterms', 'ontology', 'description')  # renaming columns
+
+heart_related_GOterms <-
+  heart_related_GOterms[!duplicated(heart_related_GOterms$goterms),]  # removing duplicated GO terms
+
+## Loading results ----
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_4wpc_vs_10wpi'
+)
+
+results_files <- list.files(pattern = 'res_')
+list.data <- list()
+for (i in 1:length(results_files)) {
+  list.data[[i]] <- load(results_files[i])
+}
+
+rm(list.data, i, results_files)
+```
+
+```{r}
+#| label: improved-data-wrangling-conu
+#| output: false
+
+improved_data_wrangling(res_conu_4wpc_vs_10wpi, 'conu', '4wpc_vs_10wpi')
+
+```
+
+```{r}
+#| label: running-ora-conu
+#| cache: true
+
+## ORA ##
+egoORA_downreg_conu <-
+  enrichGO(
+    gene = ora_down,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+egoORA_upreg_conu <-
+  enrichGO(
+    gene = ora_up,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+```
+
+```{r}
+#| label: fig-downregulated-conu
+#| fig-cap: 'Downregulated CONU pathways between 4WPC and 10WPI'
+
+downreg_conu <-
+  as_tibble(egoORA_downreg_conu) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_downreg_conu, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  #   labs(title = 'Downregulated immune pathways in CONU',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .5)) +
+    theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+downreg_conu
+```
+
+```{r}
+#| label: fig-upregulated-conu
+#| fig-cap: 'Upregulated CONU pathways between 4WPC and 10WPI'
+
+upreg_conu <-
+  as_tibble(egoORA_upreg_conu) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_upreg_conu, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(
+    stat = "identity",
+    colour = 'black',
+    linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  #   labs(title = 'Upregulated immune pathways in CONU',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+    theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+upreg_conu
+```
+
+```{r}
+#| label: fig-downregulated-conu-immune-conu
+#| fig-cap: CONU downregulated immune pathways, 
+
+downregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_downreg_conu, immune_related_GOterms, 'goterms')
+
+downreg_immune_conu <-
+  as_tibble(downregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(downregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           width = 0.8,
+           show.legend = FALSE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous(name = NULL) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+    theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  # ggtitle('CONU downregulated immune pathways @ 4WPC vs 10WPI') +
+  theme(legend.position = 'right') +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+```{r}
+#| label: upregulated-conu-immune-conu
+#| fig-cap: Upregulated immune pathways
+
+upregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_upreg_conu, immune_related_GOterms, 'goterms')
+
+upreg_immune_conu <-
+  as_tibble(upregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(upregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           width = 0.8,
+           show.legend = TRUE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  # scale_y_continuous(name = NULL) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+    theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  # ggtitle('CONU upregulated immune pathways @ 4WPC vs 10WPI') +
+  theme(legend.position = 'right') +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+```{r}
+#| label: fig-patchwork-plots-conu
+#| fig-cap: Downregulated (A) and upregulated (B) immune pathways in CONU
+
+regulation_ora <- (downreg_immune_conu / upreg_immune_conu)
+regulation_ora +
+  plot_layout(guides = 'collect') +
+  plot_annotation(
+    # title = 'Downregulated and upregulated immune pathways in CONU \
+    # 1 WPC vs 10 WPI, heart tissue',
+    # theme = theme(plot.title = element_text(hjust = .5, vjust = 2)),
+    tag_levels = 'A'
+  ) &
+  theme(text = element_text(size = 14,
+                            family = 'serif'),
+        axis.text.y = element_text(size = 14)) &
+  theme(
+    plot.tag.position = c(0.9, .95),
+    # plot.tag = element_blank(),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10),
+    legend.key.size = unit(.5, 'cm'),
+    legend.position = 'right',
+    legend.key.height = unit(.5, 'cm')
+  )
+  # theme(plot.margin = margin(0.5, 0.5, 0, 0, 'cm'))
+
+```
+
+<h2 style="text-align: center;">
+
+Inactivated virus - Low dose (IV-LD)
+
+</h2>
+
+```{r}
+#| label: improved-data-wrangling-ivld
+#| output: false
+
+improved_data_wrangling(res_ivld_4wpc_vs_10wpi, 'ivld', '4wpc_vs_10wpi')
+
+```
+
+```{r}
+#| label: running-ora-ivld
+#| cache: true
+
+## ORA ##
+egoORA_downreg_ivld <-
+  enrichGO(
+    gene = ora_down,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+egoORA_upreg_ivld <-
+  enrichGO(
+    gene = ora_up,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+```
+
+```{r}
+#| label: fig-downregulated-ivld
+#| fig-cap: 'Downregulated IV-LD pathways between 4WPC and 10WPI'
+
+downreg_ivld <-
+  as_tibble(egoORA_downreg_ivld) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_downreg_ivld, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           width = .8,
+           linewidth = .3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  # labs(title = 'Downregulated pathways in IV-LD',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +  
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+downreg_ivld
+```
+
+```{r}
+#| label: fig-upregulated-ivld
+#| fig-cap: Upregulated IV-LD pathways between 4WPC and 10WPI
+
+upreg_ivld <-
+  as_tibble(egoORA_upreg_ivld) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_upreg_ivld, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(
+    stat = "identity",
+    colour = 'black',
+    linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  # labs(title = 'Upregulated pathways in IV-LD',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +  
+  theme(legend.position = 'right') +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+upreg_ivld
+```
+
+```{r}
+#| label: fig-downregulated-ivld-immune-ivld
+#| fig-cap: IV-LD downregulated immune pathways
+
+downregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_downreg_ivld, immune_related_GOterms, 'goterms')
+
+downreg_immune_ivld <-
+  as_tibble(downregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(downregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = .3,
+           width = .8,
+           show.legend = FALSE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous(name = NULL) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+    theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+# downreg_immune_ivld
+```
+
+```{r}
+#| label: upregulated-ivld-immune-ivld
+#| fig-cap: Upregulated immune pathways, 
+
+upregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_upreg_ivld, immune_related_GOterms, 'goterms')
+
+upreg_immune_ivld <-
+  as_tibble(upregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(upregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = .3,
+           width = .8,
+           show.legend = TRUE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  # scale_y_continuous(name = NULL) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+    theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+# upreg_immune_ivld
+```
+
+```{r}
+#| label: fig-patchwork-plots-ivld
+#| fig-cap: Downregulated (A) and upregulated (B) immune pathways in IV-LD, 
+
+regulation_ora <- (downreg_immune_ivld / upreg_immune_ivld)
+regulation_ora +
+  plot_layout(guides = 'collect') +
+  plot_annotation(
+    # title = 'Downregulated and upregulated immune pathways in IV-LD \
+    # 1 WPC vs 10 WPI, heart tissue',
+    # theme = theme(plot.title = element_text(hjust = .5, vjust = 0.5)),
+    tag_levels = 'A'
+  ) &
+  theme(text = element_text(size = 14,
+                            family = 'serif'),
+        axis.text.y = element_text(size = 14)) &
+  theme(
+    plot.tag.position = c(0.9, .95),
+    # plot.tag = element_blank(),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10),
+    legend.key.size = unit(.5, 'cm'),
+    legend.position = 'right',
+    legend.key.height = unit(.5, 'cm')
+  )
+  # theme(plot.margin = margin(0.5, 0.5, 0, 0, 'cm'))
+
+
+```
+
+<h2 style="text-align: center;">
+
+Inactivated virus - High dose (IV-HD)
+
+</h2>
+
+```{r}
+#| label: improved-data-wrangling-ivhd
+#| output: false
+
+improved_data_wrangling(res_ivhd_4wpc_vs_10wpi, 'ivhd', '4wpc_vs_10wpi')
+
+```
+
+```{r}
+#| label: running-ora-ivhd
+#| cache: true
+
+## ORA ##
+egoORA_downreg_ivhd <-
+  enrichGO(
+    gene = ora_down,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+egoORA_upreg_ivhd <-
+  enrichGO(
+    gene = ora_up,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,    
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+```
+
+```{r}
+#| label: fig-downregulated-ivhd
+#| fig-cap: Downregulated IV-HD pathways between 4WPC and 10WPI
+
+downreg_ivhd <-
+  as_tibble(egoORA_downreg_ivhd) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_downreg_ivhd, level = 3)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  # labs(title = 'Downregulated pathways in IV-HD',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+downreg_ivhd
+```
+
+```{r}
+#| label: fig-upregulated-ivhd
+#| fig-cap: Upregulated IV-HD pathways between 4WPC and 10WPI
+
+upreg_ivhd <-
+  as_tibble(egoORA_upreg_ivhd) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_upreg_ivhd, level = 3)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(
+    stat = "identity",
+    colour = 'black',
+    linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  theme(legend.position = 'right') +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+upreg_ivhd
+```
+
+```{r}
+#| label: fig-downregulated-ivhd-immune-ivhd
+#| fig-cap: Downregulated IV-HD immune pathways 
+
+downregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_downreg_ivhd, immune_related_GOterms, 'goterms')
+
+downreg_immune_ivhd <-
+  as_tibble(downregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(downregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = .3,
+           width = .8,
+           show.legend = TRUE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous(NULL) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  # labs(title = 'Downregulated immune pathways in IV-HD',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+  theme(legend.position = 'right') +
+    theme(axis.title = element_text()) +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+```{r}
+#| label: upregulated-ivhd-immune-ivhd
+#| fig-cap: Upregulated immune pathways
+
+upregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_upreg_ivhd, immune_related_GOterms, 'goterms')
+
+upreg_immune_ivhd <-
+  as_tibble(upregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(upregulated_immune_ora, level = 3)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           show.legend = TRUE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  # scale_y_continuous(name = NULL) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  # ggtitle('IV-HD upregulated immune pathways @ 4WPC vs 10WPI') +
+  theme(legend.position = 'right') +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+```{r}
+#| label: fig-patchwork-plots-ivhd
+#| fig-cap: Downregulated (A) and upregulated (B) immune pathways in IV-HD
+
+regulation_ora <- (downreg_immune_ivhd / upreg_immune_ivhd)
+regulation_ora +
+  # plot_layout(guides = 'collect') +
+  plot_annotation(
+    # title = 'ORA downregulated and upregulated immune pathways \
+    # IV-HD @ 1 WPC vs 10 WPI, heart tissue',
+    # theme = theme(plot.title = element_text(hjust = .5, vjust = 0.5)),
+    tag_levels = 'A'
+  ) &
+  theme(text = element_text(size = 14,
+                            family = 'serif'),
+        axis.text.y = element_text(size = 14)) &
+  theme(
+    plot.tag.position = c(0.9, .95),
+    # plot.tag = element_blank(),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10),
+    legend.key.size = unit(.5, 'cm'),
+    legend.position = 'right',
+    legend.key.height = unit(.5, 'cm')
+  )
+  # theme(plot.margin = margin(0.5, 0.5, 0, 0, 'cm'))
+
+```
+
+<h2 style="text-align: center;">
+
+Eomesodermin (EOMES)
+
+</h2>
+
+```{r}
+#| label: improved-data-wrangling-eomes
+#| output: false
+
+improved_data_wrangling(res_eomes_4wpc_vs_10wpi, 'eomes', '4wpc_vs_10wpi')
+
+```
+
+```{r}
+#| label: running-ora-eomes
+#| cache: true
+
+## ORA ##
+egoORA_downreg_eomes <-
+  enrichGO(
+    gene = ora_down,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+egoORA_upreg_eomes <-
+  enrichGO(
+    gene = ora_up,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000, 
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+```
+
+```{r}
+#| label: fig-downregulated-eomes
+#| fig-cap: 'Downregulated EOMES pathways between 4WPC and 10WPI'
+
+downreg_eomes <-
+  as_tibble(egoORA_downreg_eomes) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_downreg_eomes, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  # labs(title = 'Downregulated pathways in EOMES',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+downreg_eomes
+```
+
+```{r}
+#| label: fig-upregulated-eomes
+#| fig-cap: Upregulated EOMES pathways between 4WPC and 10WPI
+
+upreg_eomes <-
+  as_tibble(egoORA_upreg_eomes) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_upreg_eomes, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(
+    stat = "identity",
+    colour = 'black',
+    linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  #   labs(title = 'Upregulated pathways in EOMES',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+  theme(legend.position = 'right') +
+    theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+upreg_eomes
+```
+
+```{r}
+#| label: fig-downregulated-eomes-immune-eomes
+#| fig-cap: Downregulated EOMES immune pathways 
+
+downregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_downreg_eomes, immune_related_GOterms, 'goterms')
+
+downreg_immune_eomes <-
+  as_tibble(downregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(downregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           width = .2,
+           show.legend = FALSE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous(NULL) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  # labs(title = 'Downregulated immune pathways in EOMES',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+  theme(legend.position = 'right') +
+    theme(axis.title = element_text()) +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+```{r}
+#| label: fig-upregulated-eomes-immune-eomes
+#| fig-cap: Upregulated EOMES immune pathways
+
+upregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_upreg_eomes, immune_related_GOterms, 'goterms')
+
+upreg_immune_eomes <-
+  as_tibble(upregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(upregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = .3,
+           width = .8,
+           show.legend = TRUE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  # scale_y_continuous(name = NULL) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  #   labs(title = 'Upregulated immune pathways in EOMES',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+  theme(legend.position = 'right') +
+    theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+
+```
+
+```{r}
+#| label: fig-patchwork-plots-eomes
+#| fig-cap: Downregulated (A) and upregulated (B) immune pathways in EOMES
+
+regulation_ora <- (downreg_immune_eomes / upreg_immune_eomes)
+regulation_ora +
+  plot_layout(guides = 'collect') +
+  plot_annotation(
+    # title = 'ORA downregulated and upregulated immune pathways \
+    # EOMES @ 1 WPC vs 10 WPI, heart tissue',
+    # theme = theme(plot.title = element_text(hjust = .5, vjust = 0.5)),
+    tag_levels = 'A'
+  ) &
+  theme(text = element_text(size = 14,
+                            family = 'serif'),
+        axis.text.y = element_text(size = 14)) &
+  theme(
+    plot.tag.position = c(0.9, .95),
+    # plot.tag = element_blank(),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10),
+    legend.key.size = unit(.5, 'cm'),
+    legend.position = 'right',
+    legend.key.height = unit(.5, 'cm')
+  )
+  # theme(plot.margin = margin(0.5, 0.5, 0, 0, 'cm'))
+
+```
+
+<h2 style="text-align: center;">
+
+GATA3
+
+</h2>
+
+```{r}
+#| label: improved-data-wrangling-gata3
+#| output: false
+
+improved_data_wrangling(res_gata3_4wpc_vs_10wpi, 'gata3', '4wpc_vs_10wpi')
+
+```
+
+```{r}
+#| label: running-ora-gata3
+#| cache: true
+
+## ORA ##
+egoORA_downreg_gata3 <-
+  enrichGO(
+    gene = ora_down,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+egoORA_upreg_gata3 <-
+  enrichGO(
+    gene = ora_up,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,    
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+```
+
+```{r}
+#| label: fig-downregulated-gata3
+#| fig-cap: 'Downregulated GATA 3 pathways between 4WPC and 10WPI, '
+
+downreg_gata3 <-
+  as_tibble(egoORA_downreg_gata3) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_downreg_gata3, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous(NULL) +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  # labs(title = 'Downregulated pathways in GATA 3',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+downreg_gata3
+```
+
+```{r}
+#| label: fig-upregulated-gata3
+#| fig-cap: 'Upregulated GATA 3 pathways between 4WPC and 10WPI, '
+
+upreg_gata3 <-
+  as_tibble(egoORA_upreg_gata3) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_upreg_gata3, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  # labs(title = 'Upregulated pathways in GATA 3',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+  theme(legend.position = 'right') +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+upreg_gata3
+```
+
+```{r}
+#| label: fig-downregulated-gata3-immune-gata3
+#| fig-cap: Downregulated GATA 3 immune pathways, 
+
+downregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_downreg_gata3, immune_related_GOterms, 'goterms')
+
+downreg_immune_gata3 <-
+  as_tibble(downregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(downregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           width = .8,
+           show.legend = FALSE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous(NULL) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  theme(legend.position = 'right') +
+    theme(axis.title = element_text()) +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+# downreg_immune_gata3
+```
+
+```{r}
+#| label: fig-upregulated-gata3-immune-gata3
+#| fig-cap: Upregulated GATA 3 immune pathways, 
+
+upregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_upreg_gata3, immune_related_GOterms, 'goterms')
+
+upreg_immune_gata3 <-
+  as_tibble(upregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(upregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           width = .8,
+           show.legend = TRUE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  # scale_y_continuous(name = NULL) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  theme(legend.position = 'right') +
+    theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+# upreg_immune_gata3
+```
+
+```{r}
+#| label: fig-patchwork-plots-gata3
+#| fig-cap: Downregulated (A) and upregulated (B) immune pathways in GATA 3
+
+regulation_ora <- (downreg_immune_gata3 / upreg_immune_gata3)
+regulation_ora +
+  plot_layout(guides = 'collect') +
+  plot_annotation(
+    # title = 'Downregulated and upregulated immune pathways in GATA3 \
+    # 1 WPC vs 10 WPI, heart tissue',
+    # theme = theme(plot.title = element_text(hjust = .5, vjust = 0.5)),
+    tag_levels = 'A'
+  ) &
+    theme(text = element_text(size = 18,
+                            family = 'serif'),
+        axis.text.y = element_text(size = 18)) &
+  theme(
+    plot.tag.position = c(0.9, .98),
+    # plot.tag = element_blank(),
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.key.size = unit(1, 'cm'),
+    legend.position = 'right',
+    legend.key.height = unit(1, 'cm')
+  )
+
+```
+
+<h2 style="text-align: center;">
+
+DNA vaccine
+
+</h2>
+
+```{r}
+#| label: improved-data-wrangling-dnavaccine
+#| output: false
+
+improved_data_wrangling(res_dnavaccine_4wpc_vs_10wpi, 'dnavaccine', '4wpc_vs_10wpi')
+
+```
+
+```{r}
+#| label: running-ora-dnavaccine
+#| cache: true
+
+## ORA ##
+egoORA_downreg_dnavaccine <-
+  enrichGO(
+    gene = ora_down,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+egoORA_upreg_dnavaccine <-
+  enrichGO(
+    gene = ora_up,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+```
+
+No upregulated enriched pathways in DNA vaccine.
+
+```{r}
+#| label: fig-downregulated-dnavaccine
+#| fig-cap: 'Downregulated DNA vaccine pathways between 4WPC and 10WPI, '
+
+downreg_dnavaccine <-
+  as_tibble(egoORA_downreg_dnavaccine) %>%
+  dplyr::slice(1:20) %>% 
+  # as_tibble(gofilter(egoORA_downreg_dnavaccine, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greens',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous(NULL) +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  # labs(title = 'Downregulated pathways in DNA vaccine',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+downreg_dnavaccine
+```
+
+```{r}
+#| label: fig-upregulated-dnavaccine
+#| fig-cap: 'Upregulated DNA vaccine pathways between 4WPC and 10WPI, '
+
+# upreg_dnavaccine <-
+#   as_tibble(egoORA_upreg_dnavaccine) %>%
+#   dplyr::slice(1:20) %>% 
+#   # as_tibble(egoORA_upreg_dnavaccine) %>%  # filtering for level x GO Terms
+#   mutate(Description = fct_reorder(Description, p.adjust)) %>%  # sorting 'Description' by Adjusted p-value
+#   ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+#   geom_bar(stat = "identity",
+#            colour = 'black',
+#            linewidth = 0.3) +
+#   coord_flip() +
+#   scale_fill_distiller(palette = 'Greens',
+#                        name = 'Adjusted \n p-value',
+#                        guide = guide_colorbar(reverse = TRUE)) +
+#   scale_y_continuous() +
+#   guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+#   labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+#   theme_classic() +
+#   labs(title = 'Upregulated pathways in DNA vaccine',
+#        subtitle = '4WPC vs 10WPI') +
+#   theme(plot.title = element_text(hjust = 0),
+#         plot.subtitle = element_text(hjust = .3)) +
+#   theme(legend.position = 'right') +
+#   theme(axis.text.y = element_text(
+#     color = "black",
+#     size = 14,
+#     face = "plain"
+#   )) +
+#   theme(
+#     text = element_text(family = 'serif', size = 14),
+#     plot.margin = margin(
+#       t = 5,
+#       r = 0,
+#       l = 0,
+#       b = 0
+#     ),
+#     plot.title = element_text(hjust = 0)
+#   )
+# 
+# upreg_dnavaccine
+```
+
+```{r}
+#| label: fig-downregulated-dnavaccine-immune-dnavaccine
+#| fig-cap: Downregulated DNA vaccine immune pathways 
+
+downregulated_immune_ora <-
+  filter_rows_by_GO_term(egoORA_downreg_dnavaccine, immune_related_GOterms, 'goterms')
+
+downreg_immune_dnavaccine <-
+  as_tibble(downregulated_immune_ora) %>%
+  dplyr::slice(1:10) %>% 
+  # as_tibble(gofilter(downregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+  mutate(Description = fct_reorder(Description, p.adjust)) %>%
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           width = .8,
+           show.legend = TRUE) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Blues',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+  #   labs(title = 'Downregulated immune pathways in DNA vaccine',
+  #      subtitle = '4WPC vs 10WPI') +
+  # theme(plot.title = element_text(hjust = 0),
+  #       plot.subtitle = element_text(hjust = .3)) +
+  theme(legend.position = 'right') +
+    theme(axis.title = element_text()) +
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+downreg_immune_dnavaccine
+```
+
+```{r}
+#| label: fig-upregulated-dnavaccine-immune-dnavaccine
+#| fig-cap: Upregulated DNA vaccine immune pathways, 
+
+# upregulated_immune_ora <-
+#   filter_rows_by_GO_term(egoORA_upreg_dnavaccine, immune_related_GOterms, 'goterms')
+# 
+# upreg_immune_dnavaccine <-
+#   # as_tibble(upregulated_immune_ora) %>%
+#   as_tibble(gofilter(upregulated_immune_ora, level = 4)) %>%  # filtering for level x GO Terms
+#   mutate(Description = fct_reorder(Description, p.adjust)) %>%
+#   ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+#   geom_bar(stat = "identity",
+#            colour = 'black',
+#            linewidth = 0.3,
+#            show.legend = TRUE) +
+#   coord_flip() +
+#   scale_fill_distiller(palette = 'Blues',
+#                        name = 'Adjusted \n p-value',
+#                        guide = guide_colorbar(reverse = TRUE)) +
+#   # scale_y_continuous(name = NULL) +
+#   labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+#   theme_classic() +
+#   theme(legend.position = 'right') +
+#     theme(axis.text.y = element_text(
+#     color = "black",
+#     size = 14,
+#     face = "plain"
+#   )) +
+#   theme(
+#     text = element_text(family = 'serif', size = 14),
+#     plot.margin = margin(
+#       t = 5,
+#       r = 0,
+#       l = 0,
+#       b = 5
+#     ),
+#     plot.title = element_text(hjust = 0)
+#   )
+# 
+# upreg_immune_dnavaccine
+```
+
+```{r}
+#| label: fig-patchwork-plots-dnavaccine
+#| fig-cap: Downregulated (A) and upregulated (B) immune pathways in DNA vaccine
+
+# regulation_ora <- (downreg_immune_dnavaccine / upreg_immune_dnavaccine)
+# regulation_ora +
+#   plot_layout(guides = 'collect') +
+#   plot_annotation(
+#     title = 'Downregulated and upregulated immune pathways in GATA3 \
+#     1 WPC vs 10 WPI, heart tissue',
+#     theme = theme(plot.title = element_text(hjust = .5, vjust = 0.5)),
+#     tag_levels = 'A'
+#   ) &
+#     theme(text = element_text(size = 18,
+#                             family = 'serif'),
+#         axis.text.y = element_text(size = 18)) &
+#   theme(
+#     plot.tag.position = c(0.9, .98),
+#     # plot.tag = element_blank(),
+#     legend.title = element_text(size = 14),
+#     legend.text = element_text(size = 14),
+#     legend.key.size = unit(1, 'cm'),
+#     legend.position = 'right',
+#     legend.key.height = unit(1, 'cm')
+#   )
+
+```

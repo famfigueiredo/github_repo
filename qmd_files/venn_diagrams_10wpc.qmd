@@ -1,0 +1,664 @@
+---
+title: "Data analysis across treatments at 10 weeks post-challenge"
+author: Filipe Figueiredo
+format:
+  html:
+    theme: flatly
+    fig-width: 10
+    fig-align: center
+    fig-height: 10
+    fontsize: 1.5rem
+    linestretch: 1.5
+    page-layout: full
+    embed-resources: true
+    toc: true
+    toc-depth: 4
+    toc-expand: true
+    toc-location: body
+    number-sections: false
+code-fold: true
+code-block-bg: true
+code-block-border-left: "#31BAE9"
+highlight-style: arrow
+execute: 
+  echo: false
+  warning: false
+editor: visual
+mainfont: 'Ubuntu'
+df-print: kable
+code-overflow: wrap
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+require("knitr")
+opts_knit$set(root.dir = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_10wpc')
+```
+
+```{css}
+
+#| echo: false
+p {
+  text-align: justify
+}
+
+figcaption {
+  text-align: center;
+}
+
+h1 {
+text-align: center;
+}
+
+h2 {
+text-align: center;
+}
+
+h3 {
+text-align: center;
+}
+
+h4 {
+text-align: center;
+}
+
+div {
+  text-indent: 50px;
+}
+
+/* Add space between figures and text */
+figure {
+    margin-bottom: 60px; /* Adjust the value as needed */
+    margin-top: 60px;
+}
+
+```
+
+```{r}
+#| label: loading-packages-functions-results
+#| warning: false
+
+suppressPackageStartupMessages({
+  library('tidyverse')
+  library('VennDiagram')
+  library('clusterProfiler')
+  library('gprofiler2')
+  library('org.Hs.eg.db')
+  library('kableExtra')
+})
+
+## Loading functions ----
+source(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/functions_data-wrangling_march24.R'
+)
+
+immune_related_GOterms <-
+  read.table(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/immune_related_GOterms.tsv',
+    header = T,
+    sep = '\t'
+  )  # loading dataframe containing immune related GO terms
+
+## Loading results ----
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_10wpc'
+)
+
+results_files <-
+  list.files(pattern = 'res_.*.')  # regex matching results files using ptag as reference
+list.data <- list()
+for (i in 1:length(results_files)) {
+  list.data[[i]] <- load(results_files[i])
+}
+```
+
+# Differentially expressed genes (DEG) summary
+
+```{r}
+#| label: dge-summary-10wpc-conu
+#| warning: false
+#| output: false
+#| echo: true
+
+## For loop, significant genes ----
+results_files <-
+  ls(pattern = '^res_.*conu.10wpc')  # listing Global Environment files matching regex pattern, to be used in the for loop. In this case, starting with res, and containing conu and 1wpc.
+
+# Create an empty list to store results
+all_significant_genes <- list()
+
+# Assuming results_files is a list of object names
+for (name in results_files) {
+  # Remove the file extension ".RData" if present
+  name <- sub(".RData$", "", name)
+
+  # Retrieve the object from the global environment
+  results <- get(name, envir = .GlobalEnv)
+
+  # Call the significant_genes function and store the result
+  result_genes <- significant_genes(results)
+
+  # Store the result in the list
+  all_significant_genes[[name]] <- result_genes
+}
+
+### Renaming dataframes ----
+names(all_significant_genes) <-
+  c('DNA vaccine',
+    'EOMES',
+    'GATA3',
+    'IV-HD',
+    'IV-LD')
+
+### Delisting dataframes ----
+list2env(all_significant_genes, envir = .GlobalEnv)  # splitting the dataframes to summarize their contents
+
+### Summarizing differentially expressed genes ----
+deg_regulation_summary <-
+  lapply(mget(c(
+    'DNA vaccine',
+    'EOMES',
+    'GATA3',
+    'IV-HD',
+    'IV-LD'
+  )), sig_genes_metrics)
+
+### Transforming summary into a tibble ----
+deg_regulation_summary <-
+  as_tibble(bind_rows(deg_regulation_summary, .id = 'Treatment'))
+
+### Reordering factors to plot ----
+deg_regulation_summary$Treatment <-
+  factor(
+    deg_regulation_summary$Treatment,
+    levels = c('IV-LD',
+               'IV-HD',
+               'DNA vaccine',
+               'EOMES',
+               'GATA3')
+  )
+```
+
+```{r}
+#| label: fig-dge-summary-10wpc-conu
+#| fig-cap: Summary of differentially expressed genes in the heart at 10 WPC with CONU as reference
+
+deg_regulation_summary %>%
+  ggplot(aes(x = Treatment, y = n, fill = Regulation)) +
+  geom_bar(
+    stat = 'identity',
+    position = 'dodge',
+    colour = 'black',
+    linewidth = .2
+  ) +
+  scale_fill_manual(values = c('#BAE1FF',
+                               '#FFB3BA')) +
+  ylab('Number of genes') +
+  geom_text(
+    aes(label = n),
+    position = position_dodge(width = 0.9),
+    vjust = -0.5,
+    size = 4
+  ) +
+  theme_light() +
+  theme(panel.grid = element_blank()) +
+  theme(text = element_text(size = 14, family = 'serif')) +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5)) +
+  geom_vline(
+    xintercept = c(1.5, 2.5, 3.5, 4.5, 6.5, 7.5, 8.5),
+    linetype = 'dotted',
+    linewidth = 0.2
+  ) +
+  geom_hline(yintercept = 0, size = 0.2)
+
+```
+
+```{r}
+#| label: dge-summary-10wpc-ptag-ivld
+#| warning: false
+#| output: false
+#| echo: true
+
+### For loop, significant genes ----
+results_files <-
+  ls(pattern = '^res_.*(ptag|ivld).10wpc')  # listing Global Environment files matching regex pattern, to be used in the for loop. In this case, starting with res, and containing ptag or ivld, and 10wpc
+
+# Create an empty list to store results
+all_significant_genes <- list()
+
+# Assuming results_files is a list of object names
+for (name in results_files) {
+  # Remove the file extension ".RData" if present
+  name <- sub(".RData$", "", name)
+  
+  # Retrieve the object from the global environment
+  results <- get(name, envir = .GlobalEnv)
+  
+  # Call the significant_genes function and store the result
+  result_genes <- significant_genes(results)
+  
+  # Store the result in the list
+  all_significant_genes[[name]] <- result_genes
+}
+
+### Renaming dataframes ----
+names(all_significant_genes) <-
+  c(
+    'DNA vaccine vs IV-LD',
+    'DNA vaccine vs pTagRFP',
+    'EOMES vs IV-LD',
+    'EOMES vs pTagRFP',
+    'GATA3 vs IV-LD',
+    'GATA3 vs pTagRFP',
+    'IV-HD vs IV-LD',
+    'IV-HD vs pTagRFP',
+    'IV-LD vs pTagRFP'
+  )
+
+### Delisting dataframes ----
+list2env(all_significant_genes, envir = .GlobalEnv)  # splitting the dataframes to summarize their contents
+
+### Summarizing differentially expressed genes ----
+deg_regulation_summary <-
+  lapply(mget(
+    c(
+      'DNA vaccine vs IV-LD',
+      'DNA vaccine vs pTagRFP',
+      'EOMES vs IV-LD',
+      'EOMES vs pTagRFP',
+      'GATA3 vs IV-LD',
+      'GATA3 vs pTagRFP',
+      'IV-HD vs IV-LD',
+      'IV-HD vs pTagRFP',
+      'IV-LD vs pTagRFP'
+    )
+  ), sig_genes_metrics)
+
+### Transforming summary into a tibble ----
+deg_regulation_summary <-
+  as_tibble(bind_rows(deg_regulation_summary, .id = 'Contrast'))
+
+deg_regulation_summary <-
+  deg_regulation_summary %>% add_row(Contrast = 'DNA vaccine vs IV-LD',
+                                     Regulation = 'downregulated',
+                                     n = 0) %>%
+  add_row(Contrast = 'IV-HD vs IV-LD',
+          Regulation = 'upregulated',
+          n = 0)
+
+### Reordering factors to plot ----
+deg_regulation_summary$Contrast <-
+  factor(
+    deg_regulation_summary$Contrast,
+    levels = c(
+      'IV-LD vs pTagRFP',
+      'IV-HD vs pTagRFP',
+      'DNA vaccine vs pTagRFP',
+      'EOMES vs pTagRFP',
+      'GATA3 vs pTagRFP',
+      'IV-HD vs IV-LD',
+      'DNA vaccine vs IV-LD',
+      'EOMES vs IV-LD',
+      'GATA3 vs IV-LD'
+    )
+  )
+
+
+```
+
+```{r}
+#| label: fig-dge-summary-10wpc-ptag-ivld
+#| fig-cap: Summary of differentially expressed genes in the heart at 10 WPC with pTagRFP or IV-LD as reference
+
+deg_regulation_summary %>%
+  ggplot(aes(x = Contrast, y = n, fill = Regulation)) +
+  geom_bar(
+    stat = 'identity',
+    position = 'dodge',
+    colour = 'black',
+    linewidth = .2
+  ) +
+  ylab('Number of genes') +
+  geom_text(
+    aes(label = n),
+    position = position_dodge(width = 0.9),
+    vjust = -0.5,
+    size = 4
+  ) +
+  # ggtitle(label = 'Differentially Expressed Genes',
+  #         subtitle = 'Cardiac tissue at 10 WPC') +
+  theme_light() +
+  theme(panel.grid = element_blank()) +
+  theme(text = element_text(size = 14, family = 'serif')) +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5)) +
+  geom_vline(
+    xintercept = c(1.5, 2.5, 3.5, 4.5, 6.5, 7.5, 8.5),
+    linetype = 'dotted',
+    linewidth = 0.2
+  ) +
+  geom_vline(xintercept = 5.5,
+             linetype = 'solid',
+             linewidth = 0.3) +
+  geom_hline(yintercept = 0, size = 0.2) +
+  annotate(
+    'text',
+    x = 3,
+    y = 200,
+    label = 'vs pTagRFP',
+    size = 4,
+    family = 'serif'
+  ) +
+  annotate(
+    'text',
+    x = 7.5,
+    y = 200,
+    label = 'vs IV-LD',
+    size = 4,
+    family = 'serif'
+  )
+```
+
+```{r}
+#| label: extracting-significantly-regulated-genes
+#| warning: false
+
+# Get names of all objects in global environment with a regex pattern matching 'res_.*_ptag_10wpc'
+res_objects <- ls(pattern = "res_.*_ptag_10wpc")
+
+# Apply significant_genes function to each res object
+for (res_object in res_objects) {
+  # Get the object from the global environment
+  result <- get(res_object)
+  
+  # Apply significant_genes function
+  significant_result <- significant_genes(result)
+  
+  # Assign the result back to the global environment
+  assign(paste0("significant_", res_object), significant_result, envir = .GlobalEnv)
+}
+
+rm(list.data, result, i, res_object, res_objects, results_files, significant_result)
+```
+
+# Venn diagrams and ortholog over-representation analysis
+
+## Downregulated
+
+```{r}
+#| label: significantly-downregulated-genes-list
+#| warning: false
+
+# create list of downregulated geneIDs
+b <- list(
+  A = significant_res_dnavaccine_vs_ptag_10wpc[significant_res_dnavaccine_vs_ptag_10wpc$log2FC < 0, ]$ID,
+  B = significant_res_eomes_vs_ptag_10wpc[significant_res_eomes_vs_ptag_10wpc$log2FC < 0, ]$ID,
+  C = significant_res_gata3_vs_ptag_10wpc[significant_res_gata3_vs_ptag_10wpc$log2FC < 0, ]$ID,
+  D = significant_res_ivhd_vs_ptag_10wpc[significant_res_ivhd_vs_ptag_10wpc$log2FC < 0, ]$ID,
+  E = significant_res_ivld_vs_ptag_10wpc[significant_res_ivld_vs_ptag_10wpc$log2FC < 0, ]$ID
+)
+
+# add treatment names
+names(b) <-
+  c('DNA vaccine', 'EOMES', 'GATA3', 'IVHD', 'IVLD')
+
+# check gene counts per treatment
+kable((sapply(b, length)), col.names = c('count'))
+
+# remove treatments with low counts from the list
+b$EOMES <- NULL
+b$GATA3 <- NULL
+```
+
+```{r}
+#| label: fig-plot-venn-diagram-downregulated
+#| warning: false
+#| fig-cap: Downregulated genes, per treatment, at 10 WPC. pTagRFP as reference
+#| eval: false
+
+# plot Venn diagram
+display_venn(
+  b,
+  fill = c('#C4E7D4', '#F56960', '#9D69A3'),
+  lwd = 1,
+  cex = 2,
+  cat.cex = 2,
+  cat.fontfamily = 'serif',
+  # cat.fontface = 'bold',
+  cat.default.pos = 'outer',
+  cat.dist = c(0.05, 0.05, 0.05),
+  cat.pos = c(350, 20, 180)
+)
+```
+<div>
+
+It is not possible to make a Venn diagram for downregulated genes at 10 WPC since, apart from the low number of differentially regulated genes, there is only 1 common gene between IV-HD and IV-LD.
+
+</div>
+
+<br>
+
+## Upregulated
+
+<div>
+For the Venn diagram of upregulated genes, EOMES and GATA3 were removed, since these only had 3 and 4 differentially expressed genes, respectively.
+The low number of differentially expressed genes observed at 10 WPC seen in @fig-dge-summary-10wpc-conu and @fig-dge-summary-10wpc-ptag-ivld means there are only 13 differentially upregulated genes shared between DNA vaccine and IV-HD.
+
+</div>
+```{r}
+#| label: significantly-upregulated-genes-list
+#| warning: false
+
+# create list of upregulated geneIDs
+a <- list(
+  A = significant_res_dnavaccine_vs_ptag_10wpc[significant_res_dnavaccine_vs_ptag_10wpc$log2FC > 0, ]$ID,
+  B = significant_res_eomes_vs_ptag_10wpc[significant_res_eomes_vs_ptag_10wpc$log2FC > 0, ]$ID,
+  C = significant_res_gata3_vs_ptag_10wpc[significant_res_gata3_vs_ptag_10wpc$log2FC > 0, ]$ID,
+  D = significant_res_ivhd_vs_ptag_10wpc[significant_res_ivhd_vs_ptag_10wpc$log2FC > 0, ]$ID,
+  E = significant_res_ivld_vs_ptag_10wpc[significant_res_ivld_vs_ptag_10wpc$log2FC > 0, ]$ID
+)
+
+# add treatment names
+names(a) <-
+  c('DNA vaccine', 'EOMES', 'GATA3', 'IVHD', 'IVLD')
+
+# check gene counts per treatment
+kable((sapply(a, length)), col.names = c('count'))
+
+# remove treatments with low counts from the list
+a$EOMES <- NULL
+a$GATA3 <- NULL
+```
+
+```{r}
+#| label: fig-plot-venn-diagram-upregulated
+#| warning: false
+#| fig-cap: Upregulated genes, per treatment, at 10 WPC. pTagRFP as reference
+
+
+# plot Venn diagram
+display_venn(
+  a,
+  fill = c('#C4E7D4', '#F56960', '#9D69A3'),
+  lwd = 1,
+  cex = 2,
+  cat.cex = 2,
+  cat.fontfamily = 'serif',
+  # cat.fontface = 'bold',
+  cat.default.pos = 'outer',
+  cat.dist = c(0.05, 0.05, 0.05),
+  cat.pos = c(350, 20, 180)
+)
+```
+
+### Over-representation analysis of IV-HD exclusive **UPREGULATED** genes at 10 WPC
+
+```{r}
+#| label: tbl-ivhd-upregulated-genes-10wpc
+#| tbl-cap: IV-HD exclusive upregulated orthologs at 10 WPC, first 20 rows
+#| warning: false
+#| echo: true
+
+dnavaccine_10wpc_up <- significant_res_dnavaccine_vs_ptag_10wpc[significant_res_dnavaccine_vs_ptag_10wpc$log2FC > 0,]$ID
+ivhd_10wpc_up <- significant_res_ivhd_vs_ptag_10wpc[significant_res_ivhd_vs_ptag_10wpc$log2FC > 0,]$ID
+ivld_10wpc_up <- significant_res_ivld_vs_ptag_10wpc[significant_res_ivld_vs_ptag_10wpc$log2FC > 0,]$ID
+
+
+ivhd_exclusive_up_genes_10wpc <-
+  setdiff(ivhd_10wpc_up,
+          c(dnavaccine_10wpc_up, ivld_10wpc_up))
+
+# length(ivhd_exclusive_up_genes_10wpc)
+
+ivhd_upregulated_orthologs_10wpc <- gorth(
+  query = ivhd_exclusive_up_genes_10wpc,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+)
+
+ivhd_upregulated_orthologs_tbl_10wpc <-
+  as_tibble(ivhd_upregulated_orthologs_10wpc) %>% dplyr::select(.,
+                                                                   input,
+                                                                   ortholog_name,
+                                                                   ortholog_ensg,
+                                                                   description) %>% dplyr::rename(
+                                                                     .,
+                                                                     ssalar_ensembl = input,
+                                                                     hsapiens_ortholog = ortholog_name,
+                                                                     hsapiens_ensembl = ortholog_ensg,
+                                                                     description = description
+                                                                   )
+
+ivhd_upregulated_orthologs_tbl_10wpc %>% head(., n = 20) %>%
+  kable(
+    booktabs = TRUE,
+    col.names = c(
+      'Salmon ENSEMBL',
+      'Human ortholog',
+      'Human ENSEMBL',
+      'Description'
+    ),
+    align = 'c') %>%
+  kableExtra::row_spec(., row = 0, italic = TRUE) %>%
+  kableExtra::kable_styling(font_size = 12)
+
+```
+
+
+
+```{r}
+#| label: ora-ivhd-upregulated-genes-10wpc
+#| warning: false
+#| cache: true
+
+ivhd_ora_upreg_10wpc <-
+  enrichGO(
+    gene = ivhd_upregulated_orthologs_tbl_10wpc$hsapiens_ensembl,
+    OrgDb = 'org.Hs.eg.db',
+    keyType = 'ENSEMBL',
+    ont = 'BP',
+    minGSSize = 10,
+    maxGSSize = 1000,
+    pAdjustMethod = 'BH',
+    pvalueCutoff = 0.05,
+    readable = T
+  )
+
+```
+
+```{r}
+#| label: fig-ivhd-upregulated-pathways-10wpc
+#| fig-cap: Enriched pathways from IV-HD exclusive upregulated genes at 10 WPC (top 20 pathways by adjusted p-value)
+
+as_tibble(ivhd_ora_upreg_10wpc) %>%
+  dplyr::slice(1:20) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Greys',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 0
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+```
+
+```{r}
+#| label: fig-ivhd-upregulated-immune-pathways-4wpc
+#| fig-cap: Enriched immune pathways from IV-HD upregulated genes at 10 WPC (top 10 pathways by adjusted p-value)
+#| output: false
+
+upregulated_immune_ivhd_4wpc <-
+  filter_rows_by_GO_term(ivhd_ora_upreg_10wpc, immune_related_GOterms, 'goterms')
+
+as_tibble(upregulated_immune_ivhd_4wpc) %>%
+  dplyr::slice(1:10) %>%
+  mutate(ID = fct_reorder(ID, p.adjust)) %>%  # sorting 'ID' by Adjusted p-value
+  ggplot(aes(x = Description, y = Count, fill = p.adjust)) +
+  geom_bar(stat = "identity",
+           colour = 'black',
+           linewidth = 0.3,
+           width = 0.5) +
+  coord_flip() +
+  scale_fill_distiller(palette = 'Oranges',
+                       name = 'Adjusted \n p-value',
+                       guide = guide_colorbar(reverse = TRUE)) +
+  scale_y_continuous() +
+  guides(fill = guide_colourbar(barwidth = 1, barheight = 7)) +
+  labs(x = '', y = 'Gene count', fill = 'Adjusted p-value') +
+  theme_classic() +
+
+  theme(axis.text.y = element_text(
+    color = "black",
+    size = 14,
+    face = "plain"
+  )) +
+  theme(legend.position = 'right') +
+  theme(axis.title = element_text()) +
+  theme(
+    text = element_text(family = 'serif', size = 14),
+    plot.margin = margin(
+      t = 5,
+      r = 0,
+      l = 0,
+      b = 5
+    ),
+    plot.title = element_text(hjust = 0)
+  )
+
+```
+
+<br>
+<div>
+
+The `r length(ivhd_upregulated_orthologs_10wpc$ortholog_name)` orthologs exclusive to IV-HD were over-represented in `r length(ivhd_ora_upreg_10wpc$ID)` pathways. Of these pathways, only `r length(upregulated_immune_ivhd_4wpc$ID)` were immune-related:
+
+  - `r upregulated_immune_ivhd_4wpc$ID[1]`, `r upregulated_immune_ivhd_4wpc$Description[1]`
+  
+  - `r upregulated_immune_ivhd_4wpc$ID[2]`, `r upregulated_immune_ivhd_4wpc$Description[2]`
+
+</div>
