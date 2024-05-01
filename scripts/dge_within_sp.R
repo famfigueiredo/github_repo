@@ -3,7 +3,7 @@ rm(list = setdiff(ls(), lsf.str()))  # remove everything from Global except func
 
 ## Loading functions ----
 source(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/functions_data-wrangling_march24.R'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/scripts/functions_data-wrangling_march24.R'
 )
 
 # Loading packages ####
@@ -19,8 +19,10 @@ suppressPackageStartupMessages({
   library('gprofiler2')
   library('org.Hs.eg.db')
   library('openxlsx')
-  register(MulticoreParam(10))
+  MulticoreParam(10)
 })
+
+
 # 1wpc ----
 ### Loading results files ----
 setwd(
