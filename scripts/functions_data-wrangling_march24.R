@@ -120,5 +120,3 @@ display_venn <- function(x, ...){
   venn_object <- venn.diagram(x, filename = NULL, ...)
   grid.draw(venn_object)
 }
-
-## Testing git
