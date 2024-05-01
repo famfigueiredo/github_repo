@@ -97,7 +97,7 @@ while read line
 do
         /data/ffi007/01_quantseq/01_bbmap/bbduk.sh \
         in=/data/ffi007/01_quantseq/03_data/02_demuxed-files/lane4_alex/$line.fq.gz \
-        out=//data/ffi007/01_quantseq/03_data/02_demuxed-files/lane4_alex/$line.clean.fq.gz \
+        out=/data/ffi007/01_quantseq/03_data/02_demuxed-files/lane4_alex/$line.clean.fq.gz \
         ref=/data/ffi007/01_quantseq/03_data/05_useful-files/polyA.fa,/data/ffi007/01_quantseq/03_data/05_useful-files/adapters.fa \
         k=13 ktrim=r useshortkmers=t mink=5 qtrim=r trimq=10 minlength=20 |& tee -a lane4-bbduklog.txt
 
@@ -173,17 +173,28 @@ while read line
 do
         /data/ffi007/01_quantseq/01_bbmap/bbduk.sh \
         in=/data/ffi007/01_quantseq/03_data/02_demuxed-files/lane5_alex/$line.fq.gz \
-        out=//data/ffi007/01_quantseq/03_data/02_demuxed-files/lane5_alex/$line.clean.fq.gz \
+        out=/data/ffi007/01_quantseq/03_data/02_demuxed-files/lane5_alex/$line.clean.fq.gz \
         ref=/data/ffi007/01_quantseq/03_data/05_useful-files/polyA.fa,/data/ffi007/01_quantseq/03_data/05_useful-files/adapters.fa \
         k=13 ktrim=r useshortkmers=t mink=5 qtrim=r trimq=10 minlength=20 |& tee -a lane5-bbduklog.txt
 
 done
 
-fastqc -o /data/ffi007/01_quantseq/03_data/03_clean-files/lane4_alex/fastqc -t 72 -f fastq *.fq.gz
+## Repeating the trimming process since I got an error on several samples 
+# pigz: skipping: /data/ffi007/01_quantseq/03_data/02_demuxed-files/lane5_alex/194_ivld_4wpc_s1_L5.fq.gz: corrupted -- incomplete deflate data
+# pigz: abort: internal threads error
 
 
+#!/bin/bash
+cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane5.txt |
+while read line
+do
+        /data/ffi007/01_quantseq/01_bbmap/bbduk.sh \
+        in=/data/ffi007/01_quantseq/03_data/02_demuxed-files/lane5_alex/$line.fq.gz \
+        out=/data/ffi007/01_quantseq/03_data/03_clean-files/lane5_alex/$line.clean.fq.gz \
+        ref=/data/ffi007/01_quantseq/03_data/05_useful-files/polyA.fa,/data/ffi007/01_quantseq/03_data/05_useful-files/adapters.fa \
+        k=13 ktrim=r useshortkmers=t mink=5 qtrim=r trimq=10 minlength=20 |& tee -a lane5-bbduklog_v2.txt
 
-
+done
 
 
 
