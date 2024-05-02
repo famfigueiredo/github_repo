@@ -1,7 +1,5 @@
 rm(list = setdiff(ls(), lsf.str()))  # remove everything from Global except functions\
 
-BiocManager::install("limma")
-
 # Loading packages ----
 library('DESeq2')
 library('limma')
@@ -9,6 +7,9 @@ library('tidyverse')
 library('clusterProfiler')
 library('gprofiler2')
 library('org.Hs.eg.db')
+library('BiocParallel')
+MulticoreParam(10)
+
 
 # Loading data ----
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsGroup_ensembl.RData')
@@ -257,7 +258,7 @@ res_dnavaccine_vs_conu_1wpc <- results(ddsGroup_ensembl, contrast = c('group', '
 
 # Saving results files
 setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_1wpc'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc'
 )
 
 obj <- ls(pattern = 'res_')
@@ -268,63 +269,38 @@ for (i in 1:length(obj)) {
 
 ## Using pTagRFP as the reference ----
 ### IVLD
-ivld_vs_ptag_1wpc <-
-  makeContrasts(groupivld.1wpc - groupptagrfp.1wpc, levels = colnames(design))
-res_ivld_vs_ptag_1wpc <-
-  results(ddsGroup_ensembl, contrast = ivld_vs_ptag_1wpc, parallel = T)
-
+res_ivld_vs_ptag_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivld.1wpc', 'ptagrfp.1wpc'), parallel = T)
+  
 ### IVHD
-ivhd_vs_ptag_1wpc <-
-  makeContrasts(groupivhd.1wpc - groupptagrfp.1wpc, levels = colnames(design))
-res_ivhd_vs_ptag_1wpc <-
-  results(ddsGroup_ensembl, contrast = ivhd_vs_ptag_1wpc, parallel = T)
+res_ivhd_vs_ptag_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivhd.1wpc', 'ptagrfp.1wpc'), parallel = T)
 
 ### GATA3 
-gata3_vs_ptag_1wpc <-
-  makeContrasts(groupgata3.1wpc - groupptagrfp.1wpc, levels = colnames(design))
-res_gata3_vs_ptag_1wpc <-
-  results(ddsGroup_ensembl, contrast = gata3_vs_ptag_1wpc, parallel = T)
+res_gata3_vs_ptag_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'gata3.1wpc', 'ptagrfp.1wpc'), parallel = T)
 
 ### EOMES
-eomes_vs_ptag_1wpc <-
-  makeContrasts(groupeomes.1wpc - groupptagrfp.1wpc, levels = colnames(design))
-res_eomes_vs_ptag_1wpc <-
-  results(ddsGroup_ensembl, contrast = eomes_vs_ptag_1wpc, parallel = T)
+res_eomes_vs_ptag_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'eomes.1wpc', 'ptagrfp.1wpc'), parallel = T)
 
 ### DNA vaccine
-dnavaccine_vs_ptag_1wpc <-
-  makeContrasts(groupdnavaccine.1wpc - groupptagrfp.1wpc, levels = colnames(design))
-res_dnavaccine_vs_ptag_1wpc <-
-  results(ddsGroup_ensembl, contrast = dnavaccine_vs_ptag_1wpc, parallel = T)
+res_dnavaccine_vs_ptag_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'dnavaccine.1wpc', 'ptagrfp.1wpc'), parallel = T)
+
 
 ## Using IV-LD as the reference ----
 ### IVHD
-ivhd_vs_ivld_1wpc <-
-  makeContrasts(groupivhd.1wpc - groupivld.1wpc, levels = colnames(design))
-res_ivhd_vs_ivld_1wpc <-
-  results(ddsGroup_ensembl, contrast = ivhd_vs_ivld_1wpc, parallel = T)
+res_ivhd_vs_ivld_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivhd.1wpc', 'ivld.1wpc'), parallel = T)
 
 ### GATA3 
-gata3_vs_ivld_1wpc <-
-  makeContrasts(groupgata3.1wpc - groupivld.1wpc, levels = colnames(design))
-res_gata3_vs_ivld_1wpc <-
-  results(ddsGroup_ensembl, contrast = gata3_vs_ivld_1wpc, parallel = T)
+res_gata3_vs_ivld_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'gata3.1wpc', 'ivld.1wpc'), parallel = T)
 
 ### EOMES
-eomes_vs_ivld_1wpc <-
-  makeContrasts(groupeomes.1wpc - groupivld.1wpc, levels = colnames(design))
-res_eomes_vs_ivld_1wpc <-
-  results(ddsGroup_ensembl, contrast = eomes_vs_ivld_1wpc, parallel = T)
+res_eomes_vs_ivld_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'eomes.1wpc', 'ivld.1wpc'), parallel = T)
 
 ### DNA vaccine
-dnavaccine_vs_ivld_1wpc <-
-  makeContrasts(groupdnavaccine.1wpc - groupivld.1wpc, levels = colnames(design))
-res_dnavaccine_vs_ivld_1wpc <-
-  results(ddsGroup_ensembl, contrast = dnavaccine_vs_ivld_1wpc, parallel = T) 
+res_dnavaccine_vs_ivld_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'dnavaccine.1wpc', 'ivld.1wpc'), parallel = T)
+
 
 # Saving results files
 setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_1wpc'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc'
 )
 
 obj <- ls(pattern = 'res_')
