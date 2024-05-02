@@ -1,15 +1,19 @@
-rm(list = setdiff(ls(), lsf.str()))  # remove everything from Global except functions
+rm(list = setdiff(ls(), lsf.str()))  # remove everything from Global except functions\
+
+BiocManager::install("limma")
+
 # Loading packages ----
-library(DESeq2)
-library(limma)
-library(tidyverse)
+library('DESeq2')
+library('limma')
+library('tidyverse')
 library('clusterProfiler')
 library('gprofiler2')
 library('org.Hs.eg.db')
 
 # Loading data ----
-load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/ddsGroup_ensembl.RData')
-load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/sampleTable_group_ensembl.Rda')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsGroup_ensembl.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable_group_ensembl.Rda')
+
 
 summary(sampleTable_group_ensembl)
 results_names <- resultsNames(ddsGroup_ensembl)
@@ -237,34 +241,19 @@ design <- model.matrix( ~ group, sampleTable_group_ensembl)
 
 ## Using CONU as the reference ----
 ### IVLD
-ivld_vs_conu_1wpc <-
-  makeContrasts(groupivld.1wpc - groupconu.1wpc, levels = colnames(design))
-res_ivld_vs_conu_1wpc <-
-  results(ddsGroup_ensembl, contrast = ivld_vs_conu_1wpc, parallel = T)
+res_ivld_vs_conu_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivld.1wpc', 'conu.1wpc'), parallel = T)
 
 ### IVHD
-ivhd_vs_conu_1wpc <-
-  makeContrasts(groupivhd.1wpc - groupconu.1wpc, levels = colnames(design))
-res_ivhd_vs_conu_1wpc <-
-  results(ddsGroup_ensembl, contrast = ivhd_vs_conu_1wpc, parallel = T)
+res_ivhd_vs_conu_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivhd.1wpc', 'conu.1wpc'), parallel = T)
 
 ### GATA3 
-gata3_vs_conu_1wpc <-
-  makeContrasts(groupgata3.1wpc - groupconu.1wpc, levels = colnames(design))
-res_gata3_vs_conu_1wpc <-
-  results(ddsGroup_ensembl, contrast = gata3_vs_conu_1wpc, parallel = T)
+res_gata3_vs_conu_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'gata3.1wpc', 'conu.1wpc'), parallel = T)
 
 ### EOMES
-eomes_vs_conu_1wpc <-
-  makeContrasts(groupeomes.1wpc - groupconu.1wpc, levels = colnames(design))
-res_eomes_vs_conu_1wpc <-
-  results(ddsGroup_ensembl, contrast = eomes_vs_conu_1wpc, parallel = T)
+res_eomes_vs_conu_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'eomes.1wpc', 'conu.1wpc'), parallel = T)
 
 ### DNA vaccine
-dnavaccine_vs_conu_1wpc <-
-  makeContrasts(groupdnavaccine.1wpc - groupconu.1wpc, levels = colnames(design))
-res_dnavaccine_vs_conu_1wpc <-
-  results(ddsGroup_ensembl, contrast = dnavaccine_vs_conu_1wpc, parallel = T)
+res_dnavaccine_vs_conu_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'dnavaccine.1wpc', 'conu.1wpc'), parallel = T)
 
 # Saving results files
 setwd(
@@ -276,6 +265,7 @@ for (i in 1:length(obj)) {
   save(list = (obj[i]),
        file = paste(obj[i], ".RData", sep = ""))
 }
+
 ## Using pTagRFP as the reference ----
 ### IVLD
 ivld_vs_ptag_1wpc <-
