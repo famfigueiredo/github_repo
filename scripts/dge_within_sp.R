@@ -23,7 +23,7 @@ suppressPackageStartupMessages({
 })
 
 ## NEED TO TRY STRING FOR PATHWAY ENRICHMENT AND GSEA ##
-# 10 wpi
+# 10 wpi ----
 ### Loading results files ----
 setwd(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_10wpi'
