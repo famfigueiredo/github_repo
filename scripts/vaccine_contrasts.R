@@ -8,7 +8,7 @@ library('clusterProfiler')
 library('gprofiler2')
 library('org.Hs.eg.db')
 library('BiocParallel')
-MulticoreParam(10)
+MulticoreParam(10) # setting number of available cores for 'parallel'
 
 
 # Loading data ----
@@ -312,45 +312,29 @@ for (i in 1:length(obj)) {
 
 # Treatment contrasts within sampling points - 4wpc ----
 results_names <- resultsNames(ddsGroup_ensembl)
-design <- model.matrix( ~ group, sampleTable_group_ensembl)
 
 ## Using CONU as the reference ----
 ### IVLD
-ivld_vs_conu_4wpc <-
-  makeContrasts(groupivld.4wpc - groupconu.4wpc, levels = colnames(design))
-res_ivld_vs_conu_4wpc <-
-  results(ddsGroup_ensembl, contrast = ivld_vs_conu_4wpc, parallel = T)
+res_ivld_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivld.4wpc', 'conu.4wpc'), parallel = T)
 
 ### IVHD
-ivhd_vs_conu_4wpc <-
-  makeContrasts(groupivhd.4wpc - groupconu.4wpc, levels = colnames(design))
-res_ivhd_vs_conu_4wpc <-
-  results(ddsGroup_ensembl, contrast = ivhd_vs_conu_4wpc, parallel = T)
+res_ivhd_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivhd.4wpc', 'conu.4wpc'), parallel = T)
 
 ### GATA3 
-gata3_vs_conu_4wpc <-
-  makeContrasts(groupgata3.4wpc - groupconu.4wpc, levels = colnames(design))
-res_gata3_vs_conu_4wpc <-
-  results(ddsGroup_ensembl, contrast = gata3_vs_conu_4wpc, parallel = T)
+res_gata3_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'gata3.4wpc', 'conu.4wpc'), parallel = T)
 
 ### EOMES
-eomes_vs_conu_4wpc <-
-  makeContrasts(groupeomes.4wpc - groupconu.4wpc, levels = colnames(design))
-res_eomes_vs_conu_4wpc <-
-  results(ddsGroup_ensembl, contrast = eomes_vs_conu_4wpc, parallel = T)
+res_eomes_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'eomes.4wpc', 'conu.4wpc'), parallel = T)
 
 ### DNA vaccine
-dnavaccine_vs_conu_4wpc <-
-  makeContrasts(groupdnavaccine.4wpc - groupconu.4wpc, levels = colnames(design))
-res_dnavaccine_vs_conu_4wpc <-
-  results(ddsGroup_ensembl, contrast = dnavaccine_vs_conu_4wpc, parallel = T)
+res_dnavaccine_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'dnavaccine.4wpc', 'conu.4wpc'), parallel = T)
 
 # Saving results files
 setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_4wpc'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc'
 )
 
-obj <- ls(pattern = 'res_')
+obj <- ls(pattern = '^res_.*4wpc')  # regex pattern matching files starting with res and containing 4wpc
 for (i in 1:length(obj)) {
   save(list = (obj[i]),
        file = paste(obj[i], ".RData", sep = ""))
@@ -358,66 +342,39 @@ for (i in 1:length(obj)) {
 
 ## Using pTagRFP as the reference ----
 ### IVLD
-ivld_vs_ptag_4wpc <-
-  makeContrasts(groupivld.4wpc - groupptagrfp.4wpc, levels = colnames(design))
-res_ivld_vs_ptag_4wpc <-
-  results(ddsGroup_ensembl, contrast = ivld_vs_ptag_4wpc, parallel = T)
+res_ivld_vs_ptag_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivld.4wpc', 'ptagrfp.4wpc'), parallel = T)
 
 ### IVHD
-ivhd_vs_ptag_4wpc <-
-  makeContrasts(groupivhd.4wpc - groupptagrfp.4wpc, levels = colnames(design))
-res_ivhd_vs_ptag_4wpc <-
-  results(ddsGroup_ensembl, contrast = ivhd_vs_ptag_4wpc, parallel = T)
+res_ivhd_vs_ptag_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivhd.4wpc', 'ptagrfp.4wpc'), parallel = T)
 
 ### GATA3 
-gata3_vs_ptag_4wpc <-
-  makeContrasts(groupgata3.4wpc - groupptagrfp.4wpc, levels = colnames(design))
-res_gata3_vs_ptag_4wpc <-
-  results(ddsGroup_ensembl, contrast = gata3_vs_ptag_4wpc, parallel = T)
+res_gata3_vs_ptag_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'gata3.4wpc', 'ptagrfp.4wpc'), parallel = T)
 
 ### EOMES
-eomes_vs_ptag_4wpc <-
-  makeContrasts(groupeomes.4wpc - groupptagrfp.4wpc, levels = colnames(design))
-res_eomes_vs_ptag_4wpc <-
-  results(ddsGroup_ensembl, contrast = eomes_vs_ptag_4wpc, parallel = T)
+res_eomes_vs_ptag_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'eomes.4wpc', 'ptagrfp.4wpc'), parallel = T)
 
 ### DNA vaccine
-dnavaccine_vs_ptag_4wpc <-
-  makeContrasts(groupdnavaccine.4wpc - groupptagrfp.4wpc, levels = colnames(design))
-res_dnavaccine_vs_ptag_4wpc <-
-  results(ddsGroup_ensembl, contrast = dnavaccine_vs_ptag_4wpc, parallel = T)
+res_dnavaccine_vs_ptag_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'dnavaccine.4wpc', 'ptagrfp.4wpc'), parallel = T)
 
 ## Using IV-LD as the reference ----
 ### IVHD
-ivhd_vs_ivld_4wpc <-
-  makeContrasts(groupivhd.4wpc - groupivld.4wpc, levels = colnames(design))
-res_ivhd_vs_ivld_4wpc <-
-  results(ddsGroup_ensembl, contrast = ivhd_vs_ivld_4wpc, parallel = T)
+res_ivhd_vs_ivld_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivhd.4wpc', 'ivld.4wpc'), parallel = T)
 
 ### GATA3 
-gata3_vs_ivld_4wpc <-
-  makeContrasts(groupgata3.4wpc - groupivld.4wpc, levels = colnames(design))
-res_gata3_vs_ivld_4wpc <-
-  results(ddsGroup_ensembl, contrast = gata3_vs_ivld_4wpc, parallel = T)
+res_gata3_vs_ivld_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'gata3.4wpc', 'ivld.4wpc'), parallel = T)
 
 ### EOMES
-eomes_vs_ivld_4wpc <-
-  makeContrasts(groupeomes.4wpc - groupivld.4wpc, levels = colnames(design))
-res_eomes_vs_ivld_4wpc <-
-  results(ddsGroup_ensembl, contrast = eomes_vs_ivld_4wpc, parallel = T)
+res_eomes_vs_ivld_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'eomes.4wpc', 'ivld.4wpc'), parallel = T)
 
 ### DNA vaccine
-dnavaccine_vs_ivld_4wpc <-
-  makeContrasts(groupdnavaccine.4wpc - groupivld.4wpc, levels = colnames(design))
-res_dnavaccine_vs_ivld_4wpc <-
-  results(ddsGroup_ensembl, contrast = dnavaccine_vs_ivld_4wpc, parallel = T) 
+res_dnavaccine_vs_ivld_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'dnavaccine.4wpc', 'ivld.4wpc'), parallel = T)
 
 # Saving results files
 setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_4wpc'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc'
 )
 
-obj <- ls(pattern = 'res_')
+obj <- ls(pattern = '^res_.*4wpc')
 for (i in 1:length(obj)) {
   save(list = (obj[i]),
        file = paste(obj[i], ".RData", sep = ""))
@@ -426,126 +383,145 @@ for (i in 1:length(obj)) {
 
 # Treatment contrasts within sampling points - 10wpc ----
 results_names <- resultsNames(ddsGroup_ensembl)
-design <- model.matrix( ~ group, sampleTable_group_ensembl)
 
-## Using CONU as the reference ---- RE-WROTE THESE RESULTS EXTRACTIONS ON 23/04/2024 after figuring out makeContrasts was not picking up group.conu10wpc
+## Using CONU as the reference ----
 
 ## IVLD
-res_ivld_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","ivld.10wpc","conu.10wpc"))
+res_ivld_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","ivld.10wpc","conu.10wpc"), parallel = T)
 
 ## IVHD
-res_ivhd_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","ivhd.10wpc","conu.10wpc"))
+res_ivhd_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","ivhd.10wpc","conu.10wpc"), parallel = T)
 
 ### GATA3 
-res_gata3_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","gata3.10wpc","conu.10wpc"))
+res_gata3_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","gata3.10wpc","conu.10wpc"), parallel = T)
 
 ### EOMES
-res_eomes_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","eomes.10wpc","conu.10wpc"))
+res_eomes_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","eomes.10wpc","conu.10wpc"), parallel = T)
 
 ### DNA vaccine
-res_dnavaccine_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.10wpc","conu.10wpc"))
+res_dnavaccine_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.10wpc","conu.10wpc"), parallel = T)
   
   
 # Saving results files
 setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_10wpc'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_10wpc'
 )
 
-obj <- ls(pattern = 'res_')
+obj <- ls(pattern = '^res_.*10wpc')
 for (i in 1:length(obj)) {
   save(list = (obj[i]),
        file = paste(obj[i], ".RData", sep = ""))
 }
 
 ## Using pTagRFP as the reference ----
-### IVLD
-ivld_vs_ptag_10wpc <-
-  makeContrasts(groupivld.10wpc - groupptagrfp.10wpc, levels = colnames(design))
-res_ivld_vs_ptag_10wpc <-
-  results(ddsGroup_ensembl, contrast = ivld_vs_ptag_10wpc, parallel = T)
+## IVLD
+res_ivld_vs_ptagrfp_10wpc <- results(ddsGroup_ensembl, contrast=c("group","ivld.10wpc","ptagrfp.10wpc"), parallel = T)
 
-### IVHD
-ivhd_vs_ptag_10wpc <-
-  makeContrasts(groupivhd.10wpc - groupptagrfp.10wpc, levels = colnames(design))
-res_ivhd_vs_ptag_10wpc <-
-  results(ddsGroup_ensembl, contrast = ivhd_vs_ptag_10wpc, parallel = T)
+## IVHD
+res_ivhd_vs_ptagrfp_10wpc <- results(ddsGroup_ensembl, contrast=c("group","ivhd.10wpc","ptagrfp.10wpc"), parallel = T)
 
 ### GATA3 
-gata3_vs_ptag_10wpc <-
-  makeContrasts(groupgata3.10wpc - groupptagrfp.10wpc, levels = colnames(design))
-res_gata3_vs_ptag_10wpc <-
-  results(ddsGroup_ensembl, contrast = gata3_vs_ptag_10wpc, parallel = T)
+res_gata3_vs_ptagrfp_10wpc <- results(ddsGroup_ensembl, contrast=c("group","gata3.10wpc","ptagrfp.10wpc"), parallel = T)
 
 ### EOMES
-eomes_vs_ptag_10wpc <-
-  makeContrasts(groupeomes.10wpc - groupptagrfp.10wpc, levels = colnames(design))
-res_eomes_vs_ptag_10wpc <-
-  results(ddsGroup_ensembl, contrast = eomes_vs_ptag_10wpc, parallel = T)
+res_eomes_vs_ptagrfp_10wpc <- results(ddsGroup_ensembl, contrast=c("group","eomes.10wpc","ptagrfp.10wpc"), parallel = T)
 
 ### DNA vaccine
-dnavaccine_vs_ptag_10wpc <-
-  makeContrasts(groupdnavaccine.10wpc - groupptagrfp.10wpc, levels = colnames(design))
-res_dnavaccine_vs_ptag_10wpc <-
-  results(ddsGroup_ensembl, contrast = dnavaccine_vs_ptag_10wpc, parallel = T)
+res_dnavaccine_vs_ptagrfp_10wpc <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.10wpc","ptagrfp.10wpc"), parallel = T)
 
 ## Using IV-LD as the reference ----
-### IVHD
-ivhd_vs_ivld_10wpc <-
-  makeContrasts(groupivhd.10wpc - groupivld.10wpc, levels = colnames(design))
-res_ivhd_vs_ivld_10wpc <-
-  results(ddsGroup_ensembl, contrast = ivhd_vs_ivld_10wpc, parallel = T)
+## IVHD
+res_ivhd_vs_ivld_10wpc <- results(ddsGroup_ensembl, contrast=c("group","ivhd.10wpc","ivld.10wpc"), parallel = T)
 
 ### GATA3 
-gata3_vs_ivld_10wpc <-
-  makeContrasts(groupgata3.10wpc - groupivld.10wpc, levels = colnames(design))
-res_gata3_vs_ivld_10wpc <-
-  results(ddsGroup_ensembl, contrast = gata3_vs_ivld_10wpc, parallel = T)
+res_gata3_vs_ivld_10wpc <- results(ddsGroup_ensembl, contrast=c("group","gata3.10wpc","ivld.10wpc"), parallel = T)
 
 ### EOMES
-eomes_vs_ivld_10wpc <-
-  makeContrasts(groupeomes.10wpc - groupivld.10wpc, levels = colnames(design))
-res_eomes_vs_ivld_10wpc <-
-  results(ddsGroup_ensembl, contrast = eomes_vs_ivld_10wpc, parallel = T)
+res_eomes_vs_ivld_10wpc <- results(ddsGroup_ensembl, contrast=c("group","eomes.10wpc","ivld.10wpc"), parallel = T)
 
 ### DNA vaccine
-dnavaccine_vs_ivld_10wpc <-
-  makeContrasts(groupdnavaccine.10wpc - groupivld.10wpc, levels = colnames(design))
-res_dnavaccine_vs_ivld_10wpc <-
-  results(ddsGroup_ensembl, contrast = dnavaccine_vs_ivld_10wpc, parallel = T) 
+res_dnavaccine_vs_ivld_10wpc <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.10wpc","ivld.10wpc"), parallel = T)
 
 # Saving results files
 setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_10wpc'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_10wpc'
 )
 
-obj <- ls(pattern = 'res_')
+obj <- ls(pattern = '^res_.*10wpc')
+for (i in 1:length(obj)) {
+  save(list = (obj[i]),
+       file = paste(obj[i], ".RData", sep = ""))
+}
+
+# Treatment contrasts within sampling points - 10wpi ----
+
+## Using CONU as the reference ----
+
+## IVLD
+res_ivld_vs_conu_10wpi <- results(ddsGroup_ensembl, contrast=c("group","ivld.10wpi","conu.10wpi"), parallel = T)
+
+## IVHD
+res_ivhd_vs_conu_10wpi <- results(ddsGroup_ensembl, contrast=c("group","ivhd.10wpi","conu.10wpi"), parallel = T)
+
+### GATA3 
+res_gata3_vs_conu_10wpi <- results(ddsGroup_ensembl, contrast=c("group","gata3.10wpi","conu.10wpi"), parallel = T)
+
+### EOMES
+res_eomes_vs_conu_10wpi <- results(ddsGroup_ensembl, contrast=c("group","eomes.10wpi","conu.10wpi"), parallel = T)
+
+### DNA vaccine
+res_dnavaccine_vs_conu_10wpi <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.10wpi","conu.10wpi"), parallel = T)
+
+
+# Saving results files
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_10wpi'
+)
+
+obj <- ls(pattern = '^res_.*10wpi')
+for (i in 1:length(obj)) {
+  save(list = (obj[i]),
+       file = paste(obj[i], ".RData", sep = ""))
+}
+
+## Using pTagRFP as the reference ----
+## IVLD
+res_ivld_vs_ptagrfp_10wpi <- results(ddsGroup_ensembl, contrast=c("group","ivld.10wpi","ptagrfp.10wpi"), parallel = T)
+
+## IVHD
+res_ivhd_vs_ptagrfp_10wpi <- results(ddsGroup_ensembl, contrast=c("group","ivhd.10wpi","ptagrfp.10wpi"), parallel = T)
+
+### GATA3 
+res_gata3_vs_ptagrfp_10wpi <- results(ddsGroup_ensembl, contrast=c("group","gata3.10wpi","ptagrfp.10wpi"), parallel = T)
+
+### EOMES
+res_eomes_vs_ptagrfp_10wpi <- results(ddsGroup_ensembl, contrast=c("group","eomes.10wpi","ptagrfp.10wpi"), parallel = T)
+
+### DNA vaccine
+res_dnavaccine_vs_ptagrfp_10wpi <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.10wpi","ptagrfp.10wpi"), parallel = T)
+
+## Using IV-LD as the reference ----
+## IVHD
+res_ivhd_vs_ivld_10wpi <- results(ddsGroup_ensembl, contrast=c("group","ivhd.10wpi","ivld.10wpi"), parallel = T)
+
+### GATA3 
+res_gata3_vs_ivld_10wpi <- results(ddsGroup_ensembl, contrast=c("group","gata3.10wpi","ivld.10wpi"), parallel = T)
+
+### EOMES
+res_eomes_vs_ivld_10wpi <- results(ddsGroup_ensembl, contrast=c("group","eomes.10wpi","ivld.10wpi"), parallel = T)
+
+### DNA vaccine
+res_dnavaccine_vs_ivld_10wpi <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.10wpi","ivld.10wpi"), parallel = T)
+
+# Saving results files
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_10wpi'
+)
+
+obj <- ls(pattern = '^res_.*(ptag|ivld).*10wpi')  # regex pattern matching files starting with res, and containing either ptag or ivld
 for (i in 1:length(obj)) {
   save(list = (obj[i]),
        file = paste(obj[i], ".RData", sep = ""))
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Treatment contrasts within sampling points - 10wpi
