@@ -74,6 +74,10 @@ improved_data_wrangling <-
     results_name <-
       paste('results', treatment, sampling_point, sep = '_')
     
+    # Add treatment column
+    results <- results %>%
+      mutate(treatment = treatment)
+    
     # assign the results data frame to the dynamic name
     assign(results_name, results, envir = .GlobalEnv)
     
