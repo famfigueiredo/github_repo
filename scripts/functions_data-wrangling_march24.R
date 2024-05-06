@@ -1,7 +1,20 @@
 # Loading functions ####
 # Significant genes grabs a DESeq2 result table, subsets the genes with padj < 0.05, and selects the ID, log2FoldChange, and padj columns. Also arranges log2FC in a descending manner.
+# significant_genes <- function(results_files) {
+#   b <- as.data.frame(subset(results_files, padj < 0.05)) %>%
+#     rownames_to_column(var = 'ID') %>%
+#     as_tibble()
+#   
+#   sig_genes <- b %>%
+#     dplyr::select(ID, log2FC = log2FoldChange, adjusted_p.val = padj, pvalue) %>%
+#     dplyr::arrange(desc(log2FC))
+#   
+#   return(sig_genes)
+# }
+
+## Testing GSEA without selecting by p-value
 significant_genes <- function(results_files) {
-  b <- as.data.frame(subset(results_files, padj < 0.05)) %>%
+  b <- as.data.frame(results_files) %>%
     rownames_to_column(var = 'ID') %>%
     as_tibble()
   
