@@ -81,7 +81,6 @@ improved_data_wrangling <-
     # assign the results data frame to the dynamic name
     assign(results_name, results, envir = .GlobalEnv)
     
-    print(get(results_name))
   }
 
 # combine and label pathways merges both downregulated and upregulated dataframes into one
