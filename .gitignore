@@ -7,3 +7,6 @@
 
 # Ignore folders containing "cache" in the name
 *cache*/
+
+# Ignore PNG files
+*.png
