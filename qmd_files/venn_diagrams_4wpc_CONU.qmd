@@ -2690,7 +2690,7 @@ The number of enriched (over-represented) pathways was `r length(GATA3eomesDNAVA
 <div>
 
 Besides running over-representation analysis, I also tried to do Gene Set Enrichment Analysis (GSEA). While ORA is based on the overlap of gene sets, GSEA considers the distribution of gene expression changes in a dataset.
-In this case, I started from genes that were commonly expressed in all treatments in relation to CONU. The summ of the center of both Venn diagrams, since GSEA uses down- and upregulated at the same time, as input.
+In this case, I started from genes that were commonly expressed in all treatments in relation to CONU. The sum of the center of both Venn diagrams, since GSEA uses down- and upregulated at the same time, as input.
 These were converted to orthologs, and because salmon ENSEMBL ID to human ortholog conversion yields repeated gene symbols, I had to select one gene 'version' per treatment (the one with the lowest adjusted p-value)
 </div>
 

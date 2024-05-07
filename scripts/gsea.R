@@ -7,7 +7,6 @@ suppressPackageStartupMessages({
   library('enrichplot')
 })
 
-
 ## Loading functions ----
 source(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/scripts/functions_data-wrangling_march24.R'
@@ -277,9 +276,6 @@ gsea_ivhd %>%
 
 ## Testing cnetplots with GSEA output data ----
 
-# List of objects containing all results files matching the regex pattern
-objects <- ls(pattern = "^res_.*_conu_4wpc")
-
 # List of treatments
 treatments <- c("dnavaccine", "eomes", "gata3", "ivhd", "ivld")
 
@@ -347,6 +343,7 @@ enrichment_gsea_common <- enrichment_unique_common$log2FC
 names(enrichment_gsea_common) <-
   enrichment_unique_common$ortholog_ensg
 
+length(enrichment_gsea_common)
 # Running GSEA on common regulated genes
 gsea_common <- gseGO(
   geneList = enrichment_gsea_common,
@@ -358,6 +355,10 @@ gsea_common <- gseGO(
   eps = 0,
   verbose = T
 )
+
+length(enrichment_gsea_common)
+
+as_tibble(gsea_common)
 
 gsea_common %>%
   fortify(., showCategory = 20) %>%
