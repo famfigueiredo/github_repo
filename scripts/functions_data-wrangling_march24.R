@@ -12,19 +12,6 @@ significant_genes <- function(results_files) {
   return(sig_genes)
 }
 
-## Testing GSEA without selecting by p-value
-# significant_genes <- function(results_files) {
-#   b <- as.data.frame(results_files) %>%
-#     rownames_to_column(var = 'ID') %>%
-#     as_tibble()
-#   
-#   sig_genes <- b %>%
-#     dplyr::select(ID, log2FC = log2FoldChange, adjusted_p.val = padj, pvalue) %>%
-#     dplyr::arrange(desc(log2FC))
-#   
-#   return(sig_genes)
-# }
-
 # Significant genes metrics creates a table with information about number of up/down significantly regulated genes
 sig_genes_metrics <- function(significant_genes) {
   as.data.frame(significant_genes) %>% filter(adjusted_p.val < 0.05) %>%
