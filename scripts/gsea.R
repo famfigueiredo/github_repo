@@ -391,7 +391,6 @@ gsea_common %>%
 edox <- setReadable(gsea_common, 'org.Hs.eg.db', 'ENSEMBL')
 
 
-
 cnetplot(
   edox,
   color.params = list(foldChange = enrichment_gsea_common),
@@ -402,6 +401,306 @@ cnetplot(
   cex_label_category = 0.8,
   cex_label_gene = 0.8
 )
+
+## Testing gseGO with salmon annotation ----
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc'
+)
+
+results_files <-
+  list.files(pattern = '^res_.*_conu_4wpc')  # regex matching results files
+list.data <- list()
+for (i in 1:length(results_files)) {
+  list.data[[i]] <- load(results_files[i])
+}
+
+install.packages('AnnotationHub')
+library('AnnotationHub')
+
+ah <- AnnotationHub()
+
+query(ah, c('OrgDb', 'Salmo salar'))
+
+sasa <- ah[['AH114250']]
+
+
+## DNA vaccine
+orth_hs <- gorth(
+  query = rownames(res_dnavaccine_vs_conu_4wpc),
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = T
+)
+
+res <- tibble::rownames_to_column(as.data.frame(res_dnavaccine_vs_conu_4wpc), var = 'ensembl')
+
+res <- res %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>%
+  dplyr::select(.,
+                ensembl,
+                ortholog_name,
+                ortholog_ensg,
+                log2FoldChange,
+                padj,
+                ortholog_ensg,
+                description) %>% 
+  na.omit()
+
+head(res)
+
+# table(rownames(res_eomes_vs_conu_4wpc) %in% keys(sasa, 'ENSEMBL'))
+# res_eomes_vs_conu_4wpc$entrez <- mapIds(sasa, rownames(res_eomes_vs_conu_4wpc), column="ENTREZID", keytype="ENSEMBL")
+# res <- na.omit(res_dnavaccine_vs_conu_4wpc)
+
+res <- res[order(-res$log2FoldChange),]
+
+gene_list <- res$log2FoldChange
+names(gene_list) <- res$ortholog_name
+
+gse <- gseGO(gene_list,
+             keyType = 'SYMBOL',
+             OrgDb = org.Hs.eg.db,
+             eps = 1e-300)
+
+# gseaplot(gse, geneSetID = 4)
+gse_tibble_dnavaccine <- as_tibble(gse)
+
+# edox <- setReadable(gse, org.Hs.eg.db, 'auto')
+
+top_downregulated_dnavaccine <- cnetplot(
+  gse,
+  color.params = list(foldChange = gene_list),
+  circular = T,
+  colorEdge = TRUE,
+  showCategory = c('interleukin-6 production', 'B cell receptor signaling pathway', 'type II interferon production'),
+  max.overlaps =  500
+)
+
+## GATA3
+orth_hs <- gorth(
+  query = rownames(res_gata3_vs_conu_4wpc),
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = T
+)
+
+res <- tibble::rownames_to_column(as.data.frame(res_gata3_vs_conu_4wpc), var = 'ensembl')
+
+res <- res %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>%
+  dplyr::select(.,
+                ensembl,
+                ortholog_name,
+                ortholog_ensg,
+                log2FoldChange,
+                padj,
+                ortholog_ensg,
+                description) %>% 
+  na.omit()
+
+res <- res[order(-res$log2FoldChange),]
+
+gene_list <- res$log2FoldChange
+names(gene_list) <- res$ortholog_name
+
+gse <- gseGO(gene_list,
+             keyType = 'SYMBOL',
+             OrgDb = org.Hs.eg.db,
+             eps = 1e-300)
+
+# gseaplot(gse, geneSetID = 4)
+gse_tibble_gata3 <- as_tibble(gse)
+
+# edox <- setReadable(gse, org.Hs.eg.db, 'auto')
+
+top_downregulated_gata3 <- cnetplot(
+  gse,
+  color.params = list(foldChange = gene_list),
+  circular = T,
+  colorEdge = TRUE,
+  showCategory = c('interleukin-6 production', 'B cell receptor signaling pathway', 'type II interferon production'),
+  max.overlaps =  500
+)
+
+top_downregulated_gata3 + ggtitle("Top downregulated GATA3") +theme(plot.title = element_text(hjust= 0.5))
+
+
+## EOMES
+
+orth_hs <- gorth(
+  query = rownames(res_eomes_vs_conu_4wpc),
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = T
+)
+
+res <- tibble::rownames_to_column(as.data.frame(res_eomes_vs_conu_4wpc), var = 'ensembl')
+
+res <- res %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>%
+  dplyr::select(.,
+                ensembl,
+                ortholog_name,
+                ortholog_ensg,
+                log2FoldChange,
+                padj,
+                ortholog_ensg,
+                description) %>% 
+  na.omit()
+
+res <- res[order(-res$log2FoldChange),]
+
+gene_list <- res$log2FoldChange
+names(gene_list) <- res$ortholog_name
+
+gse <- gseGO(gene_list,
+             keyType = 'SYMBOL',
+             OrgDb = org.Hs.eg.db,
+             eps = 1e-300)
+
+# gseaplot(gse, geneSetID = 4)
+gse_tibble_eomes <- as_tibble(gse)
+
+# edox <- setReadable(gse, org.Hs.eg.db, 'auto')
+
+top_downregulated_eomes <- cnetplot(
+  gse,
+  color.params = list(foldChange = gene_list),
+  circular = T,
+  colorEdge = TRUE,
+  showCategory = c('immunoglobulin mediated immune response', 'B cell mediated immunity', 'lymphocyte mediated immunity'),
+  max.overlaps =  500
+)
+
+top_downregulated_eomes + ggtitle("Top downregulated EOMES") + theme(plot.title = element_text(hjust= 0.5))
+
+## IV-HD
+orth_hs <- gorth(
+  query = rownames(res_ivhd_vs_conu_4wpc),
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = T
+)
+
+res <- tibble::rownames_to_column(as.data.frame(res_ivhd_vs_conu_4wpc), var = 'ensembl')
+
+res <- res %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>%
+  dplyr::select(.,
+                ensembl,
+                ortholog_name,
+                ortholog_ensg,
+                log2FoldChange,
+                padj,
+                ortholog_ensg,
+                description) %>% 
+  na.omit()
+
+res <- res[order(-res$log2FoldChange),]
+
+gene_list <- res$log2FoldChange
+names(gene_list) <- res$ortholog_name
+
+gse <- gseGO(gene_list,
+             keyType = 'SYMBOL',
+             OrgDb = org.Hs.eg.db,
+             eps = 1e-300)
+
+# gseaplot(gse, geneSetID = 4)
+gse_tibble_ivhd <- as_tibble(gse)
+
+# edox <- setReadable(gse, org.Hs.eg.db, 'auto')
+
+top_downregulated_ivhd <- cnetplot(
+  gse,
+  color.params = list(foldChange = gene_list),
+  circular = T,
+  colorEdge = TRUE,
+  showCategory = c('adaptive immune response', 'B cell mediated immunity', 'lymphocyte mediated immunity'),
+  max.overlaps =  500
+)
+
+top_downregulated_ivhd + ggtitle("Top downregulated IV-HD") + theme(plot.title = element_text(hjust= 0.5))
+
+
+## IV-LD
+
+orth_hs <- gorth(
+  query = rownames(res_ivld_vs_conu_4wpc),
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = T
+)
+
+res <- tibble::rownames_to_column(as.data.frame(res_ivld_vs_conu_4wpc), var = 'ensembl')
+
+res <- res %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>%
+  dplyr::select(.,
+                ensembl,
+                ortholog_name,
+                ortholog_ensg,
+                log2FoldChange,
+                padj,
+                ortholog_ensg,
+                description) %>% 
+  na.omit()
+
+res <- res[order(-res$log2FoldChange),]
+
+gene_list <- res$log2FoldChange
+names(gene_list) <- res$ortholog_name
+
+gse <- gseGO(gene_list,
+             keyType = 'SYMBOL',
+             OrgDb = org.Hs.eg.db,
+             eps = 1e-300)
+
+# gseaplot(gse, geneSetID = 4)
+gse_tibble_ivld <- as_tibble(gse)
+
+# edox <- setReadable(gse, org.Hs.eg.db, 'auto')
+
+top_downregulated_ivld <- cnetplot(
+  gse,
+  color.params = list(foldChange = gene_list),
+  circular = T,
+  colorEdge = TRUE,
+  showCategory = c('regulation of antigen processing and presentation', 'positive regulation of interferon-alpha production', 'positive regulation of CD4-positive, alpha-beta T cell activation'),
+  max.overlaps =  500
+)
+
+top_downregulated_ivhd + ggtitle("Top downregulated IV-LD") + theme(plot.title = element_text(hjust= 0.5))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# gse@result$Description[4]
+
+
 
 ## Testing cnet plot on exclusive genes ----
 
