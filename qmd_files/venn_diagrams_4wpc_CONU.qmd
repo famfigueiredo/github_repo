@@ -36,7 +36,7 @@ editor_options:
 #| cache: false
 #| code-summary: R setup
 require("knitr")
-opts_knit$set(root.dir = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_4wpc')
+opts_knit$set(root.dir = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc')
 ```
 
 ```{css css setup}
@@ -76,6 +76,7 @@ div {
 <!--     margin-top: 60px; -->
 <!-- } -->
 ```
+
 ```{r packages, functions, results}
 #| label: loading-packages-functions-results
 #| warning: false
@@ -88,23 +89,24 @@ suppressPackageStartupMessages({
   library('clusterProfiler')
   library('gprofiler2')
   library('org.Hs.eg.db')
+  library('enrichplot')
 })
 
 ## Loading functions ----
 source(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/functions_data-wrangling_march24.R'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/scripts/functions_data-wrangling_march24.R'
 )
 
 immune_related_GOterms <-
   read.table(
-    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/immune_related_GOterms.tsv',
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/goTerm_lists/immune_related_GOterms.tsv',
     header = T,
     sep = '\t'
   )  # loading dataframe containing immune related GO terms
 
 ## Loading results ----
 setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/results_4wpc'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc'
 )
 
 results_files <-
@@ -119,17 +121,18 @@ for (i in 1:length(results_files)) {
 
 To create this document, raw sequencing data was: <br>
 
-- Demultiplexed
-  
-- Trimmed
-  
-- Mapped to [Ssal_v3.1](https://www.ensembl.org/Salmo_salar/Info/Index), which is the current reference assembly for *Atlantic salmon* (released in 2021)
-  
-- Run through a feature count, which assigns sequencing reads to the mapped genes
+-   Demultiplexed
 
-- Gene counts were modelled using *DESeq2's* negative binomial distribution
+-   Trimmed
 
-- Results tables were extracted based on the desired contrasts/comparisons, as displayed in the example below:
+-   Mapped to [Ssal_v3.1](https://www.ensembl.org/Salmo_salar/Info/Index), which is the current reference assembly for *Atlantic salmon* (released in 2021)
+
+-   Run through a feature count, which assigns sequencing reads to the mapped genes
+
+-   Gene counts were modelled using *DESeq2's* negative binomial distribution
+
+-   Results tables were extracted based on the desired contrasts/comparisons, as displayed in the example below:
+
 ```{r}
 #| label: code example
 #| echo: true
@@ -146,12 +149,12 @@ res_eomes_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast=c("group","eomes.4w
 res_dnavaccine_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.4wpc","conu.4wpc"))
 ```
 
-
 ```{r dge summary conu}
 #| label: dge-summary-4wpc-conu
 #| warning: false
 #| output: false
 #| code-summary: DEG summary with CONU as reference
+#| cache: true
 
 ## For loop, significant genes ----
 results_files <-
@@ -210,6 +213,83 @@ deg_regulation_summary$Treatment <-
                'EOMES',
                'GATA3')
   )
+
+results_files <-
+  list.files(pattern = '^res_.*_conu_4wpc')  # regex matching results files
+list.data <- list()
+for (i in 1:length(results_files)) {
+  list.data[[i]] <- load(results_files[i])
+}
+
+# List of objects containing all results files matching the regex pattern
+objects <- ls(pattern = "^res_.*_conu_4wpc")
+
+# List of treatments
+treatments <- c("dnavaccine", "eomes", "gata3", "ivhd", "ivld")
+
+# Initialize an empty list to store data frames
+result_list <- list()
+
+# Loop through each treatment and apply the function, also adding a column with treatment information
+for (treatment in treatments) {
+  obj <- paste0("res_", treatment, "_vs_conu_4wpc")
+  result_list[[treatment]] <-
+    improved_data_wrangling(get(obj), treatment = treatment, sampling_point = "4wpc")
+}
+
+rm(i,
+   obj,
+   objects,
+   ora_down,
+   ora_up,
+   results_files,
+   treatment,
+   treatments)
+
+# Vertically merge data frames from all treatments and remove NA
+merged_df <- do.call(rbind, result_list) %>% na.omit()
+
+# Reduce and intersect the ID column in result_list to find common differentially regulated genes among all treatments
+reduced_intersected_ids <-
+  Reduce(intersect, lapply(result_list, function(df)
+    df$ID))
+
+# Print the reduced and intersected IDs
+print(reduced_intersected_ids)
+
+# Find the common IDs between reduced_intersected_ids and merged_df. This way we are keeping only the common regulated salmon genes
+common_ids <- intersect(merged_df$ID, reduced_intersected_ids)
+
+# Subset merged_df to keep only rows with common IDs
+# merged_subset <- merged_df[merged_df$ID %in% common_ids,]
+merged_subset <-
+  subset(merged_df, ID %in% common_ids)  # tidy version
+
+merged_df[duplicated(merged_df$ortholog_name),] %>% arrange(ortholog_name) %>% print(n = 100)  # identifying duplicates in merged_df
+
+# Splitting between up and downregulated genes, and sorting by gene name and adjusted p-value
+upregulated_gsea <-
+  merged_subset %>% dplyr::filter(log2FC > 0) %>% arrange(ortholog_name, adjusted_p.val)
+
+downregulated_gsea <-
+  merged_subset %>% dplyr::filter(log2FC < 0) %>% arrange(ortholog_name, adjusted_p.val)
+
+
+# Keeping just one of the ortholog copies, the one with the lowest adjusted p-value
+unique_upregulated <-
+  upregulated_gsea[!duplicated(upregulated_gsea$ortholog_ensg),] %>% arrange(ortholog_name)
+unique_downregulated <-
+  downregulated_gsea[!duplicated(downregulated_gsea$ortholog_ensg),] %>% arrange(ortholog_name)
+
+# Merging down and upregulated dataframes after removing duplicates
+enrichment_unique_common <-
+  rbind(unique_downregulated, unique_upregulated) %>% dplyr::arrange(desc(log2FC))
+
+# Arranging matrix for GSEA
+enrichment_gsea_common <- enrichment_unique_common$log2FC
+
+names(enrichment_gsea_common) <-
+  enrichment_unique_common$ortholog_ensg
 ```
 
 ```{r dge summary plot conu}
@@ -396,8 +476,9 @@ deg_regulation_summary %>%
   )
 
 ```
-<br>
-<br>
+
+<br> <br>
+
 ```{r extracting significant genes conu}
 #| label: extracting-significantly-regulated-genes
 #| warning: false
@@ -429,7 +510,7 @@ rm(list.data, result, i, res_object, res_objects, results_files, significant_res
 
 <div>
 
-The results tables used in these Venn diagrams and ORA were extracted <span style='color: red;'> **using CONU as reference**</span>.
+The results tables used in these Venn diagrams and ORA were extracted [**using CONU as reference**]{style="color: red;"}.
 
 </div>
 
@@ -2604,3 +2685,94 @@ as_tibble(upregulated_immune_GATA3eomesDNAVACCINEivhd_4wpc) %>%
 The number of enriched (over-represented) pathways was `r length(GATA3eomesDNAVACCINEivhd_intersection_ora_upreg_4wpc$ID)`, of which `r length(upregulated_immune_GATA3eomesDNAVACCINEivhd_4wpc$ID)` were immune-related pathways.
 
 </div>
+
+## Gene Set Enrichment Analysis of commonly regulated genes
+<div>
+
+Besides running over-representation analysis, I also tried to do Gene Set Enrichment Analysis (GSEA). While ORA is based on the overlap of gene sets, GSEA considers the distribution of gene expression changes in a dataset.
+In this case, I started from genes that were commonly expressed in all treatments in relation to CONU. The summ of the center of both Venn diagrams, since GSEA uses down- and upregulated at the same time, as input.
+These were converted to orthologs, and because salmon ENSEMBL ID to human ortholog conversion yields repeated gene symbols, I had to select one gene 'version' per treatment (the one with the lowest adjusted p-value)
+</div>
+
+
+```{r formatting-gsea-list}
+# Loop through each treatment and apply the function, also adding a column with treatment information
+
+# Vertically merge data frames from all treatments and remove NA
+merged_df <- do.call(rbind, result_list) %>% na.omit()
+
+# Reduce and intersect the ID column in result_list to find common differentially regulated genes among all treatments
+reduced_intersected_ids <-
+  Reduce(intersect, lapply(result_list, function(df)
+    df$ID))
+
+# Find the common IDs between reduced_intersected_ids and merged_df. This way we are keeping only the common regulated salmon genes
+common_ids <- intersect(merged_df$ID, reduced_intersected_ids)
+
+# Subset merged_df to keep only rows with common IDs
+# merged_subset <- merged_df[merged_df$ID %in% common_ids,]
+merged_subset <-
+  subset(merged_df, ID %in% common_ids)  # tidy version
+
+# Splitting between up and downregulated genes, and sorting by gene name and adjusted p-value
+upregulated_gsea <-
+  merged_subset %>% dplyr::filter(log2FC > 0) %>% arrange(ortholog_name, adjusted_p.val)
+
+downregulated_gsea <-
+  merged_subset %>% dplyr::filter(log2FC < 0) %>% arrange(ortholog_name, adjusted_p.val)
+
+
+# Keeping just one of the ortholog copies, the one with the lowest adjusted p-value
+unique_upregulated <-
+  upregulated_gsea[!duplicated(upregulated_gsea$ortholog_ensg),] %>% arrange(ortholog_name)
+unique_downregulated <-
+  downregulated_gsea[!duplicated(downregulated_gsea$ortholog_ensg),] %>% arrange(ortholog_name)
+
+# Merging down and upregulated dataframes after removing duplicates
+enrichment_unique_common <-
+  rbind(unique_downregulated, unique_upregulated) %>% dplyr::arrange(desc(log2FC))
+
+# Arranging matrix for GSEA
+enrichment_gsea_common <- enrichment_unique_common$log2FC
+
+names(enrichment_gsea_common) <-
+  enrichment_unique_common$ortholog_ensg
+```
+
+```{r running-gsea}
+# Running GSEA on common regulated genes
+#| label: gsea-common-genes-4wpc
+#| warning: false
+#| cache: true
+
+gsea_common <- gseGO(
+  geneList = enrichment_gsea_common,
+  OrgDb = org.Hs.eg.db,
+  keyType = 'ENSEMBL',
+  ont = 'BP',
+  pvalueCutoff = 0.05,
+  pAdjustMethod = 'BH',
+  eps = 0,
+  verbose = T
+)
+
+```
+
+```{r}
+#| label: cnet-plot
+#| warning: false
+#| #| fig-cap: cnetplot depicting GSEA enrichment results
+
+edox <- setReadable(gsea_common, 'org.Hs.eg.db', 'ENSEMBL')
+
+cnetplot(
+  edox,
+  color.params = list(foldChange = enrichment_gsea_common),
+  circular = T,
+  colorEdge = TRUE,
+  cex_category = 1,
+  cex_gene = 1,
+  cex_label_category = 0.8,
+  cex_label_gene = 0.8
+)
+```
