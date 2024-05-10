@@ -423,7 +423,6 @@ for (i in 1:length(results_files)) {
 # 
 # sasa <- ah[['AH114250']]
 
-
 ## DNA vaccine
 orth_hs <- gorth(
   query = rownames(res_dnavaccine_vs_conu_4wpc),
@@ -692,7 +691,7 @@ for (i in 1:length(results_files)) {
   list.data[[i]] <- load(results_files[i])
 }
 
-## DNA vaccine
+### DNA vaccine ----
 orth_hs <- gorth(
   query = rownames(res_dnavaccine_vs_conu_1wpc),
   source_organism = 'ssalar',
@@ -721,39 +720,39 @@ res <- res[order(-res$log2FoldChange),]
 gene_list <- res$log2FoldChange
 names(gene_list) <- res$ortholog_name
 
-gse <- gseGO(gene_list,
+gse_dnavaccine <- gseGO(gene_list,
              keyType = 'SYMBOL',
              OrgDb = org.Hs.eg.db,
              eps = 1e-300)
 
-gse_tibble_dnavaccine_1wpc <- as_tibble(gse)
+gse_tibble_dnavaccine_1wpc <- as_tibble(gse_dnavaccine)
 
 ## use new way of specifying visualization options
 color.params = list(foldChange = gene_list, edge = TRUE)
 cex.params = list(category_label = 0.6, gene_label = 0.6)
 
 top_downregulated_dnavaccine_1wpc <- cnetplot(
-  gse,
+  gse_dnavaccine,
   color.params = color.params,
   cex.params = cex.params,
   circular = T,
   colorEdge = TRUE,
-  showCategory = c('regulation of immune response', 'regulation of cytokine production', 'activation of immune response'),
+  showCategory = c('detection of external stimulus', 'cellular response to external stimulus','activation of immune response'),
   max.overlaps =  500
 )
 
 top_downregulated_dnavaccine_1wpc + ggtitle("Top downregulated DNA vaccine, 1WPC") +theme(plot.title = element_text(hjust= 0.5))
 
-## GATA3
+### GATA3 ----
 orth_hs <- gorth(
   query = rownames(res_gata3_vs_conu_1wpc),
   source_organism = 'ssalar',
   target_organism = 'hsapiens',
   mthreshold = 1,
   filter_na = T
-)
+)  # converting ensembl gene IDs to human orthologs
 
-res <- tibble::rownames_to_column(as.data.frame(res_gata3_vs_conu_1wpc), var = 'ensembl')
+res <- tibble::rownames_to_column(as.data.frame(res_gata3_vs_conu_1wpc), var = 'ensembl')  # setting rownames (gene names) as a variable column
 
 res <- res %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>%
   dplyr::select(.,
@@ -764,36 +763,35 @@ res <- res %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>%
                 padj,
                 ortholog_ensg,
                 description) %>% 
-  na.omit()
+  na.omit()  # joining gorth output with results table
 
-res <- res[order(-res$log2FoldChange),]
+res <- res[order(-res$log2FoldChange),]  # ordering by fold-change
 
-gene_list <- res$log2FoldChange
-names(gene_list) <- res$ortholog_name
+gene_list <- res$log2FoldChange  # creating matrix with fold-change values
+names(gene_list) <- res$ortholog_name  # adding gene names to fold-change
 
-gse <- gseGO(gene_list,
+gse_gata3 <- gseGO(gene_list,
              keyType = 'SYMBOL',
              OrgDb = org.Hs.eg.db,
-             eps = 1e-300)
+             eps = 1e-300)  # running gsea
 
-# gseaplot(gse, geneSetID = 4)
-gse_tibble_gata3_1wpc <- as_tibble(gse)
+gse_tibble_gata3_1wpc <- as_tibble(gse_gata3)  # converting enrichResult table to tibble
 
 
 top_downregulated_gata3_1wpc <- cnetplot(  # NOT WORKING
-  gse,
+  gse_gata3,
   color.params = color.params,
   cex.params = cex.params,
   circular = T,
   colorEdge = TRUE,
-  showCategory = c('regulation of adaptive immune response', 'humoral immune response', 'regulation of lymphocyte mediated immunity'),
+  showCategory = c('positive regulation of response to external stimulus', 'negative regulation of response to external stimulus', 'viral genome replication'),
   max.overlaps =  500
 )
 
-top_downregulated_gata3 + ggtitle("Top downregulated GATA3, 1WPC") + theme(plot.title = element_text(hjust= 0.5))
+top_downregulated_gata3_1wpc + ggtitle("Top downregulated GATA3, 1WPC") + theme(plot.title = element_text(hjust= 0.5))
 
 
-## EOMES
+### EOMES ----
 orth_hs <- gorth(
   query = rownames(res_eomes_vs_conu_1wpc),
   source_organism = 'ssalar',
@@ -820,27 +818,27 @@ res <- res[order(-res$log2FoldChange),]
 gene_list <- res$log2FoldChange
 names(gene_list) <- res$ortholog_name
 
-gse <- gseGO(gene_list,
+gse_eomes <- gseGO(gene_list,
              keyType = 'SYMBOL',
              OrgDb = org.Hs.eg.db,
              eps = 1e-300)
 
 # gseaplot(gse, geneSetID = 4)
-gse_tibble_eomes <- as_tibble(gse)
+gse_tibble_eomes <- as_tibble(gse_eomes)
 
 # edox <- setReadable(gse, org.Hs.eg.db, 'auto')
 
-top_downregulated_eomes <- cnetplot(
-  gse,
+top_downregulated_eomes_1wpc <- cnetplot(
+  gse_eomes,
   color.params = color.params,
   cex.params = cex.params,
   circular = T,
   colorEdge = TRUE,
-  showCategory = c('immunoglobulin mediated immune response', 'B cell mediated immunity', 'lymphocyte mediated immunity'),
+  showCategory = c('positive regulation of response to external stimulus', 'negative regulation of response to external stimulus', 'regulation of response to external stimulus'),
   max.overlaps =  500
 )
 
-top_downregulated_eomes + ggtitle("Top downregulated EOMES, 1WPC") + theme(plot.title = element_text(hjust= 0.5))
+top_downregulated_eomes_1wpc + ggtitle("Top downregulated EOMES, 1WPC") + theme(plot.title = element_text(hjust= 0.5))
 
 ## IV-HD
 orth_hs <- gorth(
