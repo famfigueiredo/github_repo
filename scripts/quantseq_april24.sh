@@ -184,6 +184,47 @@ done
 # pigz: abort: internal threads error
 
 
+# 02/05/2024
+
+## Re-demultiplexing source file for lane 5, since the error at trimming keeps showing up, which means the files might be corrupted.
+
+### Demultiplexing
+demuxFQ -c -d -e -i -t 1 -l 9 \
+-o /data/ffi007/01_quantseq/03_data/02_demuxed-files/lane5_alex \
+-b /data/ffi007/01_quantseq/03_data/02_demuxed-files/lane5_alex/demux-summary/lane5.lostreads.fq.gz \
+-s /data/ffi007/01_quantseq/03_data/02_demuxed-files/lane5_alex/demux-summary/lane5.summary.txt \
+/data/ffi007/01_quantseq/03_data/05_useful-files/lane5-barcodes.txt \
+/data/ffi007/01_quantseq/03_data/01_source-files/05_lane5-read1.fq.gz
+
+
+# 10/05/2024
+
+### Trimming
+#!/bin/bash
+cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane5.txt |
+while read line
+do
+        /data/ffi007/01_quantseq/01_bbmap/bbduk.sh \
+        in=/data/ffi007/01_quantseq/03_data/02_demuxed-files/lane5_alex/$line.fq.gz \
+        out=/data/ffi007/01_quantseq/03_data/03_clean-files/lane5_alex/$line.clean.fq.gz \
+        ref=/data/ffi007/01_quantseq/03_data/05_useful-files/polyA.fa,/data/ffi007/01_quantseq/03_data/05_useful-files/adapters.fa \
+        k=13 ktrim=r useshortkmers=t mink=5 qtrim=r trimq=10 minlength=20 |& tee -a lane5-bbduklog.txt
+
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #!/bin/bash
 cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane5.txt |
 while read line
