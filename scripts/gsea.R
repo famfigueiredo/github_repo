@@ -778,7 +778,7 @@ gse_gata3 <- gseGO(gene_list,
 gse_tibble_gata3_1wpc <- as_tibble(gse_gata3)  # converting enrichResult table to tibble
 
 
-top_downregulated_gata3_1wpc <- cnetplot(  # NOT WORKING
+top_downregulated_gata3_1wpc <- cnetplot(
   gse_gata3,
   color.params = color.params,
   cex.params = cex.params,
@@ -840,7 +840,7 @@ top_downregulated_eomes_1wpc <- cnetplot(
 
 top_downregulated_eomes_1wpc + ggtitle("Top downregulated EOMES, 1WPC") + theme(plot.title = element_text(hjust= 0.5))
 
-## IV-HD
+## IV-HD ----
 orth_hs <- gorth(
   query = rownames(res_ivhd_vs_conu_1wpc),
   source_organism = 'ssalar',
@@ -867,30 +867,26 @@ res <- res[order(-res$log2FoldChange),]
 gene_list <- res$log2FoldChange
 names(gene_list) <- res$ortholog_name
 
-gse <- gseGO(gene_list,
+gse_ivhd <- gseGO(gene_list,
              keyType = 'SYMBOL',
              OrgDb = org.Hs.eg.db,
              eps = 1e-300)
 
-# gseaplot(gse, geneSetID = 4)
-gse_tibble_ivhd <- as_tibble(gse)
+gse_tibble_ivhd <- as_tibble(gse_ivhd)
 
-# edox <- setReadable(gse, org.Hs.eg.db, 'auto')
-
-top_downregulated_ivhd <- cnetplot(
-  gse,
+top_downregulated_ivhd_1wpc <- cnetplot(
+  gse_ivhd,
   color.params = color.params,
   cex.params = cex.params,
   circular = T,
   colorEdge = TRUE,
-  showCategory = c('adaptive immune response', 'B cell mediated immunity', 'lymphocyte mediated immunity'),
+  showCategory = c('response to extracellular stimulus', 'detection of stimulus', 'cellular response to abiotic stimulus'),
   max.overlaps =  500
 )
 
-top_downregulated_ivhd + ggtitle("Top downregulated IV-HD, 1WPC") + theme(plot.title = element_text(hjust= 0.5))
+top_downregulated_ivhd_1wpc + ggtitle("Top downregulated IV-HD, 1WPC") + theme(plot.title = element_text(hjust= 0.5))
 
-
-## IV-LD
+## IV-LD ----
 orth_hs <- gorth(
   query = rownames(res_ivld_vs_conu_1wpc),
   source_organism = 'ssalar',
@@ -917,43 +913,44 @@ res <- res[order(-res$log2FoldChange),]
 gene_list <- res$log2FoldChange
 names(gene_list) <- res$ortholog_name
 
-gse <- gseGO(gene_list,
+gse_ivld <- gseGO(gene_list,
              keyType = 'SYMBOL',
              OrgDb = org.Hs.eg.db,
              eps = 1e-300)
 
-# gseaplot(gse, geneSetID = 4)
-gse_tibble_ivld <- as_tibble(gse)
-
-# edox <- setReadable(gse, org.Hs.eg.db, 'auto')
+gse_tibble_ivld <- as_tibble(gse_ivld)
 
 top_downregulated_ivld <- cnetplot(
-  gse,
+  gse_ivld,
   color.params = color.params,
   cex.params = cex.params,
   circular = T,
   colorEdge = TRUE,
-  showCategory = c('regulation of antigen processing and presentation', 'positive regulation of interferon-alpha production', 'positive regulation of CD4-positive, alpha-beta T cell activation'),
+  showCategory = c('detection of external stimulus', 'negative regulation of response to external stimulus', 'positive regulation of response to external stimulus'),
   max.overlaps =  500
 )
 
-top_downregulated_ivhd + ggtitle("Top downregulated IV-LD, 1WPC") + theme(plot.title = element_text(hjust= 0.5))
+top_downregulated_ivld + ggtitle("Top downregulated IV-LD, 1WPC") + theme(plot.title = element_text(hjust= 0.5))
 
 
+### Retrieving GO annotations per gene SYMBOL ----
 
+# GO terms associated with "GATA3"
+gene_symbol <- "GATA3"
 
+# Get the GO annotations for the gene
+go_terms <- select(org.Hs.eg.db, keys = gene_symbol, keytype = "SYMBOL", columns = c("GO"),
+                   keytypes = "SYMBOL")
 
+# Print the retrieved GO annotations
+print(go_terms)
 
+go_terms_gata3 <- go_terms %>% filter(., ONTOLOGY == 'BP')
 
+gse_tibble_gata3_1wpc %>% left_join(., go_terms_gata3, by = c('ID' = 'SYMBOL'))
 
-
-
-
-
-
-
-
-
+head(go_terms_gata3)
+head(gse_tibble_gata3_1wpc)
 
 
 
