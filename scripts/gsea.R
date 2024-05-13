@@ -936,23 +936,40 @@ top_downregulated_ivld + ggtitle("Top downregulated IV-LD, 1WPC") + theme(plot.t
 ### Retrieving GO annotations per gene SYMBOL ----
 
 # GO terms associated with "GATA3"
-gene_symbol <- "GATA3"
+gene_symbol_gata3 <- "GATA3"
 
 # Get the GO annotations for the gene
-go_terms <- select(org.Hs.eg.db, keys = gene_symbol, keytype = "SYMBOL", columns = c("GO"),
+go_terms_gata3 <- select(org.Hs.eg.db, keys = gene_symbol_gata3, keytype = "SYMBOL", columns = c("GO"),
                    keytypes = "SYMBOL")
 
 # Print the retrieved GO annotations
 print(go_terms)
 
-go_terms_gata3 <- go_terms %>% filter(., ONTOLOGY == 'BP')
-
-gse_tibble_gata3_1wpc %>% left_join(., go_terms_gata3, by = c('ID' = 'SYMBOL'))
+gse_tibble_gata3_1wpc %>% left_join(., go_terms_gata3, by = c('ID' = 'GO')) %>% na.omit() %>% arrange(NES)
 
 head(go_terms_gata3)
 head(gse_tibble_gata3_1wpc)
 
+gene_symbol_il4 <- 'IL4'
+go_terms_il4 <- select(org.Hs.eg.db, keys = gene_symbol_il4, keytype = "SYMBOL", columns = c("GO"),
+                       keytypes = "SYMBOL")
 
+gse_tibble_gata3_1wpc %>% left_join(., go_terms_il4, by = c('ID' = 'GO')) %>% na.omit()
+
+head(go_terms_il4)
+
+gene_symbol_il13 <- 'IL13'
+go_terms_il13 <- select(org.Hs.eg.db, keys = gene_symbol_il13, keytype = "SYMBOL", columns = c("GO"),
+                       keytypes = "SYMBOL")
+
+gse_tibble_gata3_1wpc %>% left_join(., go_terms_il13, by = c('ID' = 'GO')) %>% na.omit()
+
+
+## Looking for STAT6 in the results table for GATA3
+rownames_to_column(as.data.frame(res_gata3_vs_conu_1wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000080589'))
+
+## Looking for EF1a in the results table for GATA3
+rownames_to_column(as.data.frame(res_gata3_vs_conu_1wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000062937'))
 
 ## Testing cnet plot on exclusive genes ----
 
