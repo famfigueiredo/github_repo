@@ -933,6 +933,42 @@ top_downregulated_ivld <- cnetplot(
 top_downregulated_ivld + ggtitle("Top downregulated IV-LD, 1WPC") + theme(plot.title = element_text(hjust= 0.5))
 
 
+
+### Histoscore ----
+histoscore_heart_4wpc <- read_delim('histoscore_hear_4wpc.tsv', col_names = c('treatment', 'histoscore'), delim = '\t', show_col_types = F)
+
+
+histoscore_heart_4wpc %>% 
+  group_by(treatment) %>% 
+  summarise(
+    mean = mean(histoscore, na.rm = T),
+    sd = sd(histoscore, na.rm = T),
+    n = n(),
+    se = sd/sqrt(n)
+  ) %>% 
+  ggplot(., aes(x = treatment, y = mean)) +
+  geom_boxplot()
+
+install.packages('viridis')
+install.packages('hrbrthemes')
+library(hrbrthemes)
+library(viridis)
+
+histoscore_heart_4wpc %>% na.omit() %>%
+  ggplot(., aes(x = factor(treatment, level = c('CONU', 'IVLD', 'IVHD', 'DNAvaccine', 'EOMES', 'GATA3')), y = histoscore, fill = treatment)) +
+  geom_boxplot() +
+  theme_ipsum() +
+  theme(
+    legend.position = 'none',
+    plot.title = element_text(size = 11)
+  ) +
+  scale_fill_viridis(discrete = T, alpha = 0.6, option = 'B') +
+  ggtitle('Histoscore at heart 4WPC') +
+  ylab('') + xlab('')
+  
+
+
+
 ### Retrieving GO annotations per gene SYMBOL ----
 
 # GO terms associated with "GATA3"
@@ -968,8 +1004,25 @@ gse_tibble_gata3_1wpc %>% left_join(., go_terms_il13, by = c('ID' = 'GO')) %>% n
 ## Looking for STAT6 in the results table for GATA3
 rownames_to_column(as.data.frame(res_gata3_vs_conu_1wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000080589'))
 
-## Looking for EF1a in the results table for GATA3
-rownames_to_column(as.data.frame(res_gata3_vs_conu_1wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000062937'))
+## Looking for RSAD2 in the results table for all treatments. It is present in all of them.
+rownames_to_column(as.data.frame(res_eomes_vs_conu_1wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000048046'))
+rownames_to_column(as.data.frame(res_dnavaccine_vs_conu_1wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000048046'))
+rownames_to_column(as.data.frame(res_gata3_vs_conu_1wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000048046'))
+rownames_to_column(as.data.frame(res_ivhd_vs_conu_1wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000048046'))
+rownames_to_column(as.data.frame(res_ivld_vs_conu_1wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000048046'))
+
+## go terms associated with RSAD2
+gene_symbol_rsad2 <- 'RSAD2'
+go_terms_rsad2 <- select(org.Hs.eg.db, keys = gene_symbol_rsad2, keytype = "SYMBOL", columns = c("GO"),
+                        keytypes = "SYMBOL")
+
+gse_tibble_gata3_1wpc %>% left_join(., go_terms_rsad2, by = c('ID' = 'GO')) %>% na.omit()
+gse_tibble_eomes %>% left_join(., go_terms_rsad2, by = c('ID' = 'GO')) %>% na.omit()
+gse_tibble_ivhd %>% left_join(., go_terms_rsad2, by = c('ID' = 'GO')) %>% na.omit()
+gse_tibble_ivld %>% left_join(., go_terms_rsad2, by = c('ID' = 'GO')) %>% na.omit()
+gse_tibble_dnavaccine_1wpc %>% left_join(., go_terms_rsad2, by = c('ID' = 'GO')) %>% na.omit()
+
+
 
 ## Testing cnet plot on exclusive genes ----
 
