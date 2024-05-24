@@ -475,20 +475,7 @@ downregulated_dnavaccine_4wpc <- cnetplot(
   max.overlaps =  500
 )
 
-library(AnnotationDbi)
-# Get the GO terms related to "immune system process" - NOT WORKING
-immune_go_terms <- AnnotationDbi::select(org.Hs.eg.db, 
-                                         keys = 'GO:0002376', 
-                                         keytype = "GO", 
-                                         columns = c("GO", 'ONTOLOGYALL'))
-?AnnotationDbi::select
-
-
-BiocManager::install("GO.db")
 library(GO.db)
-# Get all child terms of GO:0002376 (immune system process)
-# Load the GOBPOFFSPRING dataset
-as.list(GOBPOFFSPRING)
 
 # Get the child terms for GO:0002376 (immune system process)
 child_terms <- GOBPOFFSPRING[["GO:0002376"]]
@@ -499,17 +486,6 @@ child_terms_details <- AnnotationDbi::select(GO.db,
                                              keytype = "GOID", 
                                              columns = c("GOID", "TERM", "ONTOLOGY", 'DEFINITION')) %>% as_tibble()
 
-# View the child terms and their details
-as_tibble(child_terms_details)
-
-
-columns(GO.db)
-# View the child terms and their details
-print(child_terms_details)
-
-keytypes(org.Hs.eg.db)
-# View the GO terms
-print(immune_go_terms)
 
 
 ## GATA3
