@@ -58,9 +58,6 @@ rm(list.data,
 rm(list = ls(pattern = '^res_.'))  # removing results files from Global
 
 # DNA vaccine ----
-
-improved_data_wrangling(res_dnavaccine_vs_conu_4wpc, 'dnavaccine', '4wpc')
-
 string_test <-
   results_dnavaccine_4wpc %>% dplyr::select(ortholog_name, log2FC) %>% na.omit()
 
@@ -414,15 +411,6 @@ for (i in 1:length(results_files)) {
   list.data[[i]] <- load(results_files[i])
 }
 
-# install.packages('AnnotationHub')
-# library('AnnotationHub')
-# 
-# ah <- AnnotationHub()
-# 
-# query(ah, c('OrgDb', 'Salmo salar'))
-# 
-# sasa <- ah[['AH114250']]
-
 ## DNA vaccine
 orth_hs <- gorth(
   query = rownames(res_dnavaccine_vs_conu_4wpc),
@@ -446,9 +434,6 @@ res <- res %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>%
   na.omit()
 
 head(res)
-# table(rownames(res_eomes_vs_conu_4wpc) %in% keys(sasa, 'ENSEMBL'))
-# res_eomes_vs_conu_4wpc$entrez <- mapIds(sasa, rownames(res_eomes_vs_conu_4wpc), column="ENTREZID", keytype="ENSEMBL")
-# res <- na.omit(res_dnavaccine_vs_conu_4wpc)
 
 res <- res[order(-res$log2FoldChange),]
 
@@ -461,7 +446,8 @@ gse <- gseGO(gene_list,
              eps = 1e-300)
 
 # gseaplot(gse, geneSetID = 4)
-gse_tibble_dnavaccine <- as_tibble(gse)
+gse_tibble_dnavaccine_4wpc <- as_tibble(gse)
+gse_tibble_dnavaccine_4wpc %>% arrange(., NES) %>% slice_head(n = 4) %>% pull(Description)
 
 # edox <- setReadable(gse, org.Hs.eg.db, 'auto')
 
@@ -475,11 +461,12 @@ top_downregulated_dnavaccine_4wpc <- cnetplot(
   cex.params = cex.params,
   circular = T,
   colorEdge = TRUE,
-  showCategory = c('alpha-beta T cell activation', 'B cell receptor signaling pathway', 'type II interferon production'),
+  showCategory = c('neutrophil activation', 'B cell receptor signaling pathway', 'interleukin-6 production'),
   max.overlaps =  500
 )
 
-top_downregulated_dnavaccine_4wpc + ggtitle("Top downregulated DNA vaccine, 4WPC") +theme(plot.title = element_text(hjust= 0.5))
+top_downregulated_dnavaccine_4wpc + ggtitle("Top 3 downregulated immune pathways\nDNA vaccine, 4WPC") + theme(plot.title = element_text(hjust= 0.5)) + theme(text = element_text(family = "Times New Roman"))
+
 
 ## GATA3
 orth_hs <- gorth(
@@ -514,21 +501,24 @@ gse <- gseGO(gene_list,
              eps = 1e-300)
 
 # gseaplot(gse, geneSetID = 4)
-gse_tibble_gata3 <- as_tibble(gse)
+gse_tibble_gata3_4wpc <- as_tibble(gse)
+
+gse_tibble_gata3_4wpc %>% arrange(., NES) %>% slice_head(n = 4) %>% pull(Description)
+
 
 # edox <- setReadable(gse, org.Hs.eg.db, 'auto')
 
-top_downregulated_gata3 <- cnetplot(
+top_downregulated_gata3_4wpc <- cnetplot(
   gse,
   color.params = color.params,
   cex.params = cex.params,
   circular = T,
   colorEdge = TRUE,
-  showCategory = c('interleukin-6 production', 'B cell receptor signaling pathway', 'type II interferon production'),
-  max.overlaps =  500
+  showCategory = c('humoral immune response', 'immunoglobulin mediated immune response', 'B cell mediated immunity'),
+  max.overlaps =  1000
 )
 
-top_downregulated_gata3 + ggtitle("Top downregulated GATA3, 4WPC") + theme(plot.title = element_text(hjust= 0.5))
+top_downregulated_gata3_4wpc + ggtitle("Top 3 downregulated immune pathways\nGATA3, 4WPC") + theme(plot.title = element_text(hjust= 0.5)) + theme(text = element_text(family = "Times New Roman"))
 
 
 ## EOMES
@@ -564,21 +554,21 @@ gse <- gseGO(gene_list,
              eps = 1e-300)
 
 # gseaplot(gse, geneSetID = 4)
-gse_tibble_eomes <- as_tibble(gse)
+gse_tibble_eomes_4wpc <- as_tibble(gse)
+gse_tibble_eomes_4wpc %>% arrange(., NES) %>% slice_head(n = 4) %>% pull(Description)
 
-# edox <- setReadable(gse, org.Hs.eg.db, 'auto')
 
-top_downregulated_eomes <- cnetplot(
+top_downregulated_eomes_4wpc <- cnetplot(
   gse,
   color.params = color.params,
   cex.params = cex.params,
   circular = T,
   colorEdge = TRUE,
-  showCategory = c('immunoglobulin mediated immune response', 'B cell mediated immunity', 'lymphocyte mediated immunity'),
-  max.overlaps =  500
+  showCategory = c('humoral immune response mediated by circulating immunoglobulin', 'complement activation, classical pathway', 'immunoglobulin mediated immune response'),
+  max.overlaps =  1000
 )
 
-top_downregulated_eomes + ggtitle("Top downregulated EOMES, 4WPC") + theme(plot.title = element_text(hjust= 0.5))
+top_downregulated_eomes_4wpc + ggtitle("Top downregulated immune pathways\nEOMES 4WPC") + theme(plot.title = element_text(hjust= 0.5)) + theme(text = element_text(family = "Times New Roman"))
 
 ## IV-HD
 orth_hs <- gorth(
@@ -1021,6 +1011,50 @@ gse_tibble_eomes %>% left_join(., go_terms_rsad2, by = c('ID' = 'GO')) %>% na.om
 gse_tibble_ivhd %>% left_join(., go_terms_rsad2, by = c('ID' = 'GO')) %>% na.omit()
 gse_tibble_ivld %>% left_join(., go_terms_rsad2, by = c('ID' = 'GO')) %>% na.omit()
 gse_tibble_dnavaccine_1wpc %>% left_join(., go_terms_rsad2, by = c('ID' = 'GO')) %>% na.omit()
+
+## goterms associated with MHC I (HLA in humans)
+gene_symbol_hlaa <- 'HLA-A'
+go_terms_hlaa <- select(org.Hs.eg.db, keys = gene_symbol_hlaa, keytype = "SYMBOL", columns = c("GO"),
+                       keytypes = "SYMBOL")
+
+gse_tibble_dnavaccine_1wpc %>% left_join(., go_terms_hlaa, by = c('ID' = 'GO')) %>% na.omit()
+
+gene_symbol_ifng <- 'IFNG'
+
+go_terms_ifng <- select(org.Hs.eg.db, keys = gene_symbol_ifng, keytype = "SYMBOL", columns = c("GO"),
+                        keytypes = "SYMBOL")
+
+
+gse_tibble_dnavaccine_1wpc %>% left_join(., go_terms_ifng, by = c('ID' = 'GO')) %>% na.omit() %>% pull(Description)
+
+## At 4wpc, all the immune related pathways have negative NES
+### A negative NES indicates that the gene set is over represented among the genes 
+### that are negatively correlated with the phenotype 
+### (e.g., highly expressed in the opposite condition or less expressed in the condition of interest).
+gse_tibble_dnavaccine_4wpc %>% left_join(., go_terms_ifng, by = c('ID' = 'GO')) %>% na.omit() %>% pull(Description)
+
+gene_symbol_ifna <- 'IFNA1'
+
+go_terms_ifna <- select(org.Hs.eg.db, keys = gene_symbol_ifna, keytype = "SYMBOL", columns = c("GO"),
+                        keytypes = "SYMBOL")
+
+
+gse_tibble_dnavaccine_4wpc %>% left_join(., go_terms_ifna, by = c('ID' = 'GO')) %>% na.omit() %>% pull(Description)
+gse_tibble_dnavaccine_1wpc %>% left_join(., go_terms_ifna, by = c('ID' = 'GO')) %>% na.omit() %>% pull(Description)
+
+gse_tibble_dnavaccine_4wpc 
+
+
+head(results_dnavaccine_4wpc)
+
+as_tibble(res_dnavaccine_vs_conu_4wpc) %>% filter(str_detect())
+
+### Looking for MHC II
+rownames_to_column(as.data.frame(res_dnavaccine_vs_conu_4wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000004635'))
+
+### Looking for ACTB
+rownames_to_column(as.data.frame(res_dnavaccine_vs_conu_4wpc), var = 'ensembl') %>% as_tibble() %>% filter(str_detect(ensembl, 'ENSSSAG00000116649'))
+
 
 
 
