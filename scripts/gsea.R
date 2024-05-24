@@ -55,17 +55,17 @@ for (i in 1:length(results_files)) {
 improved_data_wrangling(res_dnavaccine_vs_conu_4wpc, 'dnavaccine', '4wpc')
 
 string_test <-
-  results_dnavaccine_4wpc %>% dplyr::select(ortholog_name, log2FC) %>% na.omit()
+  results_dnavaccine_4wpc %>% dplyr::select(ortholog_name, log2FC) %>% na.omit()  # selecting ortholog names and fold change
 
 entrez_ids <-
-  bitr(string_test$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)
+  bitr(string_test$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)  # converting symbols to entrez for gseaGO
 
 enrichment <-
-  string_test %>% left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL')) %>% dplyr::select(ENTREZID, log2FC)
+  string_test %>% left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL')) %>% dplyr::select(ENTREZID, log2FC)  # merging entrez ids with symbols and keeping just the entrez id
 
-enrichment_gsea <- enrichment$log2FC
+enrichment_gsea <- enrichment$log2FC  # preparing matrix for gseGO
 
-names(enrichment_gsea) <- enrichment$ENTREZID
+names(enrichment_gsea) <- enrichment$ENTREZID  # preparing matrix for gseGO
 
 gseGO(
   geneList = enrichment_gsea,
