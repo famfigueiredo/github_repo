@@ -138,7 +138,7 @@ rename 's/_Aligned.sortedByCoord.out/_sorted/' *.bam
 
 cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane4.txt | \
 parallel -j 57 "htseq-count -m intersection-nonempty -i gene_id -t exon -s yes -f bam -r pos \
-/data/ffi007/01_quantseq/03_data/07_STAR-out/heart_data_ensembl/lane3_alex/{}_sorted.bam \
+/data/ffi007/01_quantseq/03_data/07_STAR-out/heart_data_ensembl/lane4_alex/{}_sorted.bam \
 /data/ffi007/01_quantseq/03_data/05_useful-files/genomes/Salmo_salar.Ssal_v3.1.111.gtf \
 >/data/ffi007/01_quantseq/03_data/08_ht-seq-count/lane4_alex/{}_readcount.txt" |& tee -a htseqlog-lane4-alex.txt
 
@@ -212,37 +212,73 @@ do
 
 done
 
+## Error keeps showing up, but it does not seem to impact final read count.
 
+# 13/05/2024
 
-
-
-
-
-
-
-
-
-
-
+## STAR alignment
 
 #!/bin/bash
+
+ulimit -n 10000
+ulimit -n
+
 cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane5.txt |
 while read line
 do
-        /data/ffi007/01_quantseq/01_bbmap/bbduk.sh \
-        in=/data/ffi007/01_quantseq/03_data/02_demuxed-files/lane5_alex/$line.fq.gz \
-        out=/data/ffi007/01_quantseq/03_data/03_clean-files/lane5_alex/$line.clean.fq.gz \
-        ref=/data/ffi007/01_quantseq/03_data/05_useful-files/polyA.fa,/data/ffi007/01_quantseq/03_data/05_useful-files/adapters.fa \
-        k=13 ktrim=r useshortkmers=t mink=5 qtrim=r trimq=10 minlength=20 |& tee -a lane5-bbduklog_v2.txt
+STAR --runThreadN 70 --genomeDir /data/ffi007/01_quantseq/02_star_genome --readFilesCommand zcat \
+ --readFilesIn /data/ffi007/01_quantseq/03_data/03_clean-files/lane5_alex/${line}.clean.fq.gz \
+ --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 \
+ --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.1 --alignIntronMin 20 \
+ --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outSAMattributes NH HI NM MD \
+ --outSAMtype BAM SortedByCoordinate \
+  --outFileNamePrefix /data/ffi007/01_quantseq/03_data/07_STAR-out/heart_data_ensembl/lane5_alex/${line}_ |& tee -a starlog-lane5-alex.txt \
 
 done
 
+rename 's/_Aligned.sortedByCoord.out/_sorted/' *.bam
 
 
+# 14/05/2024
+
+## HTseq-count
+
+#!/bin/bash
+
+cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane5.txt | \
+parallel -j 57 "htseq-count -m intersection-nonempty -i gene_id -t exon -s yes -f bam -r pos \
+/data/ffi007/01_quantseq/03_data/07_STAR-out/heart_data_ensembl/lane5_alex/{}_sorted.bam \
+/data/ffi007/01_quantseq/03_data/05_useful-files/genomes/Salmo_salar.Ssal_v3.1.111.gtf \
+>/data/ffi007/01_quantseq/03_data/08_ht-seq-count/lane5_alex/{}_readcount.txt" |& tee -a htseqlog-lane5-alex.txt
 
 
+# Demultiplexing Filipe's data
+### Pool_2_FKDL192549734-1a_H5HT2CCX2_L3_1.fq.gz = lane2_filipe
 
-# 19/04/2024
+## Demultiplexing
+
+demuxFQ -c -d -e -i -t 1 -l 9 \
+-o /data/ffi007/01_quantseq/03_data/02_demuxed-files/lane2_filipe \
+-b /data/ffi007/01_quantseq/03_data/02_demuxed-files/lane2_filipe/demux-summary/lane2.lostreads.fq.gz \
+-s /data/ffi007/01_quantseq/03_data/02_demuxed-files/lane2_filipe/demux-summary/lane2.summary.txt \
+/data/ffi007/01_quantseq/03_data/05_useful-files/lane2-barcodes.txt \
+/data/ffi007/01_quantseq/03_data/01_source-files/X201SC19112210-Z01-F004-2/raw_data/Pool2_filipe/Pool_2_FKDL192549734-1a_H5HT2CCX2_L3_1.fq.gz
+
+
+# 15/05/2024
+
+## Trimming
+#!/bin/bash
+cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane2.txt |
+while read line
+do
+        /data/ffi007/01_quantseq/01_bbmap/bbduk.sh \
+        in=/data/ffi007/01_quantseq/03_data/02_demuxed-files/lane2_filipe/$line.fq.gz \
+        out=/data/ffi007/01_quantseq/03_data/03_clean-files/lane2_filipe/$line.clean.fq.gz \
+        ref=/data/ffi007/01_quantseq/03_data/05_useful-files/polyA.fa,/data/ffi007/01_quantseq/03_data/05_useful-files/adapters.fa \
+        k=13 ktrim=r useshortkmers=t mink=5 qtrim=r trimq=10 minlength=20 |& tee -a lane2-bbduklog.txt
+
+done
 
 
 ## STAR alignment
@@ -252,46 +288,33 @@ done
 ulimit -n 10000
 ulimit -n
 
-cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane4.txt |
+cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane2.txt |
 while read line
 do
 STAR --runThreadN 70 --genomeDir /data/ffi007/01_quantseq/02_star_genome --readFilesCommand zcat \
- --readFilesIn /data/ffi007/01_quantseq/03_data/03_clean-files/lane4_alex/${line}.clean.fq.gz \
+ --readFilesIn /data/ffi007/01_quantseq/03_data/03_clean-files/lane2_filipe/${line}.clean.fq.gz \
  --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 \
  --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.1 --alignIntronMin 20 \
  --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outSAMattributes NH HI NM MD \
  --outSAMtype BAM SortedByCoordinate \
-  --outFileNamePrefix /data/ffi007/01_quantseq/03_data/07_STAR-out/heart_data_ensembl/lane4_alex/${line}_ |& tee -a starlog-lane4-alex.txt \
+  --outFileNamePrefix /data/ffi007/01_quantseq/03_data/07_STAR-out/heart_data_ensembl/lane2_filipe/${line}_ |& tee -a starlog-lane2-filipe.txt \
 
 done
 
+# there was an issue with STAR, where some files were missing, so I re-ran the bbduk trimming step. probably ran out of server space.
 
+# 21/05/2024
 rename 's/_Aligned.sortedByCoord.out/_sorted/' *.bam
-
 
 ## HTseq-count
 
 #!/bin/bash
 
-cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane4.txt | \
+cat /data/ffi007/01_quantseq/03_data/05_useful-files/filenames-lane2.txt | \
 parallel -j 57 "htseq-count -m intersection-nonempty -i gene_id -t exon -s yes -f bam -r pos \
-/data/ffi007/01_quantseq/03_data/07_STAR-out/heart_data_ensembl/lane3_alex/{}_sorted.bam \
+/data/ffi007/01_quantseq/03_data/07_STAR-out/heart_data_ensembl/lane2_filipe/sorted/{}_sorted.bam \
 /data/ffi007/01_quantseq/03_data/05_useful-files/genomes/Salmo_salar.Ssal_v3.1.111.gtf \
->/data/ffi007/01_quantseq/03_data/08_ht-seq-count/lane4_alex/{}_readcount.txt" |& tee -a htseqlog-lane4-alex.txt
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+>/data/ffi007/01_quantseq/03_data/08_ht-seq-count/lane2_filipe/{}_readcount.txt" |& tee -a htseqlog-lane2-alex.txt
 
 
 
