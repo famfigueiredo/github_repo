@@ -12,13 +12,6 @@ source(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/scripts/functions_data-wrangling_march24.R'
 )
 
-immune_related_GOterms <-
-  read.table(
-    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/goTerm_lists/immune_related_GOterms.tsv',
-    header = T,
-    sep = '\t'
-  )  # loading dataframe containing immune related GO terms
-
 setwd(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc'
 )
@@ -30,34 +23,37 @@ for (i in 1:length(results_files)) {
   list.data[[i]] <- load(results_files[i])
 }
 
+# # Get names of all objects in global environment with a regex pattern matching 'res_.*_conu_4wpc'
+# res_objects <- ls(pattern = "res_.*_4wpc")
+# 
+# # Apply significant_genes function to each res object
+# for (res_object in res_objects) {
+#   # Get the object from the global environment
+#   result <- get(res_object)
+#   
+#   # Apply significant_genes function
+#   significant_result <- significant_genes(result)
+#   
+#   # Assign the result back to the global environment
+#   assign(paste0("significant_", res_object),
+#          significant_result,
+#          envir = .GlobalEnv)
+# }
+# 
+# rm(list.data,
+#    result,
+#    i,
+#    res_object,
+#    res_objects,
+#    results_files,
+#    significant_result)
+# 
+# rm(list = ls(pattern = '^res_.'))  # removing results files from Global
 
-# Get names of all objects in global environment with a regex pattern matching 'res_.*_conu_4wpc'
-res_objects <- ls(pattern = "res_.*_4wpc")
+# GSEA with significantly differentially regulated genes ----
+## DNA vaccine
+improved_data_wrangling(res_dnavaccine_vs_conu_4wpc, 'dnavaccine', '4wpc')
 
-# Apply significant_genes function to each res object
-for (res_object in res_objects) {
-  # Get the object from the global environment
-  result <- get(res_object)
-  
-  # Apply significant_genes function
-  significant_result <- significant_genes(result)
-  
-  # Assign the result back to the global environment
-  assign(paste0("significant_", res_object),
-         significant_result,
-         envir = .GlobalEnv)
-}
-
-rm(list.data,
-   result,
-   i,
-   res_object,
-   res_objects,
-   results_files,
-   significant_result)
-rm(list = ls(pattern = '^res_.'))  # removing results files from Global
-
-# DNA vaccine ----
 string_test <-
   results_dnavaccine_4wpc %>% dplyr::select(ortholog_name, log2FC) %>% na.omit()
 
@@ -71,44 +67,46 @@ enrichment_gsea <- enrichment$log2FC
 
 names(enrichment_gsea) <- enrichment$ENTREZID
 
-gsea_DNAvacc <- gseGO(
+gseGO(
   geneList = enrichment_gsea,
   OrgDb = org.Hs.eg.db,
   ont = 'BP',
   pvalueCutoff = 0.05,
   pAdjustMethod = 'BH',
   verbose = T
-)
+) %>% as_tibble() -> gsea_dnavaccine_4wpc
 
-gsea_DNAvacc %>%
-  fortify(., showCategory = 20) %>%
-  as_tibble() %>%
-  mutate_at('.sign', str_replace, 'suppressed', 'Downregulated') %>% mutate_at('.sign', str_replace, 'activated', 'Upregulated') %>%
+
+gsea_dnavaccine_4wpc %>% 
+  top_n(20, wt = abs(NES)) %>% 
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
   mutate(Description = fct_reorder(Description, Count)) %>%
   ggplot(aes(Count, Description)) +
-  geom_point(aes(color = p.adjust, size = Count)) +
-  scale_color_viridis_c('Adjusted p-value', guide = guide_colorbar(reverse = TRUE)) +
-  guides(size = guide_bins(show.limits = TRUE)) +
-  scale_size_continuous('Gene count', range = c(2, 10)) +
+  geom_point(aes(color = Count, size = Count)) +
+  scale_color_viridis_c('Gene count', guide = 'legend') +
+  scale_size_continuous('Gene count', range = c(2, 15), guide = 'legend') +
+  xlim(40, 200) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +
-  theme(text = element_text(size = 30,
-                            family = 'Arial Narrow')) +
   ggtitle('GSEA, downregulated vs upregulated DEGs',
           subtitle = 'DNA vaccine, 4WPC, heart tissue') +
   theme_bw(base_size = 14) +
   theme(
+    text = element_text(family = 'Times New Roman'),
     legend.title = element_text(size = 10),
     legend.text = element_text(size = 8),
     legend.key.size = unit(1, 'cm'),
     legend.position = 'right',
-    legend.key.height = unit(1, 'cm')
+    legend.key.height = unit(1, 'cm'),
+    strip.text = element_text(size = 24),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
   ) +
-  facet_grid(. ~ .sign) +
-  theme(strip.text = element_text(size = 24))
+  facet_grid(. ~ Regulation)
 
-# EOMES ----
+## EOMES
 improved_data_wrangling(res_eomes_vs_conu_4wpc, 'eomes', '4wpc')
 
 string_test_eomes <-
@@ -161,7 +159,7 @@ gsea_eomes %>%
   facet_grid(. ~ .sign) +
   theme(strip.text = element_text(size = 24))
 
-# GATA 3 ----
+## GATA 3
 improved_data_wrangling(res_gata3_vs_conu_4wpc, 'gata3', '4wpc')
 
 string_test_gata3 <-
@@ -215,7 +213,7 @@ gsea_gata3 %>%
   theme(strip.text = element_text(size = 24))
 
 
-# IV-HD ----
+## IV-HD
 improved_data_wrangling(res_ivhd_vs_conu_4wpc, 'ivhd', '4wpc')
 
 string_test_ivhd <-
@@ -269,9 +267,7 @@ gsea_ivhd %>%
   theme(strip.text = element_text(size = 24))
 
 
-
-
-## Testing cnetplots with GSEA output data ----
+## cnetplots with GSEA output data ----
 
 # List of treatments
 treatments <- c("dnavaccine", "eomes", "gata3", "ivhd", "ivld")
@@ -1058,7 +1054,7 @@ rownames_to_column(as.data.frame(res_dnavaccine_vs_conu_4wpc), var = 'ensembl') 
 
 
 
-## Testing cnet plot on exclusive genes ----
+## Testing cnetplot on exclusive genes ----
 
 # List of objects
 objects <- ls(pattern = "^res_.*_conu_4wpc")
@@ -1072,7 +1068,7 @@ for (treatment in treatments) {
   improved_data_wrangling(get(obj), treatment = treatment, sampling_point = "4wpc")
 }
 
-### GATA 3 ----
+### GATA 3
 eomes_exclusives <- setdiff(
   results_eomes_4wpc$ortholog_ensg,
   c(
@@ -1115,7 +1111,7 @@ gsea_common_cnet <-
            colorEdge = TRUE)
 
 
-### EOMES ----
+### EOMES
 eomes_exclusives <- setdiff(
   results_eomes_4wpc$ortholog_ensg,
   c(
