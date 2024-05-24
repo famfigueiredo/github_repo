@@ -5,6 +5,7 @@ suppressPackageStartupMessages({
   library('gprofiler2')
   library('org.Hs.eg.db')
   library('enrichplot')
+  library('AnnotationDbi')
 })
 
 ## Loading functions ----
@@ -462,6 +463,28 @@ top_downregulated_dnavaccine_4wpc <- cnetplot(
 )
 
 top_downregulated_dnavaccine_4wpc + ggtitle("Top 3 downregulated immune pathways\nDNA vaccine, 4WPC") + theme(plot.title = element_text(hjust= 0.5)) + theme(text = element_text(family = "Times New Roman"))
+
+
+downregulated_dnavaccine_4wpc <- cnetplot(
+  gse,
+  color.params = color.params,
+  cex.params = cex.params,
+  circular = T,
+  colorEdge = TRUE,
+  showCategory = c('immune system process', 'regulation of immune system process', 'immune response'),
+  max.overlaps =  500
+)
+
+library(AnnotationDbi)
+# Get the GO terms related to "immune system process" - NOT WORKING
+immune_go_terms <- AnnotationDbi::select(org.Hs.eg.db, 
+                                         keys = 'GO:0002376', 
+                                         keytype = "GO", 
+                                         columns = c("GO"))
+
+keytypes(org.Hs.eg.db)
+# View the GO terms
+print(immune_go_terms)
 
 
 ## GATA3
