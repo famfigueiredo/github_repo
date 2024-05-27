@@ -61,7 +61,6 @@ enrichment_gsea <- enrichment_dnavaccine$log2FC  # preparing matrix for gseGO
 
 names(enrichment_gsea) <- enrichment_dnavaccine$ENTREZID  # preparing matrix for gseGO
 
-
 enrichment_dnavaccine <- enrichment_dnavaccine %>% distinct(ENTREZID, .keep_all = T)
 
 
@@ -106,20 +105,6 @@ as_tibble(gsea_dnavaccine_4wpc) %>%
     panel.grid = element_line(color = 'black', size = .05, linetype = 2)
   ) +
   facet_grid(. ~ Regulation)
-
-install.packages('topGO')
-library(topGO)
-install.packages('Rgraphviz')
-library(Rgraphviz)
-library(devtools)
-install_github("GuangchuangYu/ReactomePA")
-library('ReactomePA')
-library('DOSE')
-library('enrichplot')
-BiocManager::install("enrichplot")
-renv::snapshot()
-plotGOgraph(GOgraphtest)
-enrichplot::enrichMap(gsea_dnavaccine_4wpc)
 
 
 simplified_gsea_dnavaccine <- simplify(GOgraphtest)
@@ -581,6 +566,38 @@ gse_tibble_dnavaccine_4wpc <- as_tibble(gse)
 gse_tibble_dnavaccine_4wpc %>% arrange(., NES) %>% slice_head(n = 4) %>% pull(Description)
 
 # edox <- setReadable(gse, org.Hs.eg.db, 'auto')
+
+
+y <- gsePathway(gene_list,
+                pvalueCutoff = .2,
+                pAdjustMethod = 'BH',
+                verbose = F)
+
+as_tibble(y) %>% arrange(NES) %>% print(n = 100)
+
+viewPathway('VEGFA-VEGFR2 Pathway', readable = T, foldChange = gene_list, nodeSize = 20)
+
+head(res)
+duplicate_genes <- res[duplicated(res$ortholog_name), "ortholog_name"]
+unique_res <- res[!res$ortholog_name %in% duplicate_genes, ]
+
+nrow(res)
+nrow(unique_res)
+
+gene_list <- genes$log2FoldChange
+names(gene_list) <- genes$ENTREZID
+
+entrez_unique_res <- bitr(unique_res$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)
+
+head(unique_res)
+head(entrez_unique_res)
+genes <- genes %>% distinct(ENTREZID, .keep_all = T)
+
+
+genes <- unique_res %>% left_join(entrez_unique_res, by = c('ortholog_name' = 'SYMBOL')) %>% dplyr::select(ENTREZID, log2FoldChange)
+
+
+
 
 ## use new way of specifying visualization options
 color.params = list(foldChange = gene_list, edge = TRUE)
