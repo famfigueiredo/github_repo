@@ -1,12 +1,11 @@
-suppressPackageStartupMessages({
-  library('tidyverse')
-  library('VennDiagram')
-  library('clusterProfiler')
-  library('gprofiler2')
-  library('org.Hs.eg.db')
-  library('enrichplot')
-  library('AnnotationDbi')
-})
+library('tidyverse')
+library('VennDiagram')
+library('clusterProfiler')
+library('gprofiler2')
+library('org.Hs.eg.db')
+library('enrichplot')
+library('AnnotationDbi')
+
 
 ## Loading functions ----
 source(
@@ -41,15 +40,7 @@ for (i in 1:length(results_files)) {
 #          envir = .GlobalEnv)
 # }
 # 
-# rm(list.data,
-#    result,
-#    i,
-#    res_object,
-#    res_objects,
-#    results_files,
-#    significant_result)
-# 
-# rm(list = ls(pattern = '^res_.'))  # removing results files from Global
+
 
 # GSEA with significantly differentially regulated genes ----
 ## DNA vaccine
@@ -61,37 +52,44 @@ string_test <-
 entrez_ids <-
   bitr(string_test$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)  # converting symbols to entrez for gseaGO
 
-enrichment <-
+enrichment_dnavaccine <-
   string_test %>% left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL')) %>% dplyr::select(ENTREZID, log2FC)  # merging entrez ids with symbols and keeping just the entrez id
 
-enrichment_gsea <- enrichment$log2FC  # preparing matrix for gseGO
+enrichment_dnavaccine <- unique(enrichment_dnavaccine, by = 'ENTREZID')
 
-names(enrichment_gsea) <- enrichment$ENTREZID  # preparing matrix for gseGO
+enrichment_gsea <- enrichment_dnavaccine$log2FC  # preparing matrix for gseGO
 
-gseGO(
+names(enrichment_gsea) <- enrichment_dnavaccine$ENTREZID  # preparing matrix for gseGO
+
+
+enrichment_dnavaccine <- enrichment_dnavaccine %>% distinct(ENTREZID, .keep_all = T)
+
+
+gsea_dnavaccine_4wpc <- gseGO(
   geneList = enrichment_gsea,
   OrgDb = org.Hs.eg.db,
   ont = 'BP',
   pvalueCutoff = 0.05,
   pAdjustMethod = 'BH',
-  verbose = T
-) %>% as_tibble() -> gsea_dnavaccine_4wpc
+  verbose = T)
 
 
-gsea_dnavaccine_4wpc %>% 
+# as_tibble(simplified_gsea_dnavaccine) %>%
+as_tibble(gsea_dnavaccine_4wpc) %>%
   top_n(20, wt = abs(NES)) %>% 
   mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
   mutate(Description = fct_reorder(Description, Count)) %>%
   ggplot(aes(Count, Description)) +
   geom_point(aes(color = Count, size = Count)) +
-  scale_color_viridis_c('Gene count', guide = 'legend') +
-  scale_size_continuous('Gene count', range = c(2, 15), guide = 'legend') +
-  xlim(40, 200) +
+  # scale_color_viridis_c('Gene set') +
+  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(10, 180)) +
+  scale_size_continuous('Gene count', range = c(2, 10), guide = 'legend', limits = c(10, 180)) +
+  scale_x_continuous(limits = c(20, 180), breaks = seq(20, 180, by = 20)) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +
-  ggtitle('GSEA, downregulated vs upregulated DEGs',
+  ggtitle('GSEA (simplified), downregulated vs upregulated DEGs',
           subtitle = 'DNA vaccine, 4WPC, heart tissue') +
   theme_bw(base_size = 14) +
   theme(
@@ -103,10 +101,51 @@ gsea_dnavaccine_4wpc %>%
     legend.key.height = unit(1, 'cm'),
     strip.text = element_text(size = 24),
     plot.title = element_text(hjust = .5),
-    plot.subtitle = element_text(hjust = .5)
+    plot.subtitle = element_text(hjust = .5),
+    panel.grid.minor = element_blank(),
+    panel.grid = element_line(color = 'black', size = .05, linetype = 2)
   ) +
   facet_grid(. ~ Regulation)
 
+install.packages('topGO')
+library(topGO)
+install.packages('Rgraphviz')
+library(Rgraphviz)
+library(devtools)
+install_github("GuangchuangYu/ReactomePA")
+library('ReactomePA')
+library('DOSE')
+library('enrichplot')
+BiocManager::install("enrichplot")
+renv::snapshot()
+plotGOgraph(GOgraphtest)
+enrichplot::enrichMap(gsea_dnavaccine_4wpc)
+
+
+simplified_gsea_dnavaccine <- simplify(GOgraphtest)
+as_tibble(simplified_gsea_dnavaccine)
+
+devtools::install_github("GuangchuangYu/DOSE")
+
+readable_simp_gsea_dnavacc <- setReadable(simplified_gsea_dnavaccine, org.Hs.eg.db, keyType = 'auto')
+enrichment_gsea
+
+dnavaccine_4wpc_readable <- setReadable(gsea_dnavaccine_4wpc, org.Hs.eg.db)
+cnetplot(dnavaccine_4wpc_readable, categorySize = 'pvalue', foldChange = enrichment_gsea, setRedable = TRUE)
+
+y <- gsePathway(enrichment_gsea,
+           pvalueCutoff = .2,
+           pAdjustMethod = 'BH',
+           verbose = F)
+
+as_tibble(y) %>% arrange(NES) %>% print(n = 100)
+
+viewPathway('Costimulation by the CD28 family', readable = T, foldChange = enrichment_gsea)
+
+
+duplicate_genes <- enrichment_dnavaccine[duplicated(enrichment_dnavaccine$ENTREZID), "ENTREZID"]
+enrichment_dnavaccine <- enrichment_dnavaccine[!enrichment_dnavaccine$ENTREZID %in% duplicate_genes, ]
+?viewPathway
 ## EOMES
 improved_data_wrangling(res_eomes_vs_conu_4wpc, 'eomes', '4wpc')
 
@@ -117,48 +156,53 @@ entrez_ids <-
   bitr(string_test_eomes$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)
 
 enrichment_eomes <-
-  string_test_eomes %>% left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL')) %>% dplyr::select(ENTREZID, log2FC)
+  string_test_eomes %>% left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL'), relationship = 'many-to-many') %>% dplyr::select(ENTREZID, log2FC)
 
 enrichment_gsea_eomes <- enrichment_eomes$log2FC
 
 names(enrichment_gsea_eomes) <- enrichment_eomes$ENTREZID
 
-gsea_eomes <- gseGO(
+gseGO(
   geneList = enrichment_gsea_eomes,
   OrgDb = org.Hs.eg.db,
   ont = 'BP',
   pvalueCutoff = 0.05,
   pAdjustMethod = 'BH',
   verbose = T
-)
+) %>% as_tibble() -> gsea_eomes_4wpc
 
-gsea_eomes %>%
-  fortify(., showCategory = 20) %>%
-  as_tibble() %>%
-  mutate_at('.sign', str_replace, 'suppressed', 'Downregulated') %>% mutate_at('.sign', str_replace, 'activated', 'Upregulated') %>%
+gsea_eomes_4wpc %>%
+  top_n(15, wt = abs(NES)) %>% 
+  filter(!Description %in% 'adaptive immune response based on somatic recombination of immune receptors built from immunoglobulin superfamily domains') %>% 
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>%  # counting genes in core_enrichment
   mutate(Description = fct_reorder(Description, Count)) %>%
   ggplot(aes(Count, Description)) +
-  geom_point(aes(color = p.adjust, size = Count)) +
-  scale_color_viridis_c('Adjusted p-value', guide = guide_colorbar(reverse = TRUE)) +
-  guides(size = guide_bins(show.limits = TRUE)) +
-  scale_size_continuous('Gene count', range = c(2, 10)) +
+  geom_point(aes(color = Count, size = Count)) +
+  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(10, 200)) +
+  scale_size_continuous('Gene count', range = c(2, 10), guide = 'legend', limits = c(10, 200)) +
+  scale_x_continuous(limits = c(0, 200), breaks = seq(10, 200, by = 30)) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +
-  theme(text = element_text(size = 10,
-                            family = 'Arial Narrow')) +
   ggtitle('GSEA, downregulated vs upregulated DEGs',
           subtitle = 'EOMES, 4WPC, heart tissue') +
-  theme_bw(base_size = 10) +
+  theme_bw(base_size = 14) +
   theme(
+    text = element_text(family = 'Times New Roman'),
     legend.title = element_text(size = 10),
     legend.text = element_text(size = 8),
     legend.key.size = unit(1, 'cm'),
     legend.position = 'right',
-    legend.key.height = unit(1, 'cm')
-  ) +
-  facet_grid(. ~ .sign) +
-  theme(strip.text = element_text(size = 24))
+    legend.key.height = unit(1, 'cm'),
+    strip.text = element_text(size = 24),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5),
+    panel.grid.minor = element_blank(),
+    panel.grid = element_line(color = 'black', size = .05, linetype = 2)
+    ) +
+  facet_grid(. ~ Regulation)
+
 
 ## GATA 3
 improved_data_wrangling(res_gata3_vs_conu_4wpc, 'gata3', '4wpc')
@@ -170,48 +214,52 @@ entrez_ids <-
   bitr(string_test_gata3$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)
 
 enrichment_gata3 <-
-  string_test_gata3 %>% left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL')) %>% dplyr::select(ENTREZID, log2FC)
+  string_test_gata3 %>% left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL'), relationship = 'many-to-many') %>% dplyr::select(ENTREZID, log2FC)
 
 enrichment_gsea_gata3 <- enrichment_gata3$log2FC
 
 names(enrichment_gsea_gata3) <- enrichment_gata3$ENTREZID
 
-gsea_gata3 <- gseGO(
+gseGO(
   geneList = enrichment_gsea_gata3,
   OrgDb = org.Hs.eg.db,
   ont = 'BP',
   pvalueCutoff = 0.05,
   pAdjustMethod = 'BH',
   verbose = T
-)
+) %>% as_tibble() -> gsea_gata3_4wpc
 
-gsea_gata3 %>%
-  fortify(., showCategory = 20) %>%
-  as_tibble() %>%
-  mutate_at('.sign', str_replace, 'suppressed', 'Downregulated') %>% mutate_at('.sign', str_replace, 'activated', 'Upregulated') %>%
+
+gsea_gata3_4wpc %>%
+  top_n(20, wt = abs(NES)) %>% 
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
   mutate(Description = fct_reorder(Description, Count)) %>%
   ggplot(aes(Count, Description)) +
-  geom_point(aes(color = p.adjust, size = Count)) +
-  scale_color_viridis_c('Adjusted p-value', guide = guide_colorbar(reverse = TRUE)) +
-  guides(size = guide_bins(show.limits = TRUE)) +
-  scale_size_continuous('Gene count', range = c(2, 10)) +
+  geom_point(aes(color = Count, size = Count)) +
+  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(10, 200)) +
+  scale_size_continuous('Gene count', range = c(2, 10), guide = 'legend', limits = c(10, 200)) +
+  scale_x_continuous(limits = c(0, 200), breaks = seq(0, 200, by = 50)) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +
-  theme(text = element_text(size = 10,
-                            family = 'Arial Narrow')) +
   ggtitle('GSEA, downregulated vs upregulated DEGs',
-          subtitle = 'GATA 3, 4WPC, heart tissue') +
-  theme_bw(base_size = 10) +
+          subtitle = 'GATA3, 4WPC, heart tissue') +
+  theme_bw(base_size = 14) +
   theme(
+    text = element_text(family = 'Times New Roman'),
     legend.title = element_text(size = 10),
     legend.text = element_text(size = 8),
     legend.key.size = unit(1, 'cm'),
     legend.position = 'right',
-    legend.key.height = unit(1, 'cm')
+    legend.key.height = unit(1, 'cm'),
+    strip.text = element_text(size = 24),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5),
+    panel.grid.minor = element_blank(),
+    panel.grid = element_line(color = 'black', size = .05, linetype = 2)
   ) +
-  facet_grid(. ~ .sign) +
-  theme(strip.text = element_text(size = 24))
+  facet_grid(. ~ Regulation)
 
 
 ## IV-HD
@@ -230,42 +278,126 @@ enrichment_gsea_ivhd <- enrichment_ivhd$log2FC
 
 names(enrichment_gsea_ivhd) <- enrichment_ivhd$ENTREZID
 
-gsea_ivhd <- gseGO(
+gseGO(
   geneList = enrichment_gsea_ivhd,
   OrgDb = org.Hs.eg.db,
   ont = 'BP',
   pvalueCutoff = 0.05,
   pAdjustMethod = 'BH',
   verbose = T
-)
+) %>% as_tibble() -> gsea_ivhd_4wpc
 
-gsea_ivhd %>%
-  fortify(., showCategory = 20) %>%
-  as_tibble() %>%
-  mutate_at('.sign', str_replace, 'suppressed', 'Downregulated') %>% mutate_at('.sign', str_replace, 'activated', 'Upregulated') %>%
+gsea_ivhd_4wpc %>%
+  top_n(20, wt = abs(NES)) %>% 
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
   mutate(Description = fct_reorder(Description, Count)) %>%
   ggplot(aes(Count, Description)) +
-  geom_point(aes(color = p.adjust, size = Count)) +
-  scale_color_viridis_c('Adjusted p-value', guide = guide_colorbar(reverse = TRUE)) +
-  guides(size = guide_bins(show.limits = TRUE)) +
-  scale_size_continuous('Gene count', range = c(2, 10)) +
+  geom_point(aes(color = Count, size = Count)) +
+  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(10, 120)) +
+  scale_size_continuous('Gene count', range = c(2, 10), guide = 'legend', limits = c(10, 120)) +
+  scale_x_continuous(limits = c(20, 140), breaks = seq(20, 140, by = 20)) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +
-  theme(text = element_text(size = 10,
-                            family = 'Arial Narrow')) +
   ggtitle('GSEA, downregulated vs upregulated DEGs',
           subtitle = 'IV-HD, 4WPC, heart tissue') +
-  theme_bw(base_size = 10) +
+  theme_bw(base_size = 14) +
   theme(
+    text = element_text(family = 'Times New Roman'),
     legend.title = element_text(size = 10),
     legend.text = element_text(size = 8),
     legend.key.size = unit(1, 'cm'),
     legend.position = 'right',
-    legend.key.height = unit(1, 'cm')
+    legend.key.height = unit(1, 'cm'),
+    strip.text = element_text(size = 24),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5),
+    panel.grid.minor = element_blank(),
+    panel.grid = element_line(color = 'black', size = .05, linetype = 2)
   ) +
-  facet_grid(. ~ .sign) +
-  theme(strip.text = element_text(size = 24))
+  facet_grid(. ~ Regulation)
+
+
+## IV-LD
+improved_data_wrangling(res_ivld_vs_conu_4wpc, 'ivld', '4wpc')
+
+string_test_ivld <-
+  results_ivld_4wpc %>% dplyr::select(ortholog_name, log2FC) %>% na.omit()
+
+entrez_ids <-
+  bitr(string_test_eomes$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)
+
+enrichment_ivld <-
+  string_test_ivld %>% left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL')) %>% dplyr::select(ENTREZID, log2FC)
+
+enrichment_gsea_ivld <- enrichment_ivld$log2FC
+
+names(enrichment_gsea_ivld) <- enrichment_ivld$ENTREZID
+
+gseGO(
+  geneList = enrichment_gsea_ivld,
+  OrgDb = org.Hs.eg.db,
+  ont = 'BP',
+  pvalueCutoff = 0.05,
+  pAdjustMethod = 'BH',
+  verbose = T
+) %>% as_tibble() -> gsea_ivld_4wpc
+
+gsea_ivld_4wpc %>%
+  top_n(20, wt = abs(NES)) %>% 
+  filter(!Description %in% 'adaptive immune response based on somatic recombination of immune receptors built from immunoglobulin superfamily domains') %>% 
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
+  mutate(Description = fct_reorder(Description, Count)) %>%
+  ggplot(aes(Count, Description)) +
+  geom_point(aes(color = Count, size = Count)) +
+  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(0, 60)) +
+  scale_size_continuous('Gene count', range = c(2, 10), guide = 'legend', limits = c(0, 60)) +
+  scale_x_continuous(limits = c(0, 60), breaks = seq(0, 60, by = 10)) +
+  scale_y_discrete() +
+  xlab('Gene count') +
+  ylab(NULL) +
+  ggtitle('GSEA, downregulated vs upregulated DEGs',
+          subtitle = 'IV-LD, 4WPC, heart tissue') +
+  theme_bw(base_size = 14) +
+  theme(
+    text = element_text(family = 'Times New Roman'),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    legend.key.size = unit(1, 'cm'),
+    legend.position = 'right',
+    legend.key.height = unit(1, 'cm'),
+    strip.text = element_text(size = 24),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5),
+    panel.grid.minor = element_blank(),
+    panel.grid = element_line(color = 'black', size = .05, linetype = 2)
+  ) +
+  facet_grid(. ~ Regulation)
+
+
+
+
+
+rm(list.data,
+   result,
+   i,
+   res_object,
+   res_objects,
+   results_files,
+   significant_result)
+
+rm(list = ls(pattern = '^res_.'))  # removing results files from Global
+
+
+
+
+
+
+
+
+
 
 
 ## cnetplots with GSEA output data ----
@@ -396,7 +528,9 @@ cnetplot(
   cex_label_gene = 0.8
 )
 
-## cnetplots at 4WPC ----
+
+
+## cnetplots at 4WPC, ALL GENES, no p-value pre-selection ----
 setwd(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc'
 )
@@ -689,7 +823,7 @@ top_downregulated_ivld <- cnetplot(
 
 top_downregulated_ivhd + ggtitle("Top downregulated IV-LD, 4WPC") + theme(plot.title = element_text(hjust= 0.5))
 
-## cnetplots at 1WPC ----
+## cnetplots at 1WPC, ALL GENES, no p-value pre-selection ----
 setwd(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc'
 )
