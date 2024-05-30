@@ -6,9 +6,11 @@ However, in EOMES, more general GO terms like *negative regulation of response t
 
 Responses to external stimuli show up in the DNA vaccine, EOMES, and GATA3, but not in IV-HD? Evidence of viral infection recognition?
 
-### DNA vaccine at 1WPC
 
 
+## 1WPC
+
+### DNA vaccine
 
 Running GSEA results through ReactomePA, I get a set of downregulated pathways for DNA vaccine:
 
@@ -104,11 +106,7 @@ These pathways reflect a wide range of cellular functions, including immune resp
 
 
 
-
-
-
-
-### EOMES at 1WPC
+### EOMES
 
 Running GSEA results through ReactomePA, I get a set of downregulated pathways:
 
@@ -142,8 +140,6 @@ Overall, this combination of pathways illustrates a complex network of interacti
 
 
 
-
-
 ### GATA3
 
 | Description | NES |
@@ -172,12 +168,6 @@ Overall, this combination of pathways illustrates a complex network of interacti
 | Membrane binding and targetting of GAG proteins | -1.653289 |
 | Synthesis And Processing Of GAG, GAGPOL Polyproteins | -1.653289 |
 | Signaling by CSF3 (G-CSF) | -1.652082 |
-
-
-
-
-
-
 
 
 
@@ -303,17 +293,67 @@ The pathways cover a wide range of biological processes, including cell  cycle r
 
 
 
+### IV-LD
+
+The only *Reactome* pathway is 'Neuronal System'.
 
 
 
+## 4WPC
+
+### DNA vaccine
 
 
 
+| Description | NES |
+| --- | --- |
+| Interferon alpha/beta signaling | -2.245783 |
+| Signaling by CSF1 (M-CSF) in myeloid cells | -2.183906 |
+| GPVI-mediated activation cascade | -2.156946 |
+| Interleukin-3, Interleukin-5 and GM-CSF signaling | -2.118311 |
+| ROS and RNS production in phagocytes | -2.073070 |
+| Antigen activates B Cell Receptor (BCR) leading to generation of second messengers | -2.063355 |
+| RHO GTPases Activate NADPH Oxidases | -1.964348 |
+| Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE) | -1.956229 |
+| Inactivation of CSF3 (G-CSF) signaling | -1.950036 |
+| Regulation of signaling by CBL | -1.915487 |
+| Cytosolic tRNA aminoacylation | -1.915362 |
+| Signaling by CSF3 (G-CSF) | -1.897145 |
+| FCERI mediated MAPK activation | -1.881534 |
+| Parasite infection | -1.788290 |
+| Leishmania phagocytosis | -1.788290 |
+| FCGR3A-mediated phagocytosis | -1.788290 |
+| Generation of second messenger molecules | -1.780454 |
+| Antigen processing-Cross presentation | -1.775111 |
+| Signaling by the B Cell Receptor (BCR) | -1.749496 |
+| Costimulation by the CD28 family | -1.702488 |
+| Antigen Presentation: Folding, assembly and peptide loading of class I MHC | -1.690269 |
+| Hh mutants are degraded by ERAD | -1.689402 |
+| Hh mutants abrogate ligand secretion | -1.689402 |
+| DAP12 interactions | -1.671403 |
+| DAP12 signaling | -1.671403 |
+| FCERI mediated NF-kB activation | -1.665623 |
+| Defective CFTR causes cystic fibrosis | -1.665085 |
+| Regulation of actin dynamics for phagocytic cup formation | -1.648707 |
+| SCF-beta-TrCP mediated degradation of Emi1 | -1.615164 |
+| Fcgamma receptor (FCGR) dependent phagocytosis | -1.603441 |
+| Hedgehog ligand biogenesis | -1.602925 |
+| TCR signaling | -1.595014 |
+| Degradation of GLI2 by the proteasome | -1.585871 |
+| Activation of NF-kappaB in B cells | -1.577746 |
+| Fc epsilon receptor (FCERI) signaling | -1.544485 |
+| Interleukin-1 family signaling | -1.528250 |
+| Signaling by Interleukins | -1.498810 |
+| Cytokine Signaling in Immune system | -1.396404 |
+| Adaptive Immune System | -1.241338 |
 
 
 
+Overall, these pathways highlight key processes in the immune response,  cell signaling, and regulation, emphasizing their roles in maintaining  immune system function and responding to pathogens. Negative NES values  indicate downregulation, suggesting a potential suppression of these  pathways under certain conditions.
 
 
+
+### EOMES
 
 
 

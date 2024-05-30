@@ -841,16 +841,7 @@ top_downregulated_ivld <- cnetplot(
 top_downregulated_ivhd + ggtitle("Top downregulated IV-LD, 4WPC") + theme(plot.title = element_text(hjust= 0.5))
 
 ## cnetplots at 1WPC, ALL GENES, no p-value pre-selection ----
-setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc'
-)
 
-results_files <-
-  list.files(pattern = '^res_.*_conu_1wpc')  # regex matching results files
-list.data <- list()
-for (i in 1:length(results_files)) {
-  list.data[[i]] <- load(results_files[i])
-}
 
 ### DNA vaccine ----
 orth_hs <- gorth(

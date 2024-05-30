@@ -115,9 +115,7 @@ filter_rows_by_GO_term <- function(df1, df2, id_column_name) {
   return(filtered_rows)
 }
 
-
-
-# gsea formatting starting from a DESeq results table
+# running gsea starting from a DESeq results table
 gsea_formatting <-
   function(results_table, treatment, sampling_point) {
     # Install and load required packages
@@ -190,8 +188,6 @@ gsea_formatting <-
     return(gsea_results)
   }
 
-
-
 # gsea formatting starting from a DESeq results table and using only significantly differentially regulated genes
 gsea_formatting_significant <-
   function(results_table, treatment, sampling_point) {
@@ -217,10 +213,14 @@ gsea_formatting_significant <-
     enrichment <- ortholog_fc %>%
       left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL')) %>%
       dplyr::select(ENTREZID, log2FC)
-    
+
     # Prepare the enrichment_gsea matrix
     enrichment_gsea <- enrichment$log2FC
     names(enrichment_gsea) <- enrichment$ENTREZID
+    
+    # Prepare the enrichment_gsea matrix
+    enrichment_gsea_symbol <<- ortholog_fc$log2FC
+    names(enrichment_gsea_symbol) <<- enrichment$ortholog_name
     
     # Create a dynamic name for the enrichment_gsea object
     results_name <-
