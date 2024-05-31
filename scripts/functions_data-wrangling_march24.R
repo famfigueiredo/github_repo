@@ -162,9 +162,16 @@ gsea_formatting <-
     names(gene_list) <- ordered_df$ortholog_name
     
     # Prepare matrix for gsePathway
-    ordered_entrez <- bitr(ordered_df$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)
-    entrez_genes <- ordered_df %>% left_join(ordered_entrez, by = c('ortholog_name' = 'SYMBOL'), relationship = 'many-to-many') %>% dplyr::select(ENTREZID, log2FoldChange)
-    distinct_genes <- entrez_genes %>% distinct(ENTREZID, .keep_all = T)
+    ordered_entrez <-
+      bitr(ordered_df$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)
+    entrez_genes <-
+      ordered_df %>% left_join(
+        ordered_entrez,
+        by = c('ortholog_name' = 'SYMBOL'),
+        relationship = 'many-to-many'
+      ) %>% dplyr::select(ENTREZID, log2FoldChange)
+    distinct_genes <-
+      entrez_genes %>% distinct(ENTREZID, .keep_all = T)
     entrez_gene_list <<- distinct_genes$log2FoldChange
     names(entrez_gene_list) <<- distinct_genes$ENTREZID
     
@@ -209,18 +216,28 @@ gsea_formatting_significant <-
         OrgDb = org.Hs.eg.db
       )
     
-    # Merge ortholog_fc with entrez_ids and select relevant columns
-    enrichment <- ortholog_fc %>%
-      left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL')) %>%
-      dplyr::select(ENTREZID, log2FC)
-
-    # Prepare the enrichment_gsea matrix
-    enrichment_gsea <- enrichment$log2FC
-    names(enrichment_gsea) <- enrichment$ENTREZID
+    # Prepare matrix for gsePathway
+    entrez_genes <-
+      wrangled_data %>% left_join(entrez_ids,
+                                  by = c('ortholog_name' = 'SYMBOL'),
+                                  relationship = 'many-to-many') %>% dplyr::select(ENTREZID, log2FC) %>% na.omit()
+    distinct_genes <-
+      entrez_genes %>% distinct(ENTREZID, .keep_all = T)
+    entrez_gene_list <<- distinct_genes$log2FC
+    names(entrez_gene_list) <<- distinct_genes$ENTREZID
+    
+    # # Merge ortholog_fc with entrez_ids and select relevant columns
+    # enrichment <- ortholog_fc %>%
+    #   left_join(entrez_ids, by = c('ortholog_name' = 'SYMBOL')) %>%
+    #   dplyr::select(ENTREZID, log2FC)
+    # 
+    # # Prepare the enrichment_gsea matrix
+    # enrichment_gsea <- enrichment$log2FC
+    # names(enrichment_gsea) <- enrichment$ENTREZID
     
     # Prepare the enrichment_gsea matrix
-    enrichment_gsea_symbol <<- ortholog_fc$log2FC
-    names(enrichment_gsea_symbol) <<- enrichment$ortholog_name
+    enrichment_gsea <<- ortholog_fc$log2FC
+    names(enrichment_gsea) <<- ortholog_fc$ortholog_name
     
     # Create a dynamic name for the enrichment_gsea object
     results_name <-

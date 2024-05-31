@@ -162,12 +162,44 @@ cnetplot(
 
 bottom20_low_nes %>% slice(1:10) %>% pull(Description)
 
-x_dnavaccine <- gsePathway(enrichment_gsea_dnavaccine_4wpc,
+x_dnavaccine <- gsePathway(entrez_gene_list,
                       pvalueCutoff = .2,
                       pAdjustMethod = 'BH',
                       verbose = F)
 
 as_tibble(x_dnavaccine) %>% arrange(NES) %>% print(n = 100)
 
-viewPathway('Innate Immune System', readable = T, foldChange = enrichment_gsea_dnavaccine_4wpc)
+viewPathway('Interleukin-4 and Interleukin-13 signaling', readable = T, foldChange = entrez_gene_list)
+
+# Interleukin-4 and Interleukin-13 signaling
+# Interferon gamma signaling
+# FCGR3A-mediated phagocytosis
+# Signaling by the B Cell Receptor (BCR)  
+
+
+
+### Testing
+wrangled_data <-
+  improved_data_wrangling(res_dnavaccine_vs_conu_4wpc, 'dnavaccine', '4wpc')
+
+# Select ortholog_name and log2FC, and remove NA values
+ortholog_fc <- wrangled_data %>%
+  dplyr::select(ortholog_name, log2FC) %>%
+  na.omit()
+
+# Convert gene symbols to Entrez IDs
+entrez_ids <-
+  bitr(
+    ortholog_fc$ortholog_name,
+    fromType = 'SYMBOL',
+    toType = 'ENTREZID',
+    OrgDb = org.Hs.eg.db
+  )
+
+
+entrez_genes <-
+  wrangled_data %>% left_join(entrez_ids,
+                              by = c('ortholog_name' = 'SYMBOL'),
+                              relationship = 'many-to-many') %>% dplyr::select(ENTREZID, log2FC) %>% na.omit()
+
 
