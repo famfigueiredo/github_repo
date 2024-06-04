@@ -5,7 +5,7 @@ library('gprofiler2')
 library('org.Hs.eg.db')
 library('enrichplot')
 library('AnnotationDbi')
-library(ReactomePA)
+library('ReactomePA')
 
 rm(list = setdiff(ls(), grep("res_", ls(), value = TRUE)))
 
@@ -313,9 +313,141 @@ write_tsv(eomes_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_d
 BiocManager::install("org.Dr.eg.db")
 library(org.Dr.eg.db)
 
+gsea_formatting(res_dnavaccine_vs_conu_4wpc, 'dnavaccine', '4wpc')
+
+gsea_simplified_results_dnavaccine_4wpc <- simplify(gsea_results_dnavaccine_4wpc)
+
+results_df <-
+  tibble::rownames_to_column(as.data.frame(res_dnavaccine_vs_conu_4wpc), var = 'ensembl')
+
+# Convert salmon genes to human orthologs
+orthologs <- gorth(
+  query = results_df$ensembl,
+  source_organism = 'ssalar',
+  target_organism = 'drerio',
+  mthreshold = 1,
+  filter_na = TRUE
+)
+
+# Select relevant variables and join with ortholog data
+merged_df <- results_df %>%
+  left_join(orthologs, by = c('ensembl' = 'input')) %>%
+  dplyr::select(ensembl,
+                ortholog_name,
+                ortholog_ensg,
+                log2FoldChange,
+                padj,
+                description) %>%
+  na.omit()
+
+# Order genes by fold change
+ordered_df <- merged_df[order(-merged_df$log2FoldChange),]
+
+# Prepare matrix for GSEA
+gene_list <- ordered_df$log2FoldChange
+names(gene_list) <- ordered_df$ortholog_name
+
+# Prepare matrix for gsePathway
+ordered_entrez <-
+  bitr(ordered_df$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Dr.eg.db)  # 8.91% of input gene IDs are fail to map...
+entrez_genes <-
+  ordered_df %>% left_join(
+    ordered_entrez,
+    by = c('ortholog_name' = 'SYMBOL'),
+    relationship = 'many-to-many'
+  ) %>% dplyr::select(ENTREZID, log2FoldChange)
+distinct_genes <-
+  entrez_genes %>% distinct(ENTREZID, .keep_all = T)
+entrez_gene_list <- distinct_genes$log2FoldChange
+names(entrez_gene_list) <- distinct_genes$ENTREZID
+
+# Run GSEA
+gsea_results <- gseGO(
+  gene_list,
+  keyType = 'SYMBOL',
+  OrgDb = org.Dr.eg.db,
+  ont = 'BP',
+  pvalueCutoff = 0.05,
+  pAdjustMethod = 'BH',
+  verbose = T,
+  eps = 1e-300
+)
+
+as_tibble(gsea_results)
+gsea_simplified_results_zebrafish <- simplify(gsea_results)
 
 
+
+top10_high_nes <- 
+  as_tibble(gsea_simplified_results_zebrafish) %>%
+  filter(NES > 0) %>% 
+  arrange(-setSize) %>% 
+  top_n(10, wt = NES) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+
+bottom10_low_nes <- 
+  as_tibble(gsea_simplified_results_zebrafish) %>%
+  filter(NES < 0) %>% 
+  arrange(-setSize) %>% 
+  top_n(10, wt = setSize) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+
+low_high_nes_dnavaccine_4wpc <- bind_rows(bottom10_low_nes, top10_high_nes)
+
+
+low_high_nes_dnavaccine_4wpc %>%
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
+  mutate(Description = fct_reorder(Description, Count)) %>%
+  ggplot(aes(Count, Description)) +
+  geom_point(aes(size = setSize), shape = 1, stroke = 0.2, color = 'red') +
+  geom_point(aes(color = Count, size = Count), shape = 16) +
+  # scale_color_viridis_c('Gene set') +
+  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(1, 250)) +
+  scale_size_continuous('Set size', range = c(2, 15), guide = 'legend', limits = c(2, max(low_high_nes_dnavaccine_4wpc$setSize))) +
+  scale_x_continuous(limits = c(0, max(low_high_nes_dnavaccine_4wpc$Count) * 1.1)) +
+  scale_y_discrete() +
+  xlab('Gene count') +
+  ylab(NULL) +
+  ggtitle('GSEA, downregulated vs upregulated genes',
+          subtitle = 'DNA vaccine, 4WPC, zebrafish orthologs') +
+  theme_bw(base_size = 14) +
+  theme(
+    text = element_text(family = 'Times New Roman'),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    legend.key.size = unit(1, 'cm'),
+    legend.position = 'right',
+    legend.key.height = unit(1, 'cm'),
+    strip.text = element_text(size = 24),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5),
+    panel.grid.minor = element_blank(),
+    panel.grid = element_line(color = 'black', size = .05, linetype = 2)
+  ) + guides(
+    color = guide_legend(override.aes = list(size = 5)),  # increase point size in gene count legend
+    size = guide_legend(override.aes = list(shape = 1, fill = NA, stroke = .5, color = 'red'))  # show only borders in set size legend
+  ) +
+  facet_grid(. ~ Regulation)
+
+
+y_dnavaccine <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes the duplicates from this object
+                           organism = 'zebrafish',
+                           pvalueCutoff = .2,
+                           pAdjustMethod = 'BH',
+                           verbose = F)
+
+as_tibble(y_dnavaccine) %>% arrange(-NES) %>% print(n = 100)
+
+viewPathway('Signaling by Rho GTPases, Miro GTPases and RHOBTB3', readable = T, organism = 'zebrafish', foldChange = entrez_gene_list)
+
+dnavaccine_pathways <- as_tibble(y_dnavaccine) %>% arrange(-NES) %>% filter(., NES > 0) %>% dplyr::select(., Description, NES) 
+
+as_tibble(y_dnavaccine) %>% arrange(-NES) %>% filter(., NES > 0) %>% pull(Description)
+
+
+### Atlantic salmon
 library(AnnotationHub)
+
 sasa <<-
   query(ah, c('OrgDb', 'Salmo salar'))[[1]]
 
