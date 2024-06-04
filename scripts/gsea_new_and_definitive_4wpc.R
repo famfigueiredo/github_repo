@@ -448,13 +448,132 @@ as_tibble(y_dnavaccine) %>% arrange(-NES) %>% filter(., NES > 0) %>% pull(Descri
 ### Atlantic salmon
 library(AnnotationHub)
 
-sasa <<-
-  query(ah, c('OrgDb', 'Salmo salar'))[[1]]
+ah <- AnnotationHub()
+
+# query(ah, c('OrgDb', 'Salmo salar'))
+# AnnotationHub with 1 record
+# snapshotDate(): 2024-04-29
+# names(): AH114250
+# $dataprovider: ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/
+# $species: Salmo salar
+# $rdataclass: OrgDb
+# $rdatadateadded: 2023-10-20
+# $title: org.Salmo_salar.eg.sqlite
+# $description: NCBI gene ID based annotations about Salmo salar
+# $taxonomyid: 8030
+# $genome: NCBI genomes
+# $sourcetype: NCBI/UniProt
+# $sourceurl: ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/, ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/idmappi...
+# $sourcesize: NA
+# $tags: c("NCBI", "Gene", "Annotation") 
+# retrieve record with 'object[["AH114250"]]' 
+
+sasa <- query(ah, c('OrgDb', 'Salmo salar'))[[1]]  # querying AnnotationHub for an OrgDb object for Atlantic salmon
 
 
+# Select relevant variables
+merged_df <- results_df %>%
+  dplyr::select(ensembl,
+                log2FoldChange,
+                padj) %>%
+  na.omit()
+
+# Order genes by fold change
+ordered_df <- merged_df[order(-merged_df$log2FoldChange),]
+
+head(ordered_df)
+
+# Prepare matrix for GSEA
+gene_list <- ordered_df$log2FoldChange
+names(gene_list) <- ordered_df$ensembl
+
+# Prepare matrix for gsePathway
+ordered_entrez <-
+  bitr(ordered_df$ensembl, 'ENSEMBL', 'ENTREZID', OrgDb = sasa)  # 8.91% of input gene IDs are fail to map...
+
+head(ordered_df)
+head(ordered_entrez)
 
 
+entrez_genes <-
+  ordered_df %>% left_join(
+    ordered_entrez,
+    by = c('ensembl' = 'ENSEMBL'),
+    relationship = 'many-to-many'
+  ) %>% dplyr::select(ENTREZID, log2FoldChange)
+
+head(entrez_genes)
+
+distinct_genes <-
+  entrez_genes %>% distinct(ENTREZID, .keep_all = T)
+
+entrez_gene_list <- distinct_genes$log2FoldChange
+names(entrez_gene_list) <- distinct_genes$ENTREZID
+
+# Run GSEA
+gsea_results <- gseGO(
+  gene_list,
+  keyType = 'ENSEMBL',
+  OrgDb = sasa,
+  ont = 'BP',
+  pvalueCutoff = 0.05,
+  pAdjustMethod = 'BH',
+  verbose = T,
+  eps = 1e-300
+)
+
+as_tibble(gsea_results)
+gsea_simplified_results_salmon <- simplify(gsea_results)
 
 
+top10_high_nes <- 
+  as_tibble(gsea_simplified_results_salmon) %>%
+  filter(NES > 0) %>% 
+  arrange(-setSize) %>% 
+  top_n(10, wt = NES) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
+bottom10_low_nes <- 
+  as_tibble(gsea_simplified_results_salmon) %>%
+  filter(NES < 0) %>% 
+  arrange(-setSize) %>% 
+  top_n(10, wt = setSize) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+
+low_high_nes_dnavaccine_4wpc <- bind_rows(bottom10_low_nes, top10_high_nes)
+
+
+low_high_nes_dnavaccine_4wpc %>%
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
+  mutate(Description = fct_reorder(Description, Count)) %>%
+  ggplot(aes(Count, Description)) +
+  geom_point(aes(size = setSize), shape = 1, stroke = 0.2, color = 'red') +
+  geom_point(aes(color = Count, size = Count), shape = 16) +
+  # scale_color_viridis_c('Gene set') +
+  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(1, max(low_high_nes_dnavaccine_4wpc$Count))) +
+  scale_size_continuous('Set size', range = c(2, 15), guide = 'legend', limits = c(2, max(low_high_nes_dnavaccine_4wpc$setSize))) +
+  scale_x_continuous(limits = c(0, max(low_high_nes_dnavaccine_4wpc$Count) * 1.1)) +
+  scale_y_discrete() +
+  xlab('Gene count') +
+  ylab(NULL) +
+  ggtitle('GSEA, downregulated vs upregulated genes',
+          subtitle = 'DNA vaccine, 4WPC, Atlantic salmon') +
+  theme_bw(base_size = 14) +
+  theme(
+    text = element_text(family = 'Times New Roman'),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    legend.key.size = unit(1, 'cm'),
+    legend.position = 'right',
+    legend.key.height = unit(1, 'cm'),
+    strip.text = element_text(size = 24),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5),
+    panel.grid.minor = element_blank(),
+    panel.grid = element_line(color = 'black', size = .05, linetype = 2)
+  ) + guides(
+    color = guide_legend(override.aes = list(size = 5)),  # increase point size in gene count legend
+    size = guide_legend(override.aes = list(shape = 1, fill = NA, stroke = .5, color = 'red'))  # show only borders in set size legend
+  ) +
+  facet_grid(. ~ Regulation)
 
