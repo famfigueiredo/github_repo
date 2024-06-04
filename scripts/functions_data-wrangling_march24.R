@@ -64,11 +64,11 @@ improved_data_wrangling <-
                     description)
     
     # getting gene lists for ORA
-    ora_up <<-
-      results %>% drop_na() %>% dplyr::filter(log2FC > 0) %>%  pull(ortholog_ensg)
-    
-    ora_down <<-
-      results %>% drop_na() %>% dplyr::filter(log2FC < 0) %>%  pull(ortholog_ensg)
+    # ora_up <<-
+    #   results %>% drop_na() %>% dplyr::filter(log2FC > 0) %>%  pull(ortholog_ensg)
+    # 
+    # ora_down <<-
+    #   results %>% drop_na() %>% dplyr::filter(log2FC < 0) %>%  pull(ortholog_ensg)
     
     # create results name
     results_name <-
@@ -223,8 +223,8 @@ gsea_formatting_significant <-
                                   relationship = 'many-to-many') %>% dplyr::select(ENTREZID, log2FC) %>% na.omit()
     distinct_genes <-
       entrez_genes %>% distinct(ENTREZID, .keep_all = T)
-    entrez_gene_list <<- distinct_genes$log2FC
-    names(entrez_gene_list) <<- distinct_genes$ENTREZID
+    significant_entrez_gene_list <<- distinct_genes$log2FC
+    names(significant_entrez_gene_list) <<- distinct_genes$ENTREZID
     
     # # Merge ortholog_fc with entrez_ids and select relevant columns
     # enrichment <- ortholog_fc %>%
@@ -241,7 +241,7 @@ gsea_formatting_significant <-
     
     # Create a dynamic name for the enrichment_gsea object
     results_name <-
-      paste0("enrichment_gsea_", treatment, "_", sampling_point)
+      paste0("significant_enrichment_gsea_", treatment, "_", sampling_point)
     assign(results_name, enrichment_gsea, envir = .GlobalEnv)
     
     return(enrichment_gsea)

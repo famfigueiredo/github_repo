@@ -303,7 +303,7 @@ The only *Reactome* pathway is 'Neuronal System'.
 
 ### DNA vaccine
 
-
+Running GSEA with the whole gene list, without pre-selecting by p-value, yields the following downregulated pathways on *ReactomePA*.
 
 | Description | NES |
 | --- | --- |
@@ -351,17 +351,166 @@ The only *Reactome* pathway is 'Neuronal System'.
 
 Overall, these pathways highlight key processes in the immune response,  cell signaling, and regulation, emphasizing their roles in maintaining  immune system function and responding to pathogens. Negative NES values  indicate downregulation, suggesting a potential suppression of these  pathways under certain conditions.
 
+On the opposite side of the spectrum, the upregulated pathways:
 
+| Description | NES |
+| --- | --- |
+| Respiratory electron transport, ATP synthesis by chemiosmotic coupling, and heat production by uncoupling proteins. | 2.166720 |
+| Aerobic respiration and respiratory electron transport | 2.127555 |
+| Respiratory electron transport | 2.114959 |
+| Post-translational protein phosphorylation | 2.086596 |
+| Regulation of Insulin-like Growth Factor (IGF) transport and uptake by Insulin-like Growth Factor Binding Proteins (IGFBPs) | 2.085496 |
+| Formation of Fibrin Clot (Clotting Cascade) | 2.065645 |
+| Intrinsic Pathway of Fibrin Clot Formation | 2.043202 |
+| Complex I biogenesis | 1.923962 |
+| Heme signaling | 1.898826 |
+| Mitochondrial biogenesis | 1.863493 |
+| Branched-chain amino acid catabolism | 1.830416 |
+| Muscle contraction | 1.819388 |
+| Potassium Channels | 1.815271 |
+| Platelet degranulation | 1.802439 |
+| Cristae formation | 1.799254 |
+| Voltage gated Potassium channels | 1.788866 |
+| Mitochondrial protein degradation | 1.783941 |
+| Response to elevated platelet cytosolic Ca2+ | 1.782834 |
+| Formation of ATP by chemiosmotic coupling | 1.775668 |
+| Citric acid cycle (TCA cycle) | 1.772693 |
+| Nuclear Receptor transcription pathway | 1.759821 |
+| FOXO-mediated transcription of oxidative stress, metabolic and neuronal genes | 1.731914 |
+| GABA receptor activation | 1.727551 |
+| Striated Muscle Contraction | 1.712729 |
+| Transcriptional activation of mitochondrial biogenesis | 1.683622 |
+| FOXO-mediated transcription | 1.682785 |
+| Collagen chain trimerization | 1.670550 |
+| Metabolism of nitric oxide: NOS3 activation and regulation | 1.669765 |
+| Gluconeogenesis | 1.665098 |
+| Opioid Signalling | 1.652053 |
+| Sensory Perception | 1.651697 |
+| Collagen biosynthesis and modifying enzymes | 1.622587 |
+| Neuronal System | 1.596390 |
+| Cardiac conduction | 1.584142 |
+| Organelle biogenesis and maintenance | 1.496958 |
+| Hemostasis | 1.421507 |
+
+
+
+Overall, these pathways collectively impact:
+
+- Cellular energy production and metabolism.
+- Cell signaling and regulatory mechanisms.
+- Blood clotting and cardiovascular health.
+- Muscle function and movement.
+- Structural maintenance and tissue integrity.
+- Protein synthesis, modification, and degradation.
+- Growth, development, and response to environmental stimuli.
+
+
+
+If one starts from a list of genes pre-selected by p-value (*p < 0.05*), and runs GSEA against a genome wide annotation for human (org.Hs.eg.db), the overall result is the same, with immune-related pathways downregulated and energy production upregulated.
+
+
+
+| Description | NES |
+| --- | --- |
+| aerobic respiration |  3.157926 |
+| oxidative phosphorylation |  2.937657 |
+| proton motive force-driven mitochondrial ATP synthesis |  2.624725 |
+| dicarboxylic acid metabolic process |  2.361743 |
+| mitochondrial respiratory chain complex assembly |  2.300209 |
+| muscle system process |  2.252134 |
+| regulation of muscle system process |  2.094244 |
+| rhythmic process |  2.085570 |
+| nucleoside triphosphate biosynthetic process |  1.995967 |
+| ribonucleoside triphosphate biosynthetic process |  1.995967 |
+| amino acid catabolic process |  1.936152 |
+| nucleoside triphosphate metabolic process |  1.881641 |
+| ribonucleoside triphosphate metabolic process |  1.881641 |
+| ATP metabolic process |  1.810749 |
+| small molecule catabolic process |  1.722197 |
+| purine-containing compound metabolic process |  1.656750 |
+| cellular response to oxygen-containing compound |  1.647138 |
+| small molecule metabolic process |  1.549061 |
+| multicellular organismal process | -1.425700 |
+| cell communication | -1.510842 |
+| signaling | -1.521286 |
+| positive regulation of biological process | -1.575174 |
+| negative regulation of macromolecule biosynthetic process | -1.634718 |
+| negative regulation of biosynthetic process | -1.663773 |
+| negative regulation of cellular biosynthetic process | -1.663773 |
+| import into cell | -1.684992 |
+| lymphocyte apoptotic process | -1.774158 |
+| regulation of leukocyte mediated cytotoxicity | -1.787597 |
+| positive regulation of cell migration | -1.792857 |
+| positive regulation of locomotion | -1.792857 |
+| positive regulation of cell motility | -1.792857 |
+| locomotion | -1.801708 |
+| positive regulation of cell development | -1.812092 |
+| regulation of protein phosphorylation | -1.822433 |
+| negative regulation of T cell activation | -1.848189 |
+| collagen metabolic process | -1.854287 |
+| leukocyte homeostasis | -1.856544 |
+| response to cytokine | -1.858390 |
+| regulation of cell killing | -1.860695 |
+| regulated exocytosis | -1.866868 |
+| positive regulation of catalytic activity | -1.872830 |
+| regulation of chemotaxis | -1.875409 |
+| negative regulation of protein transport | -1.894241 |
+| negative regulation of establishment of protein localization | -1.894241 |
+| peptidyl-tyrosine modification | -1.894578 |
+| import across plasma membrane | -1.895777 |
+| regulation of leukocyte migration | -1.897036 |
+| response to external stimulus | -1.933134 |
+| positive regulation of phosphorylation | -1.949875 |
+| phagocytosis, engulfment | -1.953162 |
+| membrane invagination | -2.007528 |
+| plasma membrane invagination | -2.007528 |
+| regulation of binding | -2.009462 |
+| leukocyte mediated cytotoxicity | -2.029608 |
+| epithelial to mesenchymal transition | -2.038571 |
+| cytokine-mediated signaling pathway | -2.057145 |
+| steroid biosynthetic process | -2.079742 |
+| skeletal system development | -2.103461 |
+| production of molecular mediator of immune response | -2.113634 |
+| regulation of production of molecular mediator of immune response | -2.113634 |
+| T cell mediated immunity | -2.115681 |
+| positive regulation of response to stimulus | -2.123837 |
+| positive regulation of multicellular organismal process | -2.132066 |
+| regulation of ERK1 and ERK2 cascade | -2.137176 |
+| regulation of innate immune response | -2.137273 |
+| cell killing | -2.172378 |
+| leukocyte activation involved in immune response | -2.183926 |
+| biological process involved in interspecies interaction between organisms | -2.186225 |
+| regulation of lymphocyte differentiation | -2.199522 |
+| phagocytosis | -2.208789 |
+| regulation of defense response | -2.223763 |
+| chemotaxis | -2.247164 |
+| taxis | -2.247164 |
+| response to biotic stimulus | -2.281739 |
+| leukocyte migration | -2.302119 |
+| cell chemotaxis | -2.305048 |
+| positive regulation of T cell activation | -2.309675 |
+| regulation of cell adhesion | -2.366362 |
+| leukocyte cell-cell adhesion | -2.372385 |
+| cytokine production | -2.409554 |
+| regulation of cytokine production | -2.409554 |
+| regulation of mononuclear cell proliferation | -2.450445 |
+| defense response to other organism | -2.457111 |
+| lymphocyte proliferation | -2.480956 |
+| mononuclear cell differentiation | -2.565588 |
+| leukocyte proliferation | -2.596309 |
+| inflammatory response | -2.599778 |
+| immune system process | -2.732992 |
+| cell activation | -2.764861 |
+| lymphocyte activation | -2.795845 |
+| regulation of immune system process | -2.824275 |
+| positive regulation of immune system process | -2.826171 |
+| regulation of leukocyte activation | -2.841657 |
+| T cell activation | -2.872483 |
+| regulation of immune response | -2.915157 |
+| leukocyte activation | -2.962128 |
+| immune response | -3.085458 |
 
 ### EOMES
-
-
-
-
-
-
-
-
 
 
 

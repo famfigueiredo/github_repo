@@ -303,6 +303,7 @@ done
 
 # there was an issue with STAR, where some files were missing, so I re-ran the bbduk trimming step. probably ran out of server space.
 
+
 # 21/05/2024
 rename 's/_Aligned.sortedByCoord.out/_sorted/' *.bam
 
