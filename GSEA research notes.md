@@ -301,7 +301,15 @@ The only *Reactome* pathway is 'Neuronal System'.
 
 ## 4WPC
 
+
+
 ### DNA vaccine
+
+
+
+![dnavaccine_4wpc](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc/gsea_definitive_plots/dnavaccine_4wpc.png)
+
+
 
 Running GSEA with the whole gene list, without pre-selecting by p-value, yields the following downregulated pathways on *ReactomePA*.
 
@@ -406,9 +414,7 @@ Overall, these pathways collectively impact:
 
 
 
-If one starts from a list of genes pre-selected by p-value (*p < 0.05*), and runs GSEA against a genome wide annotation for human (org.Hs.eg.db), the overall result is the same, with immune-related pathways downregulated and energy production upregulated.
-
-
+If one starts from a list of genes pre-selected by p-value (*p < 0.05*), and runs GSEA against a genome wide annotation for human (not ReactomePA, org.Hs.eg.db), the overall result is the same, with immune-related pathways downregulated and energy production upregulated.
 
 | Description | NES |
 | --- | --- |
@@ -510,8 +516,204 @@ If one starts from a list of genes pre-selected by p-value (*p < 0.05*), and run
 | leukocyte activation | -2.962128 |
 | immune response | -3.085458 |
 
+
+
+
+
 ### EOMES
 
+| Description | NES | setSize | Count |
+| --- | --- | --- | --- |
+| Aerobic respiration and respiratory electron transport |  1.949627 | 164 | 106 |
+| Respiratory electron transport, ATP synthesis by chemiosmotic coupling, and heat production by uncoupling proteins. |  1.895979 |  98 |  68 |
+| Formation of definitive endoderm |  1.894218 |  10 |   4 |
+| Respiratory electron transport |  1.884847 |  83 |  57 |
+| Complex I biogenesis |  1.784491 |  44 |  32 |
+| Mitochondrial biogenesis |  1.754441 |  79 |  41 |
+| Muscle contraction |  1.745952 | 117 |  60 |
+| NCAM1 interactions |  1.719882 |  16 |   7 |
+| Adaptive Immune System | -1.363424 | 491 | 125 |
+| Cell Cycle | -1.394166 | 496 | 155 |
+| Cytokine Signaling in Immune system | -1.425435 | 424 | 143 |
+| Neutrophil degranulation | -1.470707 | 298 |  84 |
+| Cell Cycle Checkpoints | -1.518823 | 211 | 107 |
+| Cholesterol biosynthesis | -1.777279 |  20 |   9 |
+| ABC transporter disorders | -1.902475 |  62 |  33 |
+| Antigen processing-Cross presentation | -1.915112 |  75 |  32 |
+| Diseases of Immune System | -1.920536 |  15 |   6 |
+| Diseases associated with the TLR signaling cascade | -1.920536 |  15 |   6 |
+| Inwardly rectifying K+ channels | -1.944344 |  14 |   4 |
+| Chromosome Maintenance | -1.961067 |  77 |  29 |
+| RHO GTPases Activate NADPH Oxidases | -1.973060 |  19 |   7 |
+| Regulation of Complement cascade | -2.085535 |  17 |   7 |
+| Interferon alpha/beta signaling | -2.096606 |  34 |  18 |
+| Potassium Channels | -2.124389 |  34 |   6 |
+
+
+
+#### Key regulated pathways
+
+##### Upregulated
+
+- Aerobic respiration and respiratory electron transport:
+  - This pathway is highly upregulated. It involves processes crucial for energy production via aerobic respiration, indicating an increase in metabolic activity.
+- Respiratory electron transport, ATP synthesis by chemiosmotic coupling, and heat production by uncoupling proteins
+  - This pathway is also significantly upregulated. It points to active ATP synthesis and possible thermogenesis through uncoupling proteins, suggesting heightened mitochondrial activity.
+- Respiratory electron transport
+  - Similar to the first pathway, this one focuses on electron transport, further emphasizing the increased mitochondrial function and energy production.
+- Complex I biogenesis
+  - Upregulation of this pathway indicates an increase in the formation of *Complex I* of the mitochondrial electron transport chain, supporting enhanced respiration and ATP production.
+- Mitochondrial biogenesis
+  - Increased biogenesis of mitochondria, which correlates with the upregulation of respiratory pathways and overall cellular energy production.
+
+
+
+##### Downregulated
+
+- Adaptive immune system
+  - Downregulation suggests a suppressed adaptive immune response, potentially indicating an immune evasion mechanism or reduced immune activity.
+- Cell cycle
+  - Suggests a reduction in cell proliferation activities, possibly indicating a shift from cell division to other cellular activities.
+- Cytokine signaling in immune system
+  - Downregulation here indicates reduced cytoking-mediated signaling, which could be part of broader suppression of immune responses.
+- Neutrophil degranulation
+  - Indicative of reduced neutrophil activity, which play a key role in innate immunity.
+- Antigen processing-cross presentation
+  - Reduced antigen presentation capability, further suggesting immune suppression.
+
+- Diseases of Immune System and Diseases associated with the TLR signaling cascade
+- RHO GTPases activate NADPH oxidases
+  - Reduced activity in oxidative stress responses mediated by RHO GTPases.
+
+- Regulation of Complement cascade
+  - Deregulation of complement regulation could impair immune complex clearance and inflammatory response.
+
+- Interferon alpha/beta signaling
+  - Reduced interferon signaling, affecting antiviral responses and immune modulation.
+
+
+
+
+### Overall Interpretation
+
+- **Upregulation**: The upregulated pathways largely involve mitochondrial activity, energy production, and muscle contraction. This suggests a state of increased metabolic activity and energy demand.
+- **Downregulation**: The downregulated pathways are predominantly associated with immune responses, cell cycle processes, and certain biosynthetic pathways like cholesterol synthesis. This indicates a suppression of immune activity and cell proliferation, possibly in favor of energy conservation or other cellular priorities.
+
+These changes might reflect a specific physiological or pathological state where the organism is prioritizing energy production and mitochondrial function over immune responses and cell division. This could be relevant in contexts such as metabolic adaptation, stress responses, or certain disease states.
+
+
+
+
+
+### GATA3
+
+
+
+| Description | NES | setSize | Count |
+| --- | --- | --- | --- |
+| Aerobic respiration and respiratory electron transport |  2.204298 | 164 | 104 |
+| Respiratory electron transport, ATP synthesis by chemiosmotic coupling, and heat production by uncoupling proteins. |  2.082230 |  98 |  77 |
+| Collagen chain trimerization |  2.024129 |  18 |   5 |
+| Respiratory electron transport |  2.002613 |  83 |  65 |
+| Collagen biosynthesis and modifying enzymes |  1.906599 |  35 |   6 |
+| Formation of definitive endoderm |  1.899582 |  10 |   1 |
+| Muscle contraction |  1.857070 | 115 |  39 |
+| Complex I biogenesis |  1.837222 |  44 |  36 |
+| Mitochondrial biogenesis |  1.795692 |  79 |  37 |
+| Pyruvate metabolism |  1.793286 |  40 |  19 |
+| Regulation of pyruvate metabolism |  1.775754 |  29 |  12 |
+| Cristae formation |  1.757520 |  24 |  18 |
+| Eukaryotic Translation Elongation |  1.738635 |  73 |  53 |
+| Estrogen-dependent nuclear events downstream of ESR-membrane signaling |  1.738402 |  17 |  11 |
+| Citric acid cycle (TCA cycle) |  1.737412 |  30 |  17 |
+| Peptide chain elongation |  1.730130 |  71 |  52 |
+| Formation of ATP by chemiosmotic coupling |  1.729062 |  12 |  10 |
+| Mitochondrial protein degradation |  1.712164 |  80 |  49 |
+| FOXO-mediated transcription of oxidative stress, metabolic and neuronal genes |  1.710878 |  17 |   9 |
+| Striated Muscle Contraction |  1.701422 |  25 |   9 |
+| FOXO-mediated transcription |  1.697493 |  46 |  21 |
+| TP53 Regulates Transcription of Cell Death Genes |  1.663520 |  27 |   6 |
+| Formation of a pool of free 40S subunits |  1.651648 |  83 |  56 |
+| Nonsense Mediated Decay (NMD) independent of the Exon Junction Complex (EJC) |  1.648478 |  75 |  52 |
+| Aberrant regulation of mitotic cell cycle due to RB1 defects |  1.647869 |  30 |  15 |
+| Viral mRNA Translation |  1.634192 |  70 |  50 |
+| Platelet Adhesion to exposed collagen |  1.631415 |  10 |   4 |
+| Nonsense-Mediated Decay (NMD) |  1.617930 |  92 |  60 |
+| Nonsense Mediated Decay (NMD) enhanced by the Exon Junction Complex (EJC) |  1.617930 |  92 |  60 |
+| Eukaryotic Translation Initiation |  1.597933 |  98 |  61 |
+| Cap-dependent Translation Initiation |  1.597933 |  98 |  61 |
+| L13a-mediated translational silencing of Ceruloplasmin expression |  1.577314 |  91 |  58 |
+| GTP hydrolysis and joining of the 60S ribosomal subunit |  1.565948 |  92 |  58 |
+| Cardiac conduction |  1.557649 |  65 |  24 |
+| SRP-dependent cotranslational protein targeting to membrane |  1.556804 |  89 |  55 |
+| Selenocysteine synthesis |  1.554998 |  75 |  54 |
+| Eukaryotic Translation Termination |  1.527636 |  74 |  52 |
+| Organelle biogenesis and maintenance |  1.518678 | 218 |  61 |
+| Factors involved in megakaryocyte development and platelet production |  1.497255 | 102 |  20 |
+| Adaptive Immune System | -1.272833 | 486 |  96 |
+| GPCR downstream signalling | -1.338223 | 244 |  44 |
+| Hemostasis | -1.343668 | 375 |  75 |
+| Signaling by GPCR | -1.375192 | 271 |  47 |
+| Signaling by Interleukins | -1.383535 | 264 |  84 |
+| Metabolism of steroids | -1.431832 |  95 |  26 |
+| Interferon Signaling | -1.444722 | 147 |  41 |
+| Signaling by the B Cell Receptor (BCR) | -1.469307 |  92 |  34 |
+| SARS-CoV-2 activates/modulates innate and adaptive immune responses | -1.469872 |  74 |  18 |
+| Cytokine Signaling in Immune system | -1.474240 | 417 | 120 |
+| G alpha (q) signalling events | -1.511764 |  89 |  16 |
+| Interleukin-1 family signaling | -1.515449 | 104 |  34 |
+| Neutrophil degranulation | -1.522535 | 296 |  83 |
+| Disorders of transmembrane transporters | -1.565124 | 120 |  35 |
+| Plasma lipoprotein assembly, remodeling, and clearance | -1.577641 |  43 |  12 |
+| TCR signaling | -1.592106 |  83 |  31 |
+| Toll Like Receptor 4 (TLR4) Cascade | -1.601942 |  93 |  22 |
+| GPCR ligand binding | -1.628377 | 112 |  26 |
+| ABC transporter disorders | -1.679921 |  62 |  21 |
+| Toll-like Receptor Cascades | -1.706463 | 109 |  27 |
+| Class A/1 (Rhodopsin-like receptors) | -1.706959 |  80 |  21 |
+| tRNA Aminoacylation | -1.714003 |  40 |  14 |
+| ER-Phagosome pathway | -1.738654 |  63 |  24 |
+| Post-translational protein phosphorylation | -1.754338 |  61 |  18 |
+| Signaling by FGFR1 in disease | -1.762609 |  24 |  15 |
+| Plasma lipoprotein remodeling | -1.773702 |  18 |   6 |
+| Binding and Uptake of Ligands by Scavenger Receptors | -1.788881 |  24 |   6 |
+| Regulation of Insulin-like Growth Factor (IGF) transport and uptake by Insulin-like Growth Factor Binding Proteins (IGFBPs) | -1.794771 |  69 |  23 |
+| Antigen activates B Cell Receptor (BCR) leading to generation of second messengers | -1.820756 |  26 |  13 |
+| FCERI mediated MAPK activation | -1.833991 |  25 |  11 |
+| Platelet activation, signaling and aggregation | -1.844287 | 179 |  39 |
+| Scavenging by Class A Receptors | -1.849698 |  13 |   3 |
+| Signaling by CSF1 (M-CSF) in myeloid cells | -1.864712 |  26 |  13 |
+| Response to elevated platelet cytosolic Ca2+ | -1.989799 |  90 |  23 |
+| Cytosolic tRNA aminoacylation | -2.003514 |  23 |  12 |
+| Antigen processing-Cross presentation | -2.005494 |  75 |  33 |
+| Platelet degranulation | -2.005702 |  86 |  22 |
+| GPVI-mediated activation cascade | -2.009896 |  26 |  11 |
+| ROS and RNS production in phagocytes | -2.063678 |  22 |  11 |
+| Peptide ligand-binding receptors | -2.074588 |  39 |  11 |
+| RHO GTPases Activate NADPH Oxidases | -2.092266 |  19 |   8 |
+| Diseases of Immune System | -2.198914 |  14 |   8 |
+| Diseases associated with the TLR signaling cascade | -2.198914 |  14 |   8 |
+| Complement cascade | -2.263055 |  20 |  10 |
+| Regulation of Complement cascade | -2.307570 |  16 |   7 |
+| Interferon alpha/beta signaling | -2.342834 |  33 |  17 |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Interpretation of GSEA Results
 
 
 
@@ -519,9 +721,6 @@ From ChatGPT when prompted to explain a negative *Normalised Enrichment Score* (
 
 *In summary, a negative NES in GSEA indicates that the gene set is  significantly downregulated in the condition of interest compared to the control, reflecting a negative correlation with the phenotype being  studied. This information can provide valuable insights into the  biological processes that are less active or suppressed in the  experimental condition.*
 
-
-
-### Interpretation of GSEA Results:
 
 - **Positive NES:**
   - Indicates that the gene set is enriched at the top of the ranked list, suggesting that genes in the set are upregulated in the condition of interest.
