@@ -758,4 +758,247 @@ entrez_genes <-
 
 
 
-## Testing different annotation files
+
+
+## IV-HD ----
+
+### all genes ###
+# gsea formatting starting from a DESeq results table
+gsea_formatting(res_ivhd_vs_conu_4wpc, 'ivhd', '4wpc')
+
+nrow(gsea_results_ivhd_4wpc)  # 1129 GO terms/pathways
+
+gsea_simplified_results_ivhd_4wpc <- simplify(gsea_results_ivhd_4wpc)  # simplify output from enrichGO and gseGO by removing redundancy of enriched GO terms
+
+nrow(gsea_simplified_results_ivhd_4wpc)  # 369 GO terms/pathways
+
+as_tibble(gsea_simplified_results_ivhd_4wpc) %>% arrange(NES) %>% print(n = 100)
+
+# Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES 
+top10_high_nes <- 
+  as_tibble(gsea_simplified_results_ivhd_4wpc) %>%
+  filter(NES > 0) %>% 
+  arrange(desc(setSize)) %>% 
+  top_n(10, wt = NES) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+
+bottom10_low_nes <- 
+  as_tibble(gsea_simplified_results_ivhd_4wpc) %>%
+  filter(NES < 0) %>% 
+  arrange(desc(setSize)) %>% 
+  top_n(10, wt = setSize) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+
+low_high_nes_ivhd_4wpc <- bind_rows(top10_high_nes, bottom10_low_nes)
+
+low_high_nes_ivhd_4wpc %>%
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
+  mutate(Description = fct_reorder(Description, Count)) %>%
+  ggplot(aes(Count, Description)) +
+  geom_point(aes(size = setSize), shape = 1, stroke = 0.2, color = 'red') +
+  geom_point(aes(color = Count, size = Count), shape = 16) +
+  scale_color_viridis_c('Gene count', guide = 'colourbar', limits = c(2, 300)) +
+  scale_size_continuous('Set size', range = c(2, 10), guide = 'legend', limits = c(2, max(low_high_nes_ivhd_4wpc$setSize))) +
+  scale_x_continuous(limits = c(0, max(low_high_nes_ivhd_4wpc$Count * 1.1))) +
+  scale_y_discrete() +
+  xlab('Gene count') +
+  ylab(NULL) +  
+  ggtitle('GSEA, downregulated vs upregulated genes',
+          subtitle = 'IV-HD, 4WPC, heart, human orths') +
+  theme_bw(base_size = 14) +
+  theme(
+    text = element_text(family = 'Times New Roman'),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    legend.key.size = unit(1, 'cm'),
+    legend.position = 'right',
+    legend.key.height = unit(1, 'cm'),
+    strip.text = element_text(size = 24),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5),
+    panel.grid.minor = element_blank(),
+    panel.grid = element_line(color = 'black', linewidth = .05, linetype = 2)
+  ) + guides(
+    color = guide_legend(override.aes = list(size = 5)),  # increase point size in gene count legend
+    size = guide_legend(override.aes = list(shape =1, fill = NA, stroke = .5, color = 'red'))  # show only borders in set size legend
+  ) +
+  facet_grid(. ~ Regulation)
+
+
+y_ivhd <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes the duplicates from this object
+                      pvalueCutoff = .2,
+                      pAdjustMethod = 'BH',
+                      verbose = F)
+
+as_tibble(y_ivhd) %>% arrange(NES) %>% print(n = 100)
+
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
+
+ivhd_pathways <- as_tibble(y_ivhd) %>% 
+  arrange(-NES) %>%   
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
+  dplyr::select(., Description, NES, setSize, Count) 
+
+write_tsv(ivhd_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc/pathways/ivhd_pathways.tsv')
+
+# Convert to a Markdown table ----
+# Read the TSV file
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc/pathways/ivhd_pathways.tsv', header = TRUE, sep = "\t")
+
+markdown_table <- function(data) {
+  # Get the header
+  header <- paste("|", paste(names(data), collapse = " | "), "|")
+  
+  # Get the separator line
+  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
+  
+  # Get the table rows
+  rows <- apply(data, 1, function(row) {
+    paste("|", paste(row, collapse = " | "), "|")
+  })
+  
+  # Combine header, separator, and rows
+  c(header, separator, rows)
+}
+
+# Print the Markdown table
+cat(markdown_table(data), sep = "\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## IV-LD ----
+
+### all genes ###
+# gsea formatting starting from a DESeq results table
+gsea_formatting(res_ivld_vs_conu_4wpc, 'ivld', '4wpc')
+
+nrow(gsea_results_ivld_4wpc)  # 1622 GO terms/pathways
+
+gsea_simplified_results_ivld_4wpc <- simplify(gsea_results_ivld_4wpc)  # simplify output from enrichGO and gseGO by removing redundancy of enriched GO terms
+
+nrow(gsea_simplified_results_ivld_4wpc)  # 437 GO terms/pathways
+
+as_tibble(gsea_simplified_results_ivld_4wpc) %>% arrange(NES) %>% print(n = 100)
+
+# Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES 
+top10_high_nes <- 
+  as_tibble(gsea_simplified_results_ivld_4wpc) %>%
+  filter(NES > 0) %>% 
+  arrange(desc(setSize)) %>% 
+  top_n(10, wt = NES) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+
+bottom10_low_nes <- 
+  as_tibble(gsea_simplified_results_ivld_4wpc) %>%
+  filter(NES < 0) %>% 
+  arrange(desc(setSize)) %>% 
+  top_n(10, wt = setSize) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+
+low_high_nes_ivld_4wpc <- bind_rows(top10_high_nes, bottom10_low_nes)
+
+low_high_nes_ivld_4wpc %>%
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
+  mutate(Description = fct_reorder(Description, Count)) %>%
+  ggplot(aes(Count, Description)) +
+  geom_point(aes(size = setSize), shape = 1, stroke = 0.2, color = 'red') +
+  geom_point(aes(color = Count, size = Count), shape = 16) +
+  scale_color_viridis_c('Gene count', guide = 'colourbar', limits = c(2, 300)) +
+  scale_size_continuous('Set size', range = c(2, 10), guide = 'legend', limits = c(2, max(low_high_nes_ivld_4wpc$setSize))) +
+  scale_x_continuous(limits = c(0, max(low_high_nes_ivld_4wpc$Count * 1.1))) +
+  scale_y_discrete() +
+  xlab('Gene count') +
+  ylab(NULL) +  
+  ggtitle('GSEA, downregulated vs upregulated genes',
+          subtitle = 'IV-LD, 4WPC, heart, human orths') +
+  theme_bw(base_size = 14) +
+  theme(
+    text = element_text(family = 'Times New Roman'),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    legend.key.size = unit(1, 'cm'),
+    legend.position = 'right',
+    legend.key.height = unit(1, 'cm'),
+    strip.text = element_text(size = 24),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5),
+    panel.grid.minor = element_blank(),
+    panel.grid = element_line(color = 'black', linewidth = .05, linetype = 2)
+  ) + guides(
+    color = guide_legend(override.aes = list(size = 5)),  # increase point size in gene count legend
+    size = guide_legend(override.aes = list(shape =1, fill = NA, stroke = .5, color = 'red'))  # show only borders in set size legend
+  ) +
+  facet_grid(. ~ Regulation)
+
+
+y_ivld <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes the duplicates from this object
+                     pvalueCutoff = .2,
+                     pAdjustMethod = 'BH',
+                     verbose = T)
+
+as_tibble(y_ivld) %>% arrange(NES) %>% print(n = 100)
+
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
+
+ivld_pathways <- as_tibble(y_ivld) %>% 
+  arrange(NES) %>%   
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
+  dplyr::select(., Description, NES, setSize, Count) 
+
+write_tsv(ivld_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc/pathways/ivld_pathways.tsv')
+
+# Convert to a Markdown table ----
+# Read the TSV file
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc/pathways/ivld_pathways.tsv', header = TRUE, sep = "\t")
+
+markdown_table <- function(data) {
+  # Get the header
+  header <- paste("|", paste(names(data), collapse = " | "), "|")
+  
+  # Get the separator line
+  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
+  
+  # Get the table rows
+  rows <- apply(data, 1, function(row) {
+    paste("|", paste(row, collapse = " | "), "|")
+  })
+  
+  # Combine header, separator, and rows
+  c(header, separator, rows)
+}
+
+# Print the Markdown table
+cat(markdown_table(data), sep = "\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
