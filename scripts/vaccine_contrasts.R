@@ -1,4 +1,4 @@
-rm(list = setdiff(ls(), lsf.str()))  # remove everything from Global except functions\
+rm(list = setdiff(ls(), lsf.str()))  # remove everything from Global except functions
 
 # Loading packages ----
 library('DESeq2')
@@ -8,10 +8,10 @@ library('clusterProfiler')
 library('gprofiler2')
 library('org.Hs.eg.db')
 library('BiocParallel')
-MulticoreParam(10) # setting number of available cores for 'parallel'
+MulticoreParam(8) # setting number of available cores for 'parallel'
 
-
-# Loading data ----
+# HEART ----
+## Loading data ----
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsGroup_ensembl.RData')
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable_group_ensembl.Rda')
 
@@ -24,7 +24,7 @@ results(ddsGroup_ensembl)
 rm(list = setdiff(ls(), lsf.str()))  # remove everything from Global except functions. It uses setdiff to find the subset of objects in the global environment
 # (as returned by ls()) that don't have mode function (as returned by lsf.str())
 
-# 1wpc vs 10wpi within treatment ----
+### 1wpc vs 10wpi within treatment ----
 results_names <- resultsNames(ddsGroup_ensembl)
 design <- model.matrix( ~ group, sampleTable_group_ensembl)
 
@@ -82,7 +82,7 @@ for (i in 1:length(obj)) {
 }
 ##
 
-# 4wpc vs 10wpi within treatment ----
+### 4wpc vs 10wpi within treatment ----
 results_names <- resultsNames(ddsGroup_ensembl)
 design <- model.matrix( ~ group, sampleTable_group_ensembl)
 
@@ -137,7 +137,7 @@ for (i in 1:length(obj)) {
        file = paste(obj[i], ".RData", sep = ""))
 }
 
-# 6wpc vs 10wpi within treatment ----
+### 6wpc vs 10wpi within treatment ----
 
 results_names <- resultsNames(ddsGroup_ensembl)
 design <- model.matrix( ~ group, sampleTable_group_ensembl)
@@ -195,7 +195,7 @@ for (i in 1:length(obj)) {
 }
 
 
-# 10wpc vs 10wpi within treatment ----
+### 10wpc vs 10wpi within treatment ----
 
 results_names <- resultsNames(ddsGroup_ensembl)
 design <- model.matrix( ~ group, sampleTable_group_ensembl)
@@ -236,11 +236,11 @@ for (i in 1:length(obj)) {
 # Create a timeline of virus response through the sampling points, for all vaccine groups + controls
 # Compare relevant vaccine groups within sampling point. Use IVLD as a sort of within sampling point control?
 
-# Treatment contrasts within sampling points - 1wpc ----
+## Treatment contrasts within sampling points - 1wpc ----
 results_names <- resultsNames(ddsGroup_ensembl)
 design <- model.matrix( ~ group, sampleTable_group_ensembl)
 
-## Using CONU as the reference ----
+### Using CONU as the reference ----
 ### IVLD
 res_ivld_vs_conu_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivld.1wpc', 'conu.1wpc'), parallel = T)
 
@@ -267,7 +267,7 @@ for (i in 1:length(obj)) {
        file = paste(obj[i], ".RData", sep = ""))
 }
 
-## Using pTagRFP as the reference ----
+### Using pTagRFP as the reference ----
 ### IVLD
 res_ivld_vs_ptag_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivld.1wpc', 'ptagrfp.1wpc'), parallel = T)
   
@@ -284,7 +284,7 @@ res_eomes_vs_ptag_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'eomes
 res_dnavaccine_vs_ptag_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'dnavaccine.1wpc', 'ptagrfp.1wpc'), parallel = T)
 
 
-## Using IV-LD as the reference ----
+### Using IV-LD as the reference ----
 ### IVHD
 res_ivhd_vs_ivld_1wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivhd.1wpc', 'ivld.1wpc'), parallel = T)
 
@@ -310,10 +310,10 @@ for (i in 1:length(obj)) {
 }
 
 
-# Treatment contrasts within sampling points - 4wpc ----
+## Treatment contrasts within sampling points - 4wpc ----
 results_names <- resultsNames(ddsGroup_ensembl)
 
-## Using CONU as the reference ----
+### Using CONU as the reference ----
 ### IVLD
 res_ivld_vs_conu_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivld.4wpc', 'conu.4wpc'), parallel = T)
 
@@ -340,7 +340,7 @@ for (i in 1:length(obj)) {
        file = paste(obj[i], ".RData", sep = ""))
 }
 
-## Using pTagRFP as the reference ----
+### Using pTagRFP as the reference ----
 ### IVLD
 res_ivld_vs_ptag_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivld.4wpc', 'ptagrfp.4wpc'), parallel = T)
 
@@ -356,7 +356,7 @@ res_eomes_vs_ptag_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'eomes
 ### DNA vaccine
 res_dnavaccine_vs_ptag_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'dnavaccine.4wpc', 'ptagrfp.4wpc'), parallel = T)
 
-## Using IV-LD as the reference ----
+### Using IV-LD as the reference ----
 ### IVHD
 res_ivhd_vs_ivld_4wpc <- results(ddsGroup_ensembl, contrast = c('group', 'ivhd.4wpc', 'ivld.4wpc'), parallel = T)
 
@@ -381,10 +381,10 @@ for (i in 1:length(obj)) {
 }
 
 
-# Treatment contrasts within sampling points - 10wpc ----
+## Treatment contrasts within sampling points - 10wpc ----
 results_names <- resultsNames(ddsGroup_ensembl)
 
-## Using CONU as the reference ----
+### Using CONU as the reference ----
 
 ## IVLD
 res_ivld_vs_conu_10wpc <- results(ddsGroup_ensembl, contrast=c("group","ivld.10wpc","conu.10wpc"), parallel = T)
@@ -413,7 +413,7 @@ for (i in 1:length(obj)) {
        file = paste(obj[i], ".RData", sep = ""))
 }
 
-## Using pTagRFP as the reference ----
+### Using pTagRFP as the reference ----
 ## IVLD
 res_ivld_vs_ptagrfp_10wpc <- results(ddsGroup_ensembl, contrast=c("group","ivld.10wpc","ptagrfp.10wpc"), parallel = T)
 
@@ -429,7 +429,7 @@ res_eomes_vs_ptagrfp_10wpc <- results(ddsGroup_ensembl, contrast=c("group","eome
 ### DNA vaccine
 res_dnavaccine_vs_ptagrfp_10wpc <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.10wpc","ptagrfp.10wpc"), parallel = T)
 
-## Using IV-LD as the reference ----
+### Using IV-LD as the reference ----
 ## IVHD
 res_ivhd_vs_ivld_10wpc <- results(ddsGroup_ensembl, contrast=c("group","ivhd.10wpc","ivld.10wpc"), parallel = T)
 
@@ -453,9 +453,9 @@ for (i in 1:length(obj)) {
        file = paste(obj[i], ".RData", sep = ""))
 }
 
-# Treatment contrasts within sampling points - 10wpi ----
+## Treatment contrasts within sampling points - 10wpi ----
 
-## Using CONU as the reference ----
+### Using CONU as the reference ----
 
 ## IVLD
 res_ivld_vs_conu_10wpi <- results(ddsGroup_ensembl, contrast=c("group","ivld.10wpi","conu.10wpi"), parallel = T)
@@ -484,7 +484,7 @@ for (i in 1:length(obj)) {
        file = paste(obj[i], ".RData", sep = ""))
 }
 
-## Using pTagRFP as the reference ----
+### Using pTagRFP as the reference ----
 ## IVLD
 res_ivld_vs_ptagrfp_10wpi <- results(ddsGroup_ensembl, contrast=c("group","ivld.10wpi","ptagrfp.10wpi"), parallel = T)
 
@@ -500,7 +500,7 @@ res_eomes_vs_ptagrfp_10wpi <- results(ddsGroup_ensembl, contrast=c("group","eome
 ### DNA vaccine
 res_dnavaccine_vs_ptagrfp_10wpi <- results(ddsGroup_ensembl, contrast=c("group","dnavaccine.10wpi","ptagrfp.10wpi"), parallel = T)
 
-## Using IV-LD as the reference ----
+### Using IV-LD as the reference ----
 ## IVHD
 res_ivhd_vs_ivld_10wpi <- results(ddsGroup_ensembl, contrast=c("group","ivhd.10wpi","ivld.10wpi"), parallel = T)
 
@@ -525,3 +525,47 @@ for (i in 1:length(obj)) {
 }
 
 
+
+
+# SPLEEN ----
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_grouped_spleen.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable_grouped_spleen.Rda')
+
+
+summary(sampleTable_grouped_spleen)
+
+results_names <- resultsNames(ddsDGE_grouped_spleen)
+
+rm(list = setdiff(ls(), lsf.str()))  # remove everything from Global except functions. It uses setdiff to find the subset of objects in the global environment
+# (as returned by ls()) that don't have mode function (as returned by lsf.str())
+## Treatment contrasts within sampling points - 10wpi ----
+
+### Using CONU as the reference ----
+
+## IVLD
+spleen_res_ivld_vs_conu_10wpi <- results(ddsDGE_grouped_spleen, contrast=c("group","ivld.10wpi","conu.10wpi"), parallel = T)
+
+## IVHD
+spleen_res_ivhd_vs_conu_10wpi <- results(ddsDGE_grouped_spleen, contrast=c("group","ivhd.10wpi","conu.10wpi"), parallel = T)
+
+### GATA3 
+spleen_res_gata3_vs_conu_10wpi <- results(ddsDGE_grouped_spleen, contrast=c("group","gata3.10wpi","conu.10wpi"), parallel = T)
+
+### EOMES
+spleen_res_eomes_vs_conu_10wpi <- results(ddsDGE_grouped_spleen, contrast=c("group","eomes.10wpi","conu.10wpi"), parallel = T)
+
+### DNA vaccine
+spleen_res_dnavaccine_vs_conu_10wpi <- results(ddsDGE_grouped_spleen, contrast=c("group","dnavaccine.10wpi","conu.10wpi"), parallel = T)
+
+
+# Saving results files
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi'
+)
+
+obj <- ls(pattern = '^spleen_.*10wpi')
+for (i in 1:length(obj)) {
+  save(list = (obj[i]),
+       file = paste(obj[i], ".RData", sep = ""))
+}
