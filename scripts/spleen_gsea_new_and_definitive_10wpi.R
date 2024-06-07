@@ -42,7 +42,7 @@ top10_high_nes <-
   as_tibble(gsea_simplified_results_dnavaccine_10wpi) %>%
   filter(NES > 0) %>% 
   arrange(desc(setSize)) %>% 
-  top_n(20, wt = NES) %>% 
+  top_n(10, wt = NES) %>% 
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
@@ -436,14 +436,14 @@ y_ivhd <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes t
 
 as_tibble(y_ivhd) %>% arrange(NES) %>% print(n = 100)
 
-viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
+viewPathway('', readable = T, foldChange = entrez_gene_list)
 
-ivhd_pathways <- as_tibble(y_ivhd) %>% 
+spleen_ivhd_pathways <- as_tibble(y_ivhd) %>% 
   arrange(-NES) %>%   
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
   dplyr::select(., Description, NES, setSize, Count) 
 
-write_tsv(ivhd_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_10wpi/pathways/ivhd_pathways.tsv')
+write_tsv(spleen_ivhd_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_ivhd_pathways.tsv')
 
 # Convert to a Markdown table ----
 # Read the TSV file
@@ -469,33 +469,17 @@ markdown_table <- function(data) {
 cat(markdown_table(data), sep = "\n")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## IV-LD ----
 
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(res_ivld_vs_conu_10wpi, 'ivld', '10wpi')
+gsea_formatting(spleen_res_ivld_vs_conu_10wpi, 'ivld', '10wpi')
 
-nrow(gsea_results_ivld_10wpi)  # 1694 GO terms/pathways
+nrow(gsea_results_ivld_10wpi)  # 590 GO terms/pathways
 
 gsea_simplified_results_ivld_10wpi <- simplify(gsea_results_ivld_10wpi)  # simplify output from enrichGO and gseGO by removing redundancy of enriched GO terms
 
-nrow(gsea_simplified_results_ivld_10wpi)  # 433 GO terms/pathways
+nrow(gsea_simplified_results_ivld_10wpi)  # 246 GO terms/pathways
 
 as_tibble(gsea_simplified_results_ivld_10wpi) %>% arrange(NES) %>% print(n = 100)
 
@@ -522,14 +506,14 @@ low_high_nes_ivld_10wpi %>%
   ggplot(aes(Count, Description)) +
   geom_point(aes(size = setSize), shape = 1, stroke = 0.2, color = 'red') +
   geom_point(aes(color = Count, size = Count), shape = 16) +
-  scale_color_viridis_c('Gene count', guide = 'colourbar', limits = c(2, 400)) +
+  scale_color_viridis_c('Gene count', guide = 'colourbar', limits = c(2, max(low_high_nes_ivld_10wpi$setSize))) +
   scale_size_continuous('Set size', range = c(2, 10), guide = 'legend', limits = c(2, max(low_high_nes_ivld_10wpi$setSize))) +
   scale_x_continuous(limits = c(0, max(low_high_nes_ivld_10wpi$Count * 1.1))) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +  
   ggtitle('GSEA, downregulated vs upregulated genes',
-          subtitle = 'IV-LD, 10WPI, heart, human orths') +
+          subtitle = 'IV-LD, 10WPI, spleen, human orths') +
   theme_bw(base_size = 14) +
   theme(
     text = element_text(family = 'Times New Roman'),
@@ -557,18 +541,18 @@ y_ivld <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes t
 
 as_tibble(y_ivld) %>% arrange(NES) %>% print(n = 100)
 
-viewPathway('', readable = T, foldChange = entrez_gene_list)
+# viewPathway('', readable = T, foldChange = entrez_gene_list)
 
-ivld_pathways <- as_tibble(y_ivld) %>% 
+spleen_ivld_pathways <- as_tibble(y_ivld) %>% 
   arrange(NES) %>%   
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
   dplyr::select(., Description, NES, setSize, Count) 
 
-write_tsv(ivld_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_10wpi/pathways/ivld_pathways.tsv')
+write_tsv(spleen_ivld_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_ivld_pathways.tsv')
 
 # Convert to a Markdown table ----
 # Read the TSV file
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_10wpi/pathways/ivld_pathways.tsv', header = TRUE, sep = "\t")
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_ivld_pathways.tsv', header = TRUE, sep = "\t")
 
 markdown_table <- function(data) {
   # Get the header
