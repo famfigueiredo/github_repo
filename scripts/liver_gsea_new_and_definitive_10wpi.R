@@ -390,6 +390,7 @@ data <-
 cat(markdown_table(data), sep = "\n")
 
 
+
 ## IV-HD ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
@@ -522,6 +523,7 @@ markdown_table <- function(data) {
 
 # Print the Markdown table
 cat(markdown_table(data), sep = "\n")
+
 
 
 
