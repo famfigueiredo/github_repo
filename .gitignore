@@ -4,9 +4,9 @@
 .httr-oauth
 .DS_Store
 .quarto
-
 # Ignore folders containing "cache" in the name
 *cache*/
-
 # Ignore PNG files
 *.png
+Untitled.canvas
+.obsidian

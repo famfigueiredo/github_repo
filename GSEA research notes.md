@@ -14,7 +14,7 @@ Responses to external stimuli show up in the DNA vaccine, EOMES, and GATA3, but 
 
 ### DNA vaccine
 
-Running GSEA results through ReactomePA, I get a set of downregulated pathways for DNA vaccine:
+# Running GSEA results through ReactomePA, I get a set of downregulated pathways for DNA vaccine:
 
 | Description | NES |
 | --- | --- |
