@@ -532,15 +532,12 @@ for (i in 1:length(obj)) {
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_grouped_spleen.RData')
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable_grouped_spleen.Rda')
 
-
 summary(sampleTable_grouped_spleen)
-
-results_names <- resultsNames(ddsDGE_grouped_spleen)
+resultsNames(ddsDGE_grouped_spleen)
 
 rm(list = setdiff(ls(), lsf.str()))  # remove everything from Global except functions. It uses setdiff to find the subset of objects in the global environment
 # (as returned by ls()) that don't have mode function (as returned by lsf.str())
 ## Treatment contrasts within sampling points - 10wpi ----
-
 ### Using CONU as the reference ----
 
 ## IVLD
@@ -569,3 +566,199 @@ for (i in 1:length(obj)) {
   save(list = (obj[i]),
        file = paste(obj[i], ".RData", sep = ""))
 }
+
+
+
+
+
+
+
+## Treatment contrasts within sampling points - 4wpc ----
+### Using CONU as the reference ----
+### IVLD
+spleen_res_ivld_vs_conu_4wpc <- results(ddsDGE_grouped_spleen, contrast = c('group', 'ivld.4wpc', 'conu.4wpc'), parallel = T)
+
+### IVHD
+spleen_res_ivhd_vs_conu_4wpc <- results(ddsDGE_grouped_spleen, contrast = c('group', 'ivhd.4wpc', 'conu.4wpc'), parallel = T)
+
+### GATA3 
+spleen_res_gata3_vs_conu_4wpc <- results(ddsDGE_grouped_spleen, contrast = c('group', 'gata3.4wpc', 'conu.4wpc'), parallel = T)
+
+### EOMES
+spleen_res_eomes_vs_conu_4wpc <- results(ddsDGE_grouped_spleen, contrast = c('group', 'eomes.4wpc', 'conu.4wpc'), parallel = T)
+
+### DNA vaccine
+spleen_res_dnavaccine_vs_conu_4wpc <- results(ddsDGE_grouped_spleen, contrast = c('group', 'dnavaccine.4wpc', 'conu.4wpc'), parallel = T)
+
+# Saving results files
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc'
+)
+
+obj <- ls(pattern = '^spleen_.*4wpc')  # regex pattern matching files starting with spleen and containing 4wpc
+for (i in 1:length(obj)) {
+  save(list = (obj[i]),
+       file = paste(obj[i], ".RData", sep = ""))
+}
+
+
+# LIVER ----
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_grouped_liver.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable_grouped_liver.Rda')
+
+summary(sampleTable_grouped_liver)
+resultsNames(ddsDGE_grouped_liver)
+
+## Treatment contrasts within sampling points - 10wpi ----
+### Using CONU as the reference ----
+
+## IVLD
+liver_res_ivld_vs_conu_10wpi <- results(ddsDGE_grouped_liver, contrast=c("group","ivld.10wpi","conu.10wpi"), parallel = T)
+
+## IVHD
+liver_res_ivhd_vs_conu_10wpi <- results(ddsDGE_grouped_liver, contrast=c("group","ivhd.10wpi","conu.10wpi"), parallel = T)
+
+### GATA3 
+liver_res_gata3_vs_conu_10wpi <- results(ddsDGE_grouped_liver, contrast=c("group","gata3.10wpi","conu.10wpi"), parallel = T)
+
+### EOMES
+liver_res_eomes_vs_conu_10wpi <- results(ddsDGE_grouped_liver, contrast=c("group","eomes.10wpi","conu.10wpi"), parallel = T)
+
+### DNA vaccine
+liver_res_dnavaccine_vs_conu_10wpi <- results(ddsDGE_grouped_liver, contrast=c("group","dnavaccine.10wpi","conu.10wpi"), parallel = T)
+
+
+# Saving results files
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi'
+)
+
+obj <- ls(pattern = '^liver_.*10wpi')
+for (i in 1:length(obj)) {
+  save(list = (obj[i]),
+       file = paste(obj[i], ".RData", sep = ""))
+}
+
+
+## Treatment contrasts within sampling points - 4wpc ----
+### Using CONU as the reference ----
+### IVLD
+liver_res_ivld_vs_conu_4wpc <- results(ddsDGE_grouped_liver, contrast = c('group', 'ivld.4wpc', 'conu.4wpc'), parallel = T)
+
+### IVHD
+liver_res_ivhd_vs_conu_4wpc <- results(ddsDGE_grouped_liver, contrast = c('group', 'ivhd.4wpc', 'conu.4wpc'), parallel = T)
+
+### GATA3 
+liver_res_gata3_vs_conu_4wpc <- results(ddsDGE_grouped_liver, contrast = c('group', 'gata3.4wpc', 'conu.4wpc'), parallel = T)
+
+### EOMES
+liver_res_eomes_vs_conu_4wpc <- results(ddsDGE_grouped_liver, contrast = c('group', 'eomes.4wpc', 'conu.4wpc'), parallel = T)
+
+### DNA vaccine
+liver_res_dnavaccine_vs_conu_4wpc <- results(ddsDGE_grouped_liver, contrast = c('group', 'dnavaccine.4wpc', 'conu.4wpc'), parallel = T)
+
+# Saving results files
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc'
+)
+
+obj <- ls(pattern = '^liver_.*4wpc')  # regex pattern matching files starting with liver and containing 4wpc
+for (i in 1:length(obj)) {
+  save(list = (obj[i]),
+       file = paste(obj[i], ".RData", sep = ""))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# HEAD-KIDNEY ----
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_grouped_hkidney.RData')
+
+## Treatment contrasts within sampling points - 10wpi ----
+### Using CONU as the reference ----
+
+## IVLD
+hkidney_res_ivld_vs_conu_10wpi <- results(ddsDGE_grouped_hkidney, contrast=c("group","ivld.10wpi","conu.10wpi"), parallel = T)
+
+## IVHD
+hkidney_res_ivhd_vs_conu_10wpi <- results(ddsDGE_grouped_hkidney, contrast=c("group","ivhd.10wpi","conu.10wpi"), parallel = T)
+
+### GATA3 
+hkidney_res_gata3_vs_conu_10wpi <- results(ddsDGE_grouped_hkidney, contrast=c("group","gata3.10wpi","conu.10wpi"), parallel = T)
+
+### EOMES
+hkidney_res_eomes_vs_conu_10wpi <- results(ddsDGE_grouped_hkidney, contrast=c("group","eomes.10wpi","conu.10wpi"), parallel = T)
+
+### DNA vaccine
+hkidney_res_dnavaccine_vs_conu_10wpi <- results(ddsDGE_grouped_hkidney, contrast=c("group","dnavaccine.10wpi","conu.10wpi"), parallel = T)
+
+
+# Saving results files
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_10wpi'
+)
+
+obj <- ls(pattern = '^hkidney_.*10wpi')
+for (i in 1:length(obj)) {
+  save(list = (obj[i]),
+       file = paste(obj[i], ".RData", sep = ""))
+}
+
+
+## Treatment contrasts within sampling points - 4wpc ----
+### Using CONU as the reference ----
+### IVLD
+hkidney_res_ivld_vs_conu_4wpc <- results(ddsDGE_grouped_hkidney, contrast = c('group', 'ivld.4wpc', 'conu.4wpc'), parallel = T)
+
+### IVHD
+hkidney_res_ivhd_vs_conu_4wpc <- results(ddsDGE_grouped_hkidney, contrast = c('group', 'ivhd.4wpc', 'conu.4wpc'), parallel = T)
+
+### GATA3 
+hkidney_res_gata3_vs_conu_4wpc <- results(ddsDGE_grouped_hkidney, contrast = c('group', 'gata3.4wpc', 'conu.4wpc'), parallel = T)
+
+### EOMES
+hkidney_res_eomes_vs_conu_4wpc <- results(ddsDGE_grouped_hkidney, contrast = c('group', 'eomes.4wpc', 'conu.4wpc'), parallel = T)
+
+### DNA vaccine
+hkidney_res_dnavaccine_vs_conu_4wpc <- results(ddsDGE_grouped_hkidney, contrast = c('group', 'dnavaccine.4wpc', 'conu.4wpc'), parallel = T)
+
+# Saving results files
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc'
+)
+
+obj <- ls(pattern = '^hkidney_.*4wpc')  # regex pattern matching files starting with hkidney and containing 4wpc
+for (i in 1:length(obj)) {
+  save(list = (obj[i]),
+       file = paste(obj[i], ".RData", sep = ""))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

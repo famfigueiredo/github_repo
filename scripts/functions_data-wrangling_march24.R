@@ -184,7 +184,8 @@ gsea_formatting <-
       pvalueCutoff = 0.05,
       pAdjustMethod = 'BH',
       verbose = T,
-      eps = 1e-300
+      eps = 1e-300,
+      nPermSimple = 100000
     )
     
     # Assign the results to a variable including treatment and sampling_point in the name
@@ -253,4 +254,37 @@ display_venn <- function(x, ...) {
   grid.newpage()
   venn_object <- venn.diagram(x, filename = NULL, ...)
   grid.draw(venn_object)
+}
+
+# Helper function to load results tables
+load_results <- function(regex_pattern) {
+  # Get a list of files matching the pattern
+  results_files <- list.files(pattern = regex_pattern)
+  
+  # Loop through each file and load its data into the R environment
+  for (file in results_files) {
+    load(file, envir = .GlobalEnv)
+  }
+  
+  # Return message indicating completion
+  return(paste(length(results_files), "files loaded into the environment."))
+}
+
+# Helper function to create a Markdown table
+markdown_table <- function(data) {
+  # Get the header
+  header <-
+    paste("|", paste(names(data), collapse = " | "), "|")
+  
+  # Get the separator line
+  separator <-
+    paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
+  
+  # Get the table rows
+  rows <- apply(data, 1, function(row) {
+    paste("|", paste(row, collapse = " | "), "|")
+  })
+  
+  # Combine header, separator, and rows
+  c(header, separator, rows)
 }

@@ -66,7 +66,7 @@ sampleTable$sample <-
   )
 
 sampleTable <-
-  as.data.frame(sampleTable) %>% dplyr::select(sample, fileName, treatment, samplingPoint, tissue, lane)  # selecting columns of interest
+  as.data.frame(sampleTable) %>% dplyr::select(sample, filename, treatment, samplingPoint, tissue, lane)  # selecting columns of interest
 
 sampleTable <- sampleTable %>%
   filter(
@@ -76,7 +76,6 @@ sampleTable <- sampleTable %>%
         tissue == 'sr' |
         tissue == 'h' |
         samplingPoint == '10wpc' |
-        readcount == 'blank' |
         treatment == 'ptagrfp' | treatment == 'tbet'
     )
   )
@@ -177,7 +176,7 @@ pca_spleen
 pca_liver
 pca_hkidney
 
-# Spleen group
+# Spleen group ----
 sampleTable_grouped_spleen <- sampleTable %>%
   filter(tissue == 's') %>% 
   dplyr::mutate(group = paste(treatment, sep = '.', samplingPoint))  # creating the treatment.samplingPoint grouping
@@ -212,5 +211,85 @@ save(
 
 save(
   sampleTable_grouped_spleen,
-     file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable_grouped_spleen.Rda'
-  )
+  file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable_grouped_spleen.Rda'
+)
+
+
+
+# Liver group ----
+sampleTable_grouped_liver <- sampleTable %>%
+  filter(tissue == 'l') %>% 
+  dplyr::mutate(group = paste(treatment, sep = '.', samplingPoint))  # creating the treatment.samplingPoint grouping
+# OR
+# sampleTable %>% dplyr::mutate(group = interaction(treatment, samplingPoint)) -> sampleTable
+
+summary(sampleTable_grouped_liver)
+# formatting variables
+sampleTable_grouped_liver$group <-
+  as.factor(sampleTable_grouped_liver$group)
+sampleTable_grouped_liver <-
+  droplevels(sampleTable_grouped_liver)  # dropping the reference
+
+# creating dds object from htseq count output files
+ddsGroup_liver <-
+  DESeqDataSetFromHTSeqCount(sampleTable = sampleTable_grouped_liver,
+                             directory = directory,
+                             design = ~ group)
+
+keep <-
+  rowSums(counts(ddsGroup_liver)) >= 10  # removing low count genes (<10)
+ddsGroup_liver <-
+  ddsGroup_liver[keep, ]
+
+ddsDGE_grouped_liver <-
+  DESeq(ddsGroup_liver, parallel = T)
+
+save(
+  ddsDGE_grouped_liver,
+  file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_grouped_liver.RData'
+)  # Saving DESeqDataSet object
+
+save(
+  sampleTable_grouped_liver,
+  file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable_grouped_liver.Rda'
+)
+
+
+# Head-kidney group ----
+sampleTable_grouped_hkidney <- sampleTable %>%
+  filter(tissue == 'hk') %>% 
+  dplyr::mutate(group = paste(treatment, sep = '.', samplingPoint))  # creating the treatment.samplingPoint grouping
+# OR
+# sampleTable %>% dplyr::mutate(group = interaction(treatment, samplingPoint)) -> sampleTable
+
+summary(sampleTable_grouped_hkidney)
+
+# formatting variables
+sampleTable_grouped_hkidney$group <-
+  as.factor(sampleTable_grouped_hkidney$group)
+sampleTable_grouped_hkidney <-
+  droplevels(sampleTable_grouped_hkidney)  # dropping the reference
+
+# creating dds object from htseq count output files
+ddsGroup_hkidney <-
+  DESeqDataSetFromHTSeqCount(sampleTable = sampleTable_grouped_hkidney,
+                             directory = directory,
+                             design = ~ group)
+
+keep <-
+  rowSums(counts(ddsGroup_hkidney)) >= 10  # removing low count genes (<10)
+ddsGroup_hkidney <-
+  ddsGroup_hkidney[keep, ]
+
+ddsDGE_grouped_hkidney <-
+  DESeq(ddsGroup_hkidney, parallel = T)
+
+save(
+  ddsDGE_grouped_hkidney,
+  file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_grouped_hkidney.RData'
+)  # Saving DESeqDataSet object
+
+save(
+  sampleTable_grouped_hkidney,
+  file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable_grouped_hkidney.Rda'
+)
