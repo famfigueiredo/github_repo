@@ -298,13 +298,11 @@ The only *Reactome* pathway is 'Neuronal System'.
 
 ### DNA vaccine
 
-
-
-“/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_4wpc/gsea_definitive_plots/dnavaccine_4wpc.png” could not be found.
+![alt](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_definitive_plots/dnavaccine_4wpc.png)
 
 
 
-Running GSEA with the whole gene list, without pre-selecting by p-value, yields the following downregulated pathways on *ReactomePA*.
+Running GSEA with the whole gene list, without pre-selecting by p-value, yields the following downregulated pathways on *ReactomePA*. Top 20 negative NES.
 
 | Description                                                  | NES       |
 | ------------------------------------------------------------ | --------- |
@@ -328,29 +326,12 @@ Running GSEA with the whole gene list, without pre-selecting by p-value, yields 
 | Antigen processing-Cross presentation                        | -1.775111 |
 | Signaling by the B Cell Receptor (BCR)                       | -1.749496 |
 | Costimulation by the CD28 family                             | -1.702488 |
-| Antigen Presentation: Folding, assembly and peptide loading of class I MHC | -1.690269 |
-| Hh mutants are degraded by ERAD                              | -1.689402 |
-| Hh mutants abrogate ligand secretion                         | -1.689402 |
-| DAP12 interactions                                           | -1.671403 |
-| DAP12 signaling                                              | -1.671403 |
-| FCERI mediated NF-kB activation                              | -1.665623 |
-| Defective CFTR causes cystic fibrosis                        | -1.665085 |
-| Regulation of actin dynamics for phagocytic cup formation    | -1.648707 |
-| SCF-beta-TrCP mediated degradation of Emi1                   | -1.615164 |
-| Fcgamma receptor (FCGR) dependent phagocytosis               | -1.603441 |
-| Hedgehog ligand biogenesis                                   | -1.602925 |
-| TCR signaling                                                | -1.595014 |
-| Degradation of GLI2 by the proteasome                        | -1.585871 |
-| Activation of NF-kappaB in B cells                           | -1.577746 |
-| Fc epsilon receptor (FCERI) signaling                        | -1.544485 |
-| Interleukin-1 family signaling                               | -1.528250 |
-| Signaling by Interleukins                                    | -1.498810 |
-| Cytokine Signaling in Immune system                          | -1.396404 |
-| Adaptive Immune System                                       | -1.241338 |
 
-Overall, these pathways highlight key processes in the immune response, cell signaling, and regulation, emphasizing their roles in maintaining immune system function and responding to pathogens. Negative NES values indicate downregulation, suggesting a potential suppression of these pathways under certain conditions.
 
-On the opposite side of the spectrum, the upregulated pathways:
+
+​	Overall, these pathways highlight key processes in the immune response, cell signaling, and regulation, emphasizing their roles in maintaining immune system function and responding to pathogens. Negative NES values indicate downregulation, suggesting a potential suppression of these pathways under certain conditions.
+
+On the opposite side of the spectrum, the upregulated pathways (top 20):
 
 | Description                                                  | NES      |
 | ------------------------------------------------------------ | -------- |
@@ -374,52 +355,27 @@ On the opposite side of the spectrum, the upregulated pathways:
 | Response to elevated platelet cytosolic Ca2+                 | 1.782834 |
 | Formation of ATP by chemiosmotic coupling                    | 1.775668 |
 | Citric acid cycle (TCA cycle)                                | 1.772693 |
-| Nuclear Receptor transcription pathway                       | 1.759821 |
-| FOXO-mediated transcription of oxidative stress, metabolic and neuronal genes | 1.731914 |
-| GABA receptor activation                                     | 1.727551 |
-| Striated Muscle Contraction                                  | 1.712729 |
-| Transcriptional activation of mitochondrial biogenesis       | 1.683622 |
-| FOXO-mediated transcription                                  | 1.682785 |
-| Collagen chain trimerization                                 | 1.670550 |
-| Metabolism of nitric oxide: NOS3 activation and regulation   | 1.669765 |
-| Gluconeogenesis                                              | 1.665098 |
-| Opioid Signalling                                            | 1.652053 |
-| Sensory Perception                                           | 1.651697 |
-| Collagen biosynthesis and modifying enzymes                  | 1.622587 |
-| Neuronal System                                              | 1.596390 |
-| Cardiac conduction                                           | 1.584142 |
-| Organelle biogenesis and maintenance                         | 1.496958 |
-| Hemostasis                                                   | 1.421507 |
+
 
 Overall, these pathways collectively impact:
 
-- 
+Cellular energy production and metabolism.
 
-  Cellular energy production and metabolism.
+Cell signaling and regulatory mechanisms.
 
-- 
+Blood clotting and cardiovascular health.
 
-  Cell signaling and regulatory mechanisms.
+Muscle function and movement.
 
-- 
+Structural maintenance and tissue integrity.
 
-  Blood clotting and cardiovascular health.
+Protein synthesis, modification, and degradation.
 
-- 
+Growth, development, and response to environmental stimuli.
 
-  Muscle function and movement.
 
-- 
 
-  Structural maintenance and tissue integrity.
-
-- 
-
-  Protein synthesis, modification, and degradation.
-
-- 
-
-  Growth, development, and response to environmental stimuli.
+##### org.Hs.eg.db annotation
 
 If one starts from a list of genes pre-selected by p-value (*p < 0.05*), and runs GSEA against a genome wide annotation for human (not ReactomePA, org.Hs.eg.db), the overall result is the same, with immune-related pathways downregulated and energy production upregulated.
 
@@ -1108,17 +1064,9 @@ ReactomePA results
 
 #### Overall Interpretation
 
-- 
+Downregulation: The downregulated pathways are primarily involved in lipid metabolism, protein ubiquitination, mitochondrial function, and autophagy. This suggests a suppression of energy production, lipid clearance, protein turnover, and cellular recycling processes.
 
-  Downregulation
-
-  : The downregulated pathways are primarily involved in lipid metabolism, protein ubiquitination, mitochondrial function, and autophagy. This suggests a suppression of energy production, lipid clearance, protein turnover, and cellular recycling processes.
-
-- 
-
-  Upregulation
-
-  : The upregulated pathways involve cell signaling, particularly through receptor tyrosine kinases, GTPase cycles, extracellular matrix interactions, and vitamin metabolism. This indicates enhanced cellular communication, structural dynamics, and metabolic activities.
+Upregulation: The upregulated pathways involve cell signaling, particularly through receptor tyrosine kinases, GTPase cycles, extracellular matrix interactions, and vitamin metabolism. This indicates enhanced cellular communication, structural dynamics, and metabolic activities.
 
 The combination of these changes suggests a cellular state where there's a shift away from energy production and basic metabolic processes towards more complex signaling and structural functions. This could be indicative of a response to external stimuli, tissue repair, or a shift towards a more specialized cellular function.
 
@@ -1157,17 +1105,9 @@ The combination of these changes suggests a cellular state where there's a shift
 
 #### Overall Interpretation
 
-- 
+Upregulated Pathways: The upregulated pathways in Atlantic salmon heart tissue are predominantly related to blood clotting (hemostasis), platelet activation, immune response (complement cascade), and various signaling pathways (GPCR signaling, insulin-like growth factor transport). This suggests an enhanced readiness for hemostasis, immune defense, and cellular communication, which are critical for maintaining cardiovascular function and responding to physiological stress or injury.
 
-  Upregulated Pathways
-
-  : The upregulated pathways in Atlantic salmon heart tissue are predominantly related to blood clotting (hemostasis), platelet activation, immune response (complement cascade), and various signaling pathways (GPCR signaling, insulin-like growth factor transport). This suggests an enhanced readiness for hemostasis, immune defense, and cellular communication, which are critical for maintaining cardiovascular function and responding to physiological stress or injury.
-
-- 
-
-  Downregulated Pathways
-
-  : The downregulated pathways are mainly involved in DNA repair and maintenance (chromosome maintenance, nucleotide excision repair, homologous recombination), cytoprotection (HMOX1), and lipid metabolism (triglyceride metabolism and catabolism). This indicates a reduced capacity for DNA repair, potentially leading to genomic instability, and decreased lipid metabolism, which may affect energy balance and cellular health.
+Downregulated Pathways: The downregulated pathways are mainly involved in DNA repair and maintenance (chromosome maintenance, nucleotide excision repair, homologous recombination), cytoprotection (HMOX1), and lipid metabolism (triglyceride metabolism and catabolism). This indicates a reduced capacity for DNA repair, potentially leading to genomic instability, and decreased lipid metabolism, which may affect energy balance and cellular health.
 
 This combination of upregulated and downregulated pathways provides a snapshot of the metabolic and regulatory state of the heart tissue, highlighting areas of increased activity in response to physiological demands and potential vulnerabilities in DNA repair and lipid metabolism.
 
@@ -1496,17 +1436,9 @@ The combination of upregulated and downregulated pathways in Atlantic salmon hea
 
 The combination of these pathways suggests that in Atlantic salmon heart tissue:
 
-- 
+Positive Enrichment: There is a significant enrichment in pathways related to signal transduction (GPCR and Rho GTPases), vesicle transport, chromatin organization, lipid metabolism, and platelet production. These processes are essential for cell communication, structural integrity, energy metabolism, and cardiovascular function.
 
-  Positive Enrichment
-
-  : There is a significant enrichment in pathways related to signal transduction (GPCR and Rho GTPases), vesicle transport, chromatin organization, lipid metabolism, and platelet production. These processes are essential for cell communication, structural integrity, energy metabolism, and cardiovascular function.
-
-- 
-
-  Negative Enrichment
-
-  : There is a downregulation of pathways involved in mitochondrial respiration and DNA damage recognition. This may indicate a reduced emphasis on oxidative phosphorylation and a potential adaptation in energy metabolism specific to the heart tissue in salmon, possibly reflecting unique metabolic demands or environmental adaptations.
+Negative Enrichment: There is a downregulation of pathways involved in mitochondrial respiration and DNA damage recognition. This may indicate a reduced emphasis on oxidative phosphorylation and a potential adaptation in energy metabolism specific to the heart tissue in salmon, possibly reflecting unique metabolic demands or environmental adaptations.
 
 ## 10WPI
 
@@ -1951,10 +1883,6 @@ These are the differentially regulated pathways from ReactomePA.
 | Neuronal System |  1.453799 | 313 | 131 |
 
 The plot below shows only upregulated pathways, since none of the enriched pathways was downregulated. These were obtained by running gseGO against the *org.Hs.eg.db*.
-
-
-
-
 
 
 ​	The pathways with positive NES values in the Atlantic salmon heart tissue, obtained through ReactomePA and human orthologs conversion, emphasize several key biological processes:
