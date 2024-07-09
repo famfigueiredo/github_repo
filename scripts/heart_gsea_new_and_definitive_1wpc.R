@@ -5,7 +5,7 @@ library('gprofiler2')
 library('org.Hs.eg.db')
 library('enrichplot')
 library('AnnotationDbi')
-library(ReactomePA)
+library('ReactomePA')
 
 rm(list = setdiff(ls(), grep("res_", ls(), value = TRUE)))
 
@@ -16,7 +16,7 @@ source(
 
 ## Loading results files ----
 setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc'
 )
 
 results_files <-
@@ -26,28 +26,32 @@ for (i in 1:length(results_files)) {
   list.data[[i]] <- load(results_files[i])
 }
 
-
-
 # GSEA ----
 
 ## DNA vaccine ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
+## added saving feature on 24/06/2024, so I don't have to re-run the formatting function everytime
 gsea_formatting(res_dnavaccine_vs_conu_1wpc, 'dnavaccine', '1wpc')
+save(gsea_results_dnavaccine_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_dnavaccine_1wpc.RData')
 
 gsea_simplified_results_dnavaccine_1wpc <- simplify(gsea_results_dnavaccine_1wpc)  # simplifying GO terms to reduce redundancy
+save(gsea_simplified_results_dnavaccine_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_dnavaccine_1wpc.RData')
+save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_dnavaccine1wpc.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES 
-top10_high_nes <- 
-  as_tibble(gsea_simplified_results_dnavaccine_1wpc@result) %>%
-  arrange(desc(NES)) %>% 
-  top_n(10, wt = NES) %>% 
+top10_high_nes <-
+  as_tibble(gsea_simplified_results_dnavaccine_1wpc) %>%
+  filter(NES > 0) %>%
+  arrange(desc(setSize)) %>%
+  top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
-bottom10_low_nes <- 
-  as_tibble(gsea_simplified_results_dnavaccine_1wpc@result) %>% 
-  arrange(NES) %>% 
-  top_n(8, wt = desc(NES)) %>% 
+bottom10_low_nes <-
+  as_tibble(gsea_simplified_results_dnavaccine_1wpc) %>%
+  filter(NES < 0) %>%
+  arrange(setSize) %>%
+  top_n(8, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 low_high_nes_dnavaccine_1wpc <- bind_rows(top10_high_nes, bottom10_low_nes)
@@ -79,51 +83,44 @@ low_high_nes_dnavaccine_1wpc %>%
     plot.title = element_text(hjust = .5),
     plot.subtitle = element_text(hjust = .5),
     panel.grid.minor = element_blank(),
-    panel.grid = element_line(color = 'black', size = .05, linetype = 2)
+    panel.grid = element_line(color = 'black', linewidth = .05, linetype = 2)
   ) + guides(
     color = guide_legend(override.aes = list(size = 5)),  # increase point size in gene count legend
     size = guide_legend(override.aes = list(shape =1, fill = NA, stroke = .5))  # show only borders in set size legend
   ) +
   facet_grid(. ~ Regulation)
 
+gseGO_dnavaccine_1wpc <- low_high_nes_dnavaccine_1wpc %>% dplyr::select(Description, setSize, Count, NES) %>% arrange(desc(Count))
 
+write_tsv(gseGO_dnavaccine_1wpc, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/gseGO_dnavaccine_1wpc.tsv')
+
+# Convert to a Markdown table ---
+# Read the TSV file
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/gseGO_dnavaccine_1wpc.tsv', header = TRUE, sep = "\t")
+# Print the Markdown table
+cat(markdown_table(data), sep = "\n")
+
+# gsePathway
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_dnavaccine1wpc.RData')
 y_dnavaccine <- gsePathway(entrez_gene_list,
                       pvalueCutoff = .2,
                       pAdjustMethod = 'BH',
+                      eps = 1e-300,
+                      nPermSimple = 100000,
                       verbose = F)
 
 as_tibble(y_dnavaccine) %>% arrange(NES) %>% print(n = 100)
 
 viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
 
-dnavaccine_pathways <- as_tibble(y_dnavaccine) %>% arrange(NES) %>% filter(., NES < 0) %>% dplyr::select(., Description, NES) 
+dnavaccine1wpc_pathways <- as_tibble(y_dnavaccine) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
 
 as_tibble(y_dnavaccine) %>% arrange(NES) %>% filter(., NES < 0) %>% pull(Description)
 
-write_tsv(dnavaccine_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/dnavaccine_downregulated_pathways.tsv')
-
+write_tsv(dnavaccine1wpc_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/dnavaccine1wpc_gsePathways.tsv')
 
 # Convert to a Markdown table ---
-# Read the TSV file
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/dnavaccine_downregulated_pathways.tsv', header = TRUE, sep = "\t")
-
-markdown_table <- function(data) {
-  # Get the header
-  header <- paste("|", paste(names(data), collapse = " | "), "|")
-  
-  # Get the separator line
-  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-  
-  # Get the table rows
-  rows <- apply(data, 1, function(row) {
-    paste("|", paste(row, collapse = " | "), "|")
-  })
-  
-  # Combine header, separator, and rows
-  c(header, separator, rows)
-}
-
-# Print the Markdown table
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/dnavaccine1wpc_gsePathways.tsv', header = TRUE, sep = "\t")
 cat(markdown_table(data), sep = "\n")
 
 ### significantly differentially regulated genes ###
@@ -143,8 +140,11 @@ as_tibble(gsea_dnavaccine_1wpc_significant)  # no enriched terms
 ## EOMES ----
 ### all genes ###
 gsea_formatting(res_eomes_vs_conu_1wpc, 'eomes', '1wpc')
+save(gsea_results_eomes_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_eomes_1wpc.RData')
 
 gsea_simplified_results_eomes_1wpc <- simplify(gsea_results_eomes_1wpc)
+save(gsea_simplified_results_eomes_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_eomes_1wpc.RData')
+save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_eomes1wpc.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <- 
@@ -212,26 +212,7 @@ eomes_pathways_down <- as_tibble(y_eomes) %>% arrange(NES) %>% filter(., NES < 0
 write_tsv(eomes_pathways_down, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/eomes_downregulated_pathways.tsv')
 
 # Convert to a Markdown table ---
-# Read the TSV file
 data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/eomes_downregulated_pathways.tsv', header = TRUE, sep = "\t")
-
-markdown_table <- function(data) {
-  # Get the header
-  header <- paste("|", paste(names(data), collapse = " | "), "|")
-  
-  # Get the separator line
-  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-  
-  # Get the table rows
-  rows <- apply(data, 1, function(row) {
-    paste("|", paste(row, collapse = " | "), "|")
-  })
-  
-  # Combine header, separator, and rows
-  c(header, separator, rows)
-}
-
-# Print the Markdown table
 cat(markdown_table(data), sep = "\n")
 
 ### significantly differentially regulated genes ###
