@@ -13,7 +13,6 @@ rm(list = setdiff(ls(), grep("res_", ls(), value = TRUE)))
 source(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/scripts/functions_data-wrangling_march24.R'
 )
-
 ## Loading results files ----
 setwd(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc'
@@ -27,7 +26,6 @@ for (i in 1:length(results_files)) {
 }
 
 # GSEA ----
-
 ## DNA vaccine ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
@@ -38,6 +36,10 @@ save(gsea_results_dnavaccine_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataA
 gsea_simplified_results_dnavaccine_1wpc <- simplify(gsea_results_dnavaccine_1wpc)  # simplifying GO terms to reduce redundancy
 save(gsea_simplified_results_dnavaccine_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_dnavaccine_1wpc.RData')
 save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_dnavaccine1wpc.RData')
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_dnavaccine_1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_dnavaccine_1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_dnavaccine1wpc.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES 
 top10_high_nes <-
@@ -51,8 +53,8 @@ bottom10_low_nes <-
   as_tibble(gsea_simplified_results_dnavaccine_1wpc) %>%
   filter(NES < 0) %>%
   arrange(setSize) %>%
-  top_n(8, wt = NES) %>%
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+  top_n(10, wt = NES) %>%
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))  # only 6 terms had NES < 0
 
 low_high_nes_dnavaccine_1wpc <- bind_rows(top10_high_nes, bottom10_low_nes)
 
@@ -90,8 +92,13 @@ low_high_nes_dnavaccine_1wpc %>%
   ) +
   facet_grid(. ~ Regulation)
 
-gseGO_dnavaccine_1wpc <- low_high_nes_dnavaccine_1wpc %>% dplyr::select(Description, setSize, Count, NES) %>% arrange(desc(Count))
+# Selecting variables for dotplot and sorting by gene count
+gseGO_dnavaccine_1wpc <-
+  low_high_nes_dnavaccine_1wpc %>% 
+  dplyr::select(Description, setSize, Count, NES) %>% 
+  arrange(desc(Count))
 
+# Writing out top and bottom terms to .tsv
 write_tsv(gseGO_dnavaccine_1wpc, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/gseGO_dnavaccine_1wpc.tsv')
 
 # Convert to a Markdown table ---
@@ -100,18 +107,22 @@ data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnal
 # Print the Markdown table
 cat(markdown_table(data), sep = "\n")
 
-# gsePathway
+# gsePathway with 10k permutations in nPermSimple
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_dnavaccine1wpc.RData')
 y_dnavaccine <- gsePathway(entrez_gene_list,
                       pvalueCutoff = .2,
                       pAdjustMethod = 'BH',
                       eps = 1e-300,
-                      nPermSimple = 100000,
+                      nPermSimple = 10000,
                       verbose = F)
 
 as_tibble(y_dnavaccine) %>% arrange(NES) %>% print(n = 100)
 
 viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
+viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = entrez_gene_list)
+viewPathway('TNFR1-induced NF-kappa-B signaling pathway', readable = T, foldChange = entrez_gene_list)
+viewPathway('Interleukin-6 family signaling', readable = T, foldChange = entrez_gene_list)
+
 
 dnavaccine1wpc_pathways <- as_tibble(y_dnavaccine) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
 
@@ -146,17 +157,23 @@ gsea_simplified_results_eomes_1wpc <- simplify(gsea_results_eomes_1wpc)
 save(gsea_simplified_results_eomes_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_eomes_1wpc.RData')
 save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_eomes1wpc.RData')
 
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_eomes_1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_eomes_1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_eomes1wpc.RData')
+
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <- 
   as_tibble(gsea_simplified_results_eomes_1wpc@result) %>%
-  arrange(desc(NES)) %>% 
+  filter(NES > 0) %>%
+  arrange(desc(setSize)) %>% 
   top_n(10, wt = NES) %>% 
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
-bottom10_low_nes <- 
-  as_tibble(gsea_simplified_results_eomes_1wpc@result) %>% 
-  arrange(NES) %>% 
-  top_n(10, wt = desc(NES)) %>% 
+bottom10_low_nes <-
+  as_tibble(gsea_simplified_results_eomes_1wpc) %>%
+  filter(NES < 0) %>%
+  arrange(setSize) %>%
+  top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 low_high_nes_eomes_1wpc <- bind_rows(top10_high_nes, bottom10_low_nes)
@@ -189,7 +206,7 @@ low_high_nes_eomes_1wpc %>%
     panel.grid.minor = element_blank(),
     panel.grid = element_line(
       color = 'black',
-      size = .05,
+      linewidth = .05,
       linetype = 2)) +
   guides(
     color = guide_legend(override.aes = list(size = 5)),  # increase point size in gene count legend
@@ -198,51 +215,77 @@ low_high_nes_eomes_1wpc %>%
   facet_grid(. ~ Regulation)
 
 
+# gsePathway with 100k permutations in nPermSimple
 y_eomes <- gsePathway(entrez_gene_list,
-                pvalueCutoff = .2,
-                pAdjustMethod = 'BH',
-                verbose = F)
+                      pvalueCutoff = .2,
+                      pAdjustMethod = 'BH',
+                      eps = 1e-300,
+                      nPermSimple = 100000,
+                      verbose = F)
 
 as_tibble(y_eomes) %>% arrange(NES) %>% print(n = 100)
 
-viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
+# viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
 
-eomes_pathways_down <- as_tibble(y_eomes) %>% arrange(NES) %>% filter(., NES < 0) %>% dplyr::select(., Description, NES) 
+eomes_pathways_down <- as_tibble(y_eomes) %>% arrange(NES) %>% filter(., NES < 0) %>% dplyr::select(., Description, NES)
+eomes1wpc_pathways <- as_tibble(y_eomes) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
 
-write_tsv(eomes_pathways_down, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/eomes_downregulated_pathways.tsv')
+write_tsv(eomes_pathways_down, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/eomes_downregulated_pathways.tsv')
+write_tsv(eomes1wpc_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/eomes1wpc_gsePathways.tsv')
+
+viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = entrez_gene_list)
 
 # Convert to a Markdown table ---
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/eomes_downregulated_pathways.tsv', header = TRUE, sep = "\t")
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/eomes1wpc_gsePathways.tsv', header = TRUE, sep = "\t")
 cat(markdown_table(data), sep = "\n")
 
-### significantly differentially regulated genes ###
-gsea_formatting_significant(res_eomes_vs_conu_1wpc, 'eomes', '1wpc')
-
-gsea_eomes_1wpc_significant <- gseGO(
-  geneList = enrichment_gsea_eomes_1wpc,
-  OrgDb = org.Hs.eg.db,
-  ont = 'BP',
-  pvalueCutoff = 0.05,
-  pAdjustMethod = 'BH',
-  verbose = T)
-
-as_tibble(gsea_eomes_1wpc_significant)  # no enriched terms
+# ### significantly differentially regulated genes ###
+# gsea_formatting_significant(res_eomes_vs_conu_1wpc, 'eomes', '1wpc')
+# 
+# gsea_eomes_1wpc_significant <- gseGO(
+#   geneList = enrichment_gsea_eomes_1wpc,
+#   OrgDb = org.Hs.eg.db,
+#   ont = 'BP',
+#   pvalueCutoff = 0.05,
+#   pAdjustMethod = 'BH',
+#   verbose = T)
+# 
+# as_tibble(gsea_eomes_1wpc_significant)  # no enriched terms
 
 ## GATA3 ----
-rm(list = setdiff(ls(), grep("res_", ls(), value = TRUE)))
 
+# running gsea and saving files for later use
 gsea_formatting(res_gata3_vs_conu_1wpc, 'gata3', '1wpc')
+save(gsea_results_gata3_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_gata3_1wpc.RData')
 
 gsea_simplified_results_gata3_1wpc <- simplify(gsea_results_gata3_1wpc)  # simplifying gsea results to remove redundancy of terms
+save(gsea_simplified_results_gata3_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_gata3_1wpc.RData')
+save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_gata31wpc.RData')
 
-# Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
-top20_high_nes <- 
-  as_tibble(gsea_results_gata3_1wpc@result) %>%
-  arrange(desc(-NES)) %>% 
-  top_n(20, wt = -p.adjust) %>% 
+# loading saved files to re-run analysis
+# load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_gata3_1wpc.RData')
+# load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_gata3_1wpc.RData')
+# load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_gata31wpc.RData')
+
+# convert the gsea results to a tibble and retrieve top 10 highest and lowest NES
+top10_high_nes <- 
+  as_tibble(gsea_simplified_results_gata3_1wpc@result) %>%
+  filter(NES > 0) %>%
+  arrange(desc(setSize)) %>% 
+  top_n(10, wt = NES) %>% 
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
-top20_high_nes %>%
+bottom10_low_nes <-
+  as_tibble(gsea_simplified_results_gata3_1wpc@result) %>%
+  filter(NES < 0) %>%
+  arrange(setSize) %>%
+  top_n(10, wt = NES) %>%
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))  # only three downregulated pathways
+
+low_high_nes_gata3_1wpc <- bind_rows(top10_high_nes, bottom10_low_nes)
+
+low_high_nes_gata3_1wpc %>%
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
   mutate(Description = fct_reorder(Description, Count)) %>%
   ggplot(aes(Count, Description)) +
   geom_point(aes(size = setSize), shape = 1, stroke = 0.2, color = 'red') +
@@ -253,7 +296,7 @@ top20_high_nes %>%
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +
-  ggtitle('GSEA, upregulated genes',
+  ggtitle('GSEA, downregulated vs upregulated genes',
           subtitle = 'GATA3, 1WPC, heart tissue') +
   theme_bw(base_size = 14) +
   theme(
@@ -269,81 +312,59 @@ top20_high_nes %>%
     panel.grid.minor = element_blank(),
     panel.grid = element_line(
       color = 'black',
-      size = .05,
+      linewidth = .05,
       linetype = 2)) +
   guides(
     color = guide_legend(override.aes = list(size = 5)),  # increase point size in gene count legend
     size = guide_legend(override.aes = list(shape = 1, fill = NA, stroke = .5, color = 'red'))  # show only borders in set size legend
-  )
+  ) +
+  facet_grid(. ~ Regulation)
 
+# gsePathway with 100k permutations in nPermSimple
 y_gata3 <- gsePathway(entrez_gene_list,
                       pvalueCutoff = .2,
                       pAdjustMethod = 'BH',
+                      eps = 1e-300,
+                      nPermSimple = 100000,
                       verbose = F)
 
 as_tibble(y_gata3) %>% arrange(NES) %>% print(n = 100)
 
-viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
+gata31wpc_pathways <- as_tibble(y_gata3) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
 
-gata3_pathways_down <- as_tibble(y_gata3) %>% arrange(NES) %>% filter(., NES < 0) %>% dplyr::select(., Description, NES) 
+write_tsv(gata31wpc_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/gata31wpc_gsePathways.tsv')
 
-write_tsv(gata3_pathways_down, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/gata3_downregulated_pathways.tsv')
-
-
-# Read the TSV file
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/gata3_downregulated_pathways.tsv', header = TRUE, sep = "\t")
-
-markdown_table <- function(data) {
-  # Get the header
-  header <- paste("|", paste(names(data), collapse = " | "), "|")
-  
-  # Get the separator line
-  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-  
-  # Get the table rows
-  rows <- apply(data, 1, function(row) {
-    paste("|", paste(row, collapse = " | "), "|")
-  })
-  
-  # Combine header, separator, and rows
-  c(header, separator, rows)
-}
-
-# Print the Markdown table
+# Convert to a Markdown table ----
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/gata31wpc_gsePathways.tsv', header = TRUE, sep = "\t")
 cat(markdown_table(data), sep = "\n")
 
-### significantly differentially regulated genes ###
-gsea_formatting_significant(res_gata3_vs_conu_1wpc, 'gata3', '1wpc')
-
-gsea_eomes_1wpc_significant <- gseGO(
-  geneList = enrichment_gsea_eomes_1wpc,
-  OrgDb = org.Hs.eg.db,
-  ont = 'BP',
-  pvalueCutoff = 0.05,
-  pAdjustMethod = 'BH',
-  verbose = T)
-
-as_tibble(gsea_eomes_1wpc_significant)  # no enriched terms. very few significantly regulated genes
-
 ## IV-HD ----
+# running gsea and saving files for later use
 gsea_formatting(res_ivhd_vs_conu_1wpc, 'ivhd', '1wpc')
+save(gsea_results_ivhd_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_ivhd_1wpc.RData')
 
 gsea_simplified_results_ivhd_1wpc <- simplify(gsea_results_ivhd_1wpc)  # simplifying gsea results to remove redundancy of terms
+save(gsea_simplified_results_ivhd_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_ivhd_1wpc.RData')
+save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_ivhd_1wpc.RData')
 
-as_tibble(gsea_results_ivhd_1wpc)
-as_tibble(gsea_simplified_results_ivhd_1wpc)
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_ivhd_1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_ivhd_1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_ivhd_1wpc.RData')
 
-# Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
+
+# convert the gsea results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <- 
   as_tibble(gsea_simplified_results_ivhd_1wpc@result) %>%
-  arrange(desc(NES)) %>% 
+  filter(NES > 0) %>%
+  arrange(desc(setSize)) %>% 
   top_n(10, wt = NES) %>% 
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <- 
   as_tibble(gsea_simplified_results_ivhd_1wpc@result) %>% 
-  arrange(NES) %>% 
-  top_n(8, wt = desc(NES)) %>% 
+  filter(NES < 0) %>%
+  arrange(setSize) %>%
+  top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 low_high_nes_ivhd_1wpc <- bind_rows(top10_high_nes, bottom10_low_nes)
@@ -375,7 +396,7 @@ low_high_nes_ivhd_1wpc %>%
     plot.title = element_text(hjust = .5),
     plot.subtitle = element_text(hjust = .5),
     panel.grid.minor = element_blank(),
-    panel.grid = element_line(color = 'black', size = .05, linetype = 2)
+    panel.grid = element_line(color = 'black', linewidth = .05, linetype = 2)
   ) + 
   guides(
     color = guide_legend(override.aes = list(size = 5)),  # increase point size in gene count legend
@@ -383,85 +404,79 @@ low_high_nes_ivhd_1wpc %>%
   ) +
   facet_grid(. ~ Regulation)
 
-
-y_ivhd <- gsePathway(entrez_gene_list,
-                           pvalueCutoff = .2,
-                           pAdjustMethod = 'BH',
-                           verbose = F)
+y_ivhd <- gsePathway(
+  entrez_gene_list,
+  pvalueCutoff = .2,
+  pAdjustMethod = 'BH',
+  eps = 1e-300,
+  nPermSimple = 100000,
+  verbose = F
+)
 
 as_tibble(y_ivhd) %>% arrange(NES) %>% print(n = 100)
 
+ivhd_1wpc_pathways <- as_tibble(y_ivhd) %>% arrange(NES) %>% dplyr::select(., Description, NES)
+
+write_tsv(ivhd_1wpc_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/ivhd_1wpc_gsePathways.tsv')
+
 viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
+viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = entrez_gene_list)
+viewPathway('TRAF3-dependent IRF activation pathway', readable = T, foldChange = entrez_gene_list)
 
-ivhd_pathways_down <- as_tibble(y_ivhd) %>% arrange(NES) %>% filter(., NES < 0) %>% dplyr::select(., Description, NES)
-ivhd_pathways_up <- as_tibble(y_ivhd) %>% arrange(NES) %>% filter(., NES > 0) %>% dplyr::select(., Description, NES) 
-
-ivhd_pathways <- bind_rows(ivhd_pathways_down, ivhd_pathways_up)
-
-write_tsv(ivhd_pathways_down, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/ivhd_downregulated_pathways.tsv')
-write_tsv(ivhd_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/ivhd_pathways.tsv')
-
-# Convert to a Markdown table ---
-# Read the TSV file
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_1wpc/pathways/ivhd_pathways.tsv', header = TRUE, sep = "\t")
-
-markdown_table <- function(data) {
-  # Get the header
-  header <- paste("|", paste(names(data), collapse = " | "), "|")
-  
-  # Get the separator line
-  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-  
-  # Get the table rows
-  rows <- apply(data, 1, function(row) {
-    paste("|", paste(row, collapse = " | "), "|")
-  })
-  
-  # Combine header, separator, and rows
-  c(header, separator, rows)
-}
-
-# Print the Markdown table
+# Convert to a Markdown table ----
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/ivhd_1wpc_gsePathways.tsv', header = TRUE, sep = "\t")
 cat(markdown_table(data), sep = "\n")
-
-### significantly differentially regulated genes ###
-gsea_formatting_significant(res_ivhd_vs_conu_1wpc, 'ivhd', '1wpc')
-
-gsea_ivhd_1wpc_significant <- gseGO(
-  geneList = enrichment_gsea_ivhd_1wpc,
-  OrgDb = org.Hs.eg.db,
-  ont = 'BP',
-  pvalueCutoff = 0.05,
-  pAdjustMethod = 'BH',
-  verbose = T)
-
-as_tibble(gsea_eomes_1wpc_significant)  # no enriched terms.
 
 ## IV-LD ----
 gsea_formatting(res_ivld_vs_conu_1wpc, 'ivld', '1wpc')
+save(gsea_results_ivld_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_ivld_1wpc.RData')
 
-gsea_simplified_results_ivld_1wpc <- simplify(gsea_results_ivld_1wpc)  # simplifying gsea results to remove redundancy of terms
+gsea_simplified_results_ivld_1wpc <-
+  simplify(gsea_results_ivld_1wpc)  # simplifying gsea results to remove redundancy of terms
+save(gsea_simplified_results_ivld_1wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_ivld_1wpc.RData')
+save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_ivld_1wpc.RData')
 
-as_tibble(gsea_results_ivld_1wpc)
-as_tibble(gsea_simplified_results_ivld_1wpc) %>% arrange(NES) %>% top_n(20, wt = NES)
+# loading saved files to re-run analysis
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_ivld_1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_ivld_1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_ivld_1wpc.RData')
 
-
-# Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
-top20_high_nes <- 
+# convert the gsea results to a tibble and retrieve top 10 highest and lowest NES
+top10_high_nes <-
   as_tibble(gsea_simplified_results_ivld_1wpc@result) %>%
-  arrange(desc(NES)) %>% 
-  top_n(20, wt = NES) %>% 
+  filter(NES > 0) %>%
+  arrange(desc(setSize)) %>%
+  top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
-top20_high_nes %>%
+bottom10_low_nes <-
+  as_tibble(gsea_simplified_results_ivld_1wpc@result) %>%
+  filter(NES < 0) %>%
+  arrange(setSize) %>%
+  top_n(10, wt = NES) %>%
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+
+low_high_nes_ivld_1wpc <-
+  bind_rows(top10_high_nes, bottom10_low_nes)
+
+low_high_nes_ivld_1wpc %>%
+  mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
   mutate(Description = fct_reorder(Description, Count)) %>%
   ggplot(aes(Count, Description)) +
-  geom_point(aes(size = setSize), shape = 1, stroke = 0.2, color = 'red') +
+  geom_point(
+    aes(size = setSize),
+    shape = 1,
+    stroke = 0.2,
+    color = 'red'
+  ) +
   geom_point(aes(color = Count, size = Count), shape = 16) +
   # scale_color_viridis_c('Gene set') +
-  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(47, 260)) +
-  scale_size_continuous('Set size', range = c(2, 10), guide = 'legend') +
-  scale_x_continuous(limits = c(0, 260), breaks = seq(0, 260, by = 50)) +
+  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(2, 250)) +
+  scale_size_continuous('Set size', 
+                        range = c(2, 10), 
+                        guide = 'legend',
+                        limits = c(2, max(low_high_nes_ivld_1wpc$setSize))) +
+  scale_x_continuous(limits = c(0, 250)) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +
@@ -479,32 +494,41 @@ top20_high_nes %>%
     plot.title = element_text(hjust = .5),
     plot.subtitle = element_text(hjust = .5),
     panel.grid.minor = element_blank(),
-    panel.grid = element_line(color = 'black', size = .05, linetype = 2)
-  ) + 
-  guides(
-    color = guide_legend(override.aes = list(size = 5)),  # increase point size in gene count legend
-    size = guide_legend(override.aes = list(shape = 1, fill = NA, stroke = .5, color = 'red'))  # show only borders in set size legend
-  )
+    panel.grid = element_line(
+      color = 'black',
+      linewidth = .05,
+      linetype = 2
+    )
+  ) +
+  guides(color = guide_legend(override.aes = list(size = 5)),
+         # increase point size in gene count legend
+         size = guide_legend(override.aes = list(
+           shape = 1,
+           fill = NA,
+           stroke = .5,
+           color = 'red'
+         ))) +
+  facet_grid(. ~ Regulation)
 
-y_ivld <- gsePathway(entrez_gene_list,
-                     pvalueCutoff = .2,
-                     pAdjustMethod = 'BH',
-                     verbose = F)
+
+y_ivld <- gsePathway(
+  entrez_gene_list,
+  pvalueCutoff = .2,
+  pAdjustMethod = 'BH',
+  eps = 1e-300,
+  nPermSimple = 100000,
+  verbose = F
+)
 
 as_tibble(y_ivld) %>% arrange(NES) %>% print(n = 100)
-# the only pathway enriched on Reactome was 'Neuronal System'
+
+ivld_1wpc_pathways <- as_tibble(y_ivld) %>% arrange(NES) %>% dplyr::select(., Description, NES)
+
+write_tsv(ivld_1wpc_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/ivld_1wpc_gsePathways.tsv')
+
+# Convert to a Markdown table ----
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/ivld_1wpc_gsePathways.tsv', header = TRUE, sep = "\t")
+cat(markdown_table(data), sep = "\n")
 
 
-### significantly differentially regulated genes ###
-gsea_formatting_significant(res_ivld_vs_conu_1wpc, 'ivld', '1wpc')
-
-gsea_ivld_1wpc_significant <- gseGO(
-  geneList = enrichment_gsea_ivld_1wpc,
-  OrgDb = org.Hs.eg.db,
-  ont = 'BP',
-  pvalueCutoff = 0.05,
-  pAdjustMethod = 'BH',
-  verbose = T)
-
-as_tibble(gsea_ivld_1wpc_significant)  # no enriched terms. Only one gene enriched in gsea.
 
