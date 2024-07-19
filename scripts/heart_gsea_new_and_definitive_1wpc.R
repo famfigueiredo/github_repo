@@ -423,6 +423,13 @@ viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez
 viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = entrez_gene_list)
 viewPathway('TRAF3-dependent IRF activation pathway', readable = T, foldChange = entrez_gene_list)
 
+genes_2607 <- str_split(bottom10_low_nes %>% filter(ID == 'GO:0032607') %>% pull(core_enrichment),'/')[[1]]
+genes_2647 <- str_split(bottom10_low_nes %>% filter(ID == 'GO:0032647') %>% pull(core_enrichment), '/')[[1]]
+genes_61844 <- str_split(bottom10_low_nes %>% filter(ID == 'GO:0061844') %>% pull(core_enrichment), '/')[[1]]
+
+intersect(genes_2607, genes_2647)
+bottom10_low_nes$Description
+
 # Convert to a Markdown table ----
 data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/ivhd_1wpc_gsePathways.tsv', header = TRUE, sep = "\t")
 cat(markdown_table(data), sep = "\n")
@@ -458,6 +465,8 @@ bottom10_low_nes <-
 
 low_high_nes_ivld_1wpc <-
   bind_rows(top10_high_nes, bottom10_low_nes)
+
+low_high_nes_ivld_1wpc$Description
 
 low_high_nes_ivld_1wpc %>%
   mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
