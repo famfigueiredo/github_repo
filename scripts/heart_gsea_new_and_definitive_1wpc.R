@@ -13,6 +13,7 @@ rm(list = setdiff(ls(), grep("res_", ls(), value = TRUE)))
 source(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/scripts/functions_data-wrangling_march24.R'
 )
+
 ## Loading results files ----
 setwd(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc'
@@ -39,7 +40,7 @@ save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/dese
 
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_dnavaccine_1wpc.RData')
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_dnavaccine_1wpc.RData')
-load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_dnavaccine1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_dnavaccine_1wpc.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES 
 top10_high_nes <-
@@ -107,13 +108,13 @@ data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnal
 # Print the Markdown table
 cat(markdown_table(data), sep = "\n")
 
-# gsePathway with 10k permutations in nPermSimple
-load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_dnavaccine1wpc.RData')
+# gsePathway with 100k permutations in nPermSimple
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_dnavaccine_1wpc.RData')
 y_dnavaccine <- gsePathway(entrez_gene_list,
                       pvalueCutoff = .2,
                       pAdjustMethod = 'BH',
                       eps = 1e-300,
-                      nPermSimple = 10000,
+                      nPermSimple = 100000,
                       verbose = F)
 
 as_tibble(y_dnavaccine) %>% arrange(NES) %>% print(n = 100)
@@ -124,11 +125,11 @@ viewPathway('TNFR1-induced NF-kappa-B signaling pathway', readable = T, foldChan
 viewPathway('Interleukin-6 family signaling', readable = T, foldChange = entrez_gene_list)
 
 
-dnavaccine1wpc_pathways <- as_tibble(y_dnavaccine) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
+dnavaccine_1wpc_pathways <- as_tibble(y_dnavaccine) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
 
 as_tibble(y_dnavaccine) %>% arrange(NES) %>% filter(., NES < 0) %>% pull(Description)
 
-write_tsv(dnavaccine1wpc_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/dnavaccine1wpc_gsePathways.tsv')
+write_tsv(dnavaccine_1wpc_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/dnavaccine1wpc_gsePathways.tsv')
 
 # Convert to a Markdown table ---
 data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/dnavaccine1wpc_gsePathways.tsv', header = TRUE, sep = "\t")
@@ -159,7 +160,7 @@ save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/dese
 
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_eomes_1wpc.RData')
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_eomes_1wpc.RData')
-load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_eomes1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_eomes_1wpc.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <- 
@@ -214,6 +215,15 @@ low_high_nes_eomes_1wpc %>%
   ) +
   facet_grid(. ~ Regulation)
 
+genes_69597 <- str_split(low_high_nes_eomes_1wpc %>% filter(ID == 'GO:0006959') %>% pull(core_enrichment),'/')[[1]]
+genes_19730 <- str_split(low_high_nes_eomes_1wpc %>% filter(ID == 'GO:0019730') %>% pull(core_enrichment),'/')[[1]]
+genes_983695 <- str_split(as_tibble(y_eomes) %>% filter(ID == 'R-HSA-983695') %>% pull(core_enrichment), '/')[[1]]
+
+y_eomes <- setReadable(y_eomes, org.Hs.eg.db)
+intersect(genes_69597, genes_19730)
+setdiff(genes_69597, genes_19730)
+
+intersect(genes_69597, genes_983695)
 
 # gsePathway with 100k permutations in nPermSimple
 y_eomes <- gsePathway(entrez_gene_list,
@@ -227,16 +237,16 @@ as_tibble(y_eomes) %>% arrange(NES) %>% print(n = 100)
 
 # viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
 
-eomes_pathways_down <- as_tibble(y_eomes) %>% arrange(NES) %>% filter(., NES < 0) %>% dplyr::select(., Description, NES)
-eomes1wpc_pathways <- as_tibble(y_eomes) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
+eomes_1wpc_pathways <- as_tibble(y_eomes) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
 
-write_tsv(eomes_pathways_down, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/eomes_downregulated_pathways.tsv')
-write_tsv(eomes1wpc_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/eomes1wpc_gsePathways.tsv')
+write_tsv(eomes_1wpc_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/eomes_1wpc_gsePathways.tsv')
 
-viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = entrez_gene_list)
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = entrez_gene_list)
+viewPathway('ADORA2B mediated anti-inflammatory cytokines production', readable = T, foldChange = entrez_gene_list)
+
 
 # Convert to a Markdown table ---
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/eomes1wpc_gsePathways.tsv', header = TRUE, sep = "\t")
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/eomes_1wpc_gsePathways.tsv', header = TRUE, sep = "\t")
 cat(markdown_table(data), sep = "\n")
 
 # ### significantly differentially regulated genes ###
@@ -263,9 +273,9 @@ save(gsea_simplified_results_gata3_1wpc, file = '~/Documents/PhD/Thesis/quantseq
 save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_gata31wpc.RData')
 
 # loading saved files to re-run analysis
-# load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_gata3_1wpc.RData')
-# load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_gata3_1wpc.RData')
-# load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_gata31wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_results_gata3_1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/gsea_simplified_results_gata3_1wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/gsea_results_tables/entrez_gene_list_gata3_1wpc.RData')
 
 # convert the gsea results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <- 
@@ -415,20 +425,22 @@ y_ivhd <- gsePathway(
 
 as_tibble(y_ivhd) %>% arrange(NES) %>% print(n = 100)
 
-ivhd_1wpc_pathways <- as_tibble(y_ivhd) %>% arrange(NES) %>% dplyr::select(., Description, NES)
+genes_909733 <- str_split(as_tibble(y_ivhd) %>% filter(ID == 'R-HSA-909733') %>% pull(core_enrichment), '/')[[1]]
+genes_936964 <- str_split(as_tibble(y_ivhd) %>% filter(ID == 'R-HSA-936964') %>% pull(core_enrichment), '/')[[1]]
+genes_918233 <- str_split(as_tibble(y_ivhd) %>% filter(ID == 'R-HSA-918233') %>% pull(core_enrichment), '/')[[1]]
+# the genes pulled from core_enrichment do not match the ones in viewPathway. there are more genes in viewPathway.
 
+ivhd_1wpc_pathways <- as_tibble(y_ivhd) %>% arrange(NES) %>% dplyr::select(., Description, NES)
 write_tsv(ivhd_1wpc_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/ivhd_1wpc_gsePathways.tsv')
 
 viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
 viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = entrez_gene_list)
 viewPathway('TRAF3-dependent IRF activation pathway', readable = T, foldChange = entrez_gene_list)
 
+
 genes_2607 <- str_split(bottom10_low_nes %>% filter(ID == 'GO:0032607') %>% pull(core_enrichment),'/')[[1]]
 genes_2647 <- str_split(bottom10_low_nes %>% filter(ID == 'GO:0032647') %>% pull(core_enrichment), '/')[[1]]
 genes_61844 <- str_split(bottom10_low_nes %>% filter(ID == 'GO:0061844') %>% pull(core_enrichment), '/')[[1]]
-
-intersect(genes_2607, genes_2647)
-bottom10_low_nes$Description
 
 # Convert to a Markdown table ----
 data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_1wpc/pathways/ivhd_1wpc_gsePathways.tsv', header = TRUE, sep = "\t")
