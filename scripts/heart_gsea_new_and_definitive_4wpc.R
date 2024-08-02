@@ -257,7 +257,7 @@ write_tsv(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/eomes_4wpc_gsePathways.tsv'
 )
 
-# Convert to a Markdown table ----
+# Convert to a Markdown table ---
 data <-
   read.delim(
     '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/eomes_4wpc_gsePathways.tsv',
@@ -270,6 +270,8 @@ cat(markdown_table(data), sep = "\n")
 
 ### all genes ###
 # gsea formatting starting from a DESeq results table
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
 gsea_formatting(res_gata3_vs_conu_4wpc, 'gata3', '4wpc')
 save(gsea_results_gata3_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_gata3_4wpc.RData')
 
@@ -387,7 +389,7 @@ write_tsv(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/gata3_4wpc_gsePathways.tsv'
 )
 
-# Convert to a Markdown table ----
+# Convert to a Markdown table ---
 data <-
   read.delim(
     '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/gata3_4wpc_gsePathways.tsv',
@@ -524,16 +526,7 @@ viewPathway('Cytokine Signaling in Immune system', readable = T, foldChange = iv
 viewPathway('TRAF3-dependent IRF activation pathway', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
 
 
-# Convert to a Markdown table ----
-data <-
-  read.delim(
-    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/ivhd_4wpc_gsePathways.tsv',
-    header = TRUE,
-    sep = "\t"
-  )
-cat(markdown_table(data), sep = "\n")
-
-
+# Convert to a Markdown table 
 ## IV-LD ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
@@ -549,6 +542,8 @@ save(ivld_entrez_gene_list_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAna
 
 nrow(gsea_results_ivld_4wpc)  # 1543 GO terms/pathways
 nrow(gsea_simplified_results_ivld_4wpc)  # 418 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
 
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_ivld_4wpc.RData')
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_ivld_4wpc.RData')
@@ -650,22 +645,8 @@ write_tsv(
 
 options(ggrepel.max.overlaps = Inf)
 
-viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('ROS and RNS production in phagocytes', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('Antigen processing-Cross presentation', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('Signaling by CSF1 (M-CSF) in myeloid cells', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('Cytokine Signaling in Immune system', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('TRAF3-dependent IRF activation pathway', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = ivld_entrez_gene_list_4wpc)
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = ivld_entrez_gene_list_4wpc)
 
 
-# Convert to a Markdown table ----
-data <-
-  read.delim(
-    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/ivld_4wpc_gsePathways.tsv',
-    header = TRUE,
-    sep = "\t"
-  )
-cat(markdown_table(data), sep = "\n")
-        
+# Convert to a Markdown table 
