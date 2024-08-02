@@ -35,7 +35,9 @@ save(gsea_results_dnavaccine_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataA
 gsea_simplified_results_dnavaccine_4wpc <-
   simplify(gsea_results_dnavaccine_4wpc)  # simplifying GO terms to reduce redundancy
 save(gsea_simplified_results_dnavaccine_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_dnavaccine_4wpc.RData')
-save(entrez_gene_list, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_dnavaccine_4wpc.RData')
+
+dnavaccine_entrez_gene_list_4wpc <- entrez_gene_list
+save(dnavaccine_entrez_gene_list_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_dnavaccine_4wpc.RData')
 
 nrow(gsea_results_dnavaccine_4wpc)  # 1222 GO terms/pathways
 nrow(gsea_simplified_results_dnavaccine_4wpc)  # 398 GO terms/pathways
@@ -127,13 +129,13 @@ y_dnavaccine_4wpc <-
 
 as_tibble(y_dnavaccine_4wpc) %>% arrange(NES) %>% print(n = 100)
 
-viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = entrez_gene_list)
-viewPathway('Signaling by CSF1 (M-CSF) in myeloid cells', readable = T, foldChange = entrez_gene_list)
-viewPathway('GPVI-mediated activation cascade', readable = T, foldChange = entrez_gene_list)
-viewPathway('Interleukin-3, Interleukin-5 and GM-CSF signaling', readable = T, foldChange = entrez_gene_list)
-viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = entrez_gene_list)
-viewPathway('Inactivation of CSF3 (G-CSF) signaling', readable = T, foldChange = entrez_gene_list)
-viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = entrez_gene_list)
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
+viewPathway('Signaling by CSF1 (M-CSF) in myeloid cells', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
+viewPathway('GPVI-mediated activation cascade', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
+viewPathway('Interleukin-3, Interleukin-5 and GM-CSF signaling', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
+viewPathway('Inactivation of CSF3 (G-CSF) signaling', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
+viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
 
 
 dnavaccine_4wpc_pathways <- as_tibble(y_dnavaccine_4wpc) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
@@ -369,8 +371,16 @@ y_gata3_4wpc <-
   )
 
 as_tibble(y_gata3_4wpc) %>% arrange(NES) %>% print(n = 100)
+as_tibble(y_gata3_4wpc) %>% filter(NES < 0) %>% print(n = 100)
 
-gata3_4wpc_pathways <- as_tibble(y_gata3_4wpc) %>% arrange(NES) %>% dplyr::select(., Description, NES)
+gata3_4wpc_pathways <- as_tibble(y_gata3_4wpc) %>% 
+  arrange(NES) %>% 
+  dplyr::select(., Description, NES) %>%
+  mutate(NES = sprintf('%.3f', NES))  # format NES to 3 decimal places
+
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = gata3_entrez_gene_list_4wpc)
+viewPathway('Activation of NF-kappaB in B cells', readable = T, foldChange = gata3_entrez_gene_list_4wpc)
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = gata3_entrez_gene_list_4wpc)
 
 write_tsv(
   gata3_4wpc_pathways,
@@ -491,10 +501,28 @@ as_tibble(y_ivhd_4wpc) %>% arrange(NES) %>% print(n = 100)
 
 ivhd_4wpc_pathways <- as_tibble(y_ivhd_4wpc) %>% arrange(NES) %>% dplyr::select(., Description, NES)
 
+ivhd_4wpc_pathways <- as_tibble(y_ivhd_4wpc) %>% 
+  arrange(NES) %>% 
+  dplyr::select(., Description, NES) %>%
+  mutate(NES = sprintf('%.3f', NES))  # format NES to 3 decimal places
+
+
 write_tsv(
   ivhd_4wpc_pathways,
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/ivhd_4wpc_gsePathways.tsv'
 )
+
+options(ggrepel.max.overlaps = Inf)
+
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('ROS and RNS production in phagocytes', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Antigen processing-Cross presentation', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Signaling by CSF1 (M-CSF) in myeloid cells', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Cytokine Signaling in Immune system', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('TRAF3-dependent IRF activation pathway', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+
 
 # Convert to a Markdown table ----
 data <-
@@ -610,10 +638,27 @@ as_tibble(y_ivld_4wpc) %>% arrange(NES) %>% print(n = 200)
 
 ivld_4wpc_pathways <- as_tibble(y_ivld_4wpc) %>% arrange(NES) %>% dplyr::select(., Description, NES)
 
+ivld_4wpc_pathways <- as_tibble(y_ivld_4wpc) %>% 
+  arrange(NES) %>% 
+  dplyr::select(., Description, NES) %>%
+  mutate(NES = sprintf('%.3f', NES))  # format NES to 3 decimal places
+
 write_tsv(
   ivld_4wpc_pathways,
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/ivld_4wpc_gsePathways.tsv'
 )
+
+options(ggrepel.max.overlaps = Inf)
+
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('ROS and RNS production in phagocytes', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Antigen processing-Cross presentation', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Signaling by CSF1 (M-CSF) in myeloid cells', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Cytokine Signaling in Immune system', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('TRAF3-dependent IRF activation pathway', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+
 
 # Convert to a Markdown table ----
 data <-
