@@ -42,6 +42,8 @@ save(dnavaccine_entrez_gene_list_4wpc, file = '~/Documents/PhD/Thesis/quantseq_d
 nrow(gsea_results_dnavaccine_4wpc)  # 1222 GO terms/pathways
 nrow(gsea_simplified_results_dnavaccine_4wpc)  # 398 GO terms/pathways
 
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_dnavaccine_4wpc.RData')
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_dnavaccine_4wpc.RData')
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_dnavaccine_4wpc.RData')
@@ -136,6 +138,8 @@ viewPathway('Interleukin-3, Interleukin-5 and GM-CSF signaling', readable = T, f
 viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
 viewPathway('Inactivation of CSF3 (G-CSF) signaling', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
 viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
+viewPathway('FCERI mediated MAPK activation', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
+viewPathway('FCERI mediated NF-kB activation', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
 
 
 dnavaccine_4wpc_pathways <- as_tibble(y_dnavaccine_4wpc) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
@@ -195,7 +199,7 @@ low_high_nes_eomes_4wpc %>%
     color = 'red'
   ) +
   geom_point(aes(color = Count, size = Count), shape = 16) +
-  # scale_color_viridis_c('Gene set') +
+  # scale_color_viridis_c('Gene set')
   scale_color_viridis_c('Gene count', guide = 'legend', limits = c(2, max(low_high_nes_eomes_4wpc$Count))) +
   scale_size_continuous(
     'Set size',
