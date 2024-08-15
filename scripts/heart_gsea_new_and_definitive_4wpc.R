@@ -29,18 +29,20 @@ for (i in 1:length(results_files)) {
 ## DNA vaccine ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(res_dnavaccine_vs_conu_4wpc, 'dnavaccine', '4wpc')
-save(gsea_results_dnavaccine_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_dnavaccine_4wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/heart_res_dnavaccine_vs_conu_4wpc.RData')
 
-gsea_simplified_results_dnavaccine_4wpc <-
-  simplify(gsea_results_dnavaccine_4wpc)  # simplifying GO terms to reduce redundancy
-save(gsea_simplified_results_dnavaccine_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_dnavaccine_4wpc.RData')
+gsea_formatting(heart_res_dnavaccine_vs_conu_4wpc, 'heart', 'dnavaccine', '4wpc')
+save(heart_gsea_results_dnavaccine_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_dnavaccine_4wpc.RData')
 
-dnavaccine_entrez_gene_list_4wpc <- entrez_gene_list
-save(dnavaccine_entrez_gene_list_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_dnavaccine_4wpc.RData')
+heart_gsea_simplified_results_dnavaccine_4wpc <-
+  simplify(heart_gsea_results_dnavaccine_4wpc)  # simplifying GO terms to reduce redundancy
+save(heart_gsea_simplified_results_dnavaccine_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_dnavaccine_4wpc.RData')
 
-nrow(gsea_results_dnavaccine_4wpc)  # 1222 GO terms/pathways
-nrow(gsea_simplified_results_dnavaccine_4wpc)  # 398 GO terms/pathways
+heart_entrez_gene_list_dnavaccine_4wpc <- entrez_gene_list
+save(heart_entrez_gene_list_dnavaccine_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_dnavaccine_4wpc.RData')
+
+nrow(heart_gsea_results_dnavaccine_4wpc)  # 1423 GO terms/pathways
+nrow(heart_gsea_simplified_results_dnavaccine_4wpc)  # 418 GO terms/pathways
 
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
 
@@ -50,14 +52,14 @@ load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/resu
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <-
-  as_tibble(gsea_simplified_results_dnavaccine_4wpc@result) %>%
+  as_tibble(heart_gsea_simplified_results_dnavaccine_4wpc) %>%
   filter(NES > 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_dnavaccine_4wpc@result) %>%
+  as_tibble(heart_gsea_simplified_results_dnavaccine_4wpc) %>%
   filter(NES < 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = NES) %>%
@@ -120,51 +122,54 @@ low_high_nes_dnavaccine_4wpc %>%
 
 y_dnavaccine_4wpc <-
   gsePathway(
-    entrez_gene_list,
+    heart_entrez_gene_list_dnavaccine_4wpc,
     # the gsea_formatting function removes the duplicates from this object
     pvalueCutoff = .2,
     pAdjustMethod = 'BH',
     eps = 1e-300,
-    nPermSimple = 100000,
+    nPermSimple = 10000,
     verbose = F
   )
 
 as_tibble(y_dnavaccine_4wpc) %>% arrange(NES) %>% print(n = 100)
 
-viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
-viewPathway('Signaling by CSF1 (M-CSF) in myeloid cells', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
-viewPathway('GPVI-mediated activation cascade', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
-viewPathway('Interleukin-3, Interleukin-5 and GM-CSF signaling', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
-viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
-viewPathway('Inactivation of CSF3 (G-CSF) signaling', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
-viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
-viewPathway('FCERI mediated MAPK activation', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
-viewPathway('FCERI mediated NF-kB activation', readable = T, foldChange = dnavaccine_entrez_gene_list_4wpc)
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = heart_entrez_gene_list_dnavaccine_4wpc)
+viewPathway('Signaling by CSF1 (M-CSF) in myeloid cells', readable = T, foldChange = heart_entrez_gene_list_dnavaccine_4wpc)
+viewPathway('Antigen processing-Cross presentation', readable = T, foldChange = heart_entrez_gene_list_dnavaccine_4wpc)
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = heart_entrez_gene_list_dnavaccine_4wpc)
+viewPathway('FCERI mediated MAPK activation', readable = T, foldChange = heart_entrez_gene_list_dnavaccine_4wpc)
+
 
 
 dnavaccine_4wpc_pathways <- as_tibble(y_dnavaccine_4wpc) %>% arrange(NES) %>% dplyr::select(., Description, NES) 
 
 as_tibble(y_dnavaccine_4wpc) %>% arrange(NES) %>% filter(., NES < 0) %>% pull(Description)
 
-write_tsv(dnavaccine_4wpc_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/dnavaccine_1wpc_gsePathways.tsv')
+write_tsv(dnavaccine_4wpc_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/dnavaccine_4wpc_gsePathways.tsv')
 
 # Convert to a Markdown table ---
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/dnavaccine_1wpc_gsePathways.tsv', header = TRUE, sep = "\t")
+data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/dnavaccine_4wpc_gsePathways.tsv', header = TRUE, sep = "\t")
 cat(markdown_table(data), sep = "\n")
 
 ## EOMES ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(res_eomes_vs_conu_4wpc, 'eomes', '4wpc')
-save(gsea_results_eomes_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_eomes_4wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/heart_res_eomes_vs_conu_4wpc.RData')
 
-gsea_simplified_results_eomes_4wpc <-
-  simplify(gsea_results_eomes_4wpc)  # simplifying GO terms to reduce redundancy
-save(gsea_simplified_results_eomes_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_eomes_4wpc.RData')
-save(eomes_entrez_gene_list_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_eomes_4wpc.RData')
+gsea_formatting(heart_res_eomes_vs_conu_4wpc, 'heart', 'eomes', '4wpc')
+save(heart_gsea_results_eomes_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_eomes_4wpc.RData')
 
-nrow(gsea_results_eomes_4wpc)  # 1148 GO terms/pathways
-nrow(gsea_simplified_results_eomes_4wpc)  # 367 GO terms/pathways
+heart_gsea_simplified_results_eomes_4wpc <-
+  simplify(heart_gsea_results_eomes_4wpc)  # simplifying GO terms to reduce redundancy
+save(heart_gsea_simplified_results_eomes_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_eomes_4wpc.RData')
+
+heart_entrez_gene_list_eomes_4wpc <- entrez_gene_list
+save(heart_entrez_gene_list_eomes_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_eomes_4wpc.RData')
+
+nrow(heart_gsea_results_eomes_4wpc)  # 1064 GO terms/pathways
+nrow(heart_gsea_simplified_results_eomes_4wpc)  # 358 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
 
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_eomes_4wpc.RData')
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_eomes_4wpc.RData')
@@ -172,14 +177,14 @@ load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/resu
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <-
-  as_tibble(gsea_simplified_results_eomes_4wpc) %>%
+  as_tibble(heart_gsea_simplified_results_eomes_4wpc) %>%
   filter(NES > 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_eomes_4wpc) %>%
+  as_tibble(heart_gsea_simplified_results_eomes_4wpc) %>%
   filter(NES < 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = setSize) %>%
@@ -240,11 +245,9 @@ low_high_nes_eomes_4wpc %>%
              ))) +
   facet_grid(. ~ Regulation)
 
-eomes_entrez_gene_list_4wpc <- entrez_gene_list
-
 y_eomes_4wpc <-
   gsePathway(
-    entrez_gene_list,
+    heart_entrez_gene_list_eomes_4wpc,
     pvalueCutoff = .2,
     pAdjustMethod = 'BH',
     eps = 1e-300,
@@ -274,38 +277,39 @@ cat(markdown_table(data), sep = "\n")
 
 ### all genes ###
 # gsea formatting starting from a DESeq results table
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/heart_res_gata3_vs_conu_4wpc.RData')
+
+gsea_formatting(heart_res_gata3_vs_conu_4wpc, 'heart', 'gata3', '4wpc')
+save(heart_gsea_results_gata3_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_gata3_4wpc.RData')
+
+heart_gsea_simplified_results_gata3_4wpc <-
+  simplify(heart_gsea_results_gata3_4wpc)  # simplifying GO terms to reduce redundancy
+save(heart_gsea_simplified_results_gata3_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_gata3_4wpc.RData')
+
+heart_entrez_gene_list_gata3_4wpc <- entrez_gene_list
+save(heart_entrez_gene_list_gata3_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_gata3_4wpc.RData')
+
+nrow(heart_gsea_results_gata3_4wpc)  # 1056 GO terms/pathways
+nrow(heart_gsea_simplified_results_gata3_4wpc)  # 351 GO terms/pathways
+
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
-
-gsea_formatting(res_gata3_vs_conu_4wpc, 'gata3', '4wpc')
-save(gsea_results_gata3_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_gata3_4wpc.RData')
-
-gsea_simplified_results_gata3_4wpc <-
-  simplify(gsea_results_gata3_4wpc)  # simplifying GO terms to reduce redundancy
-save(gsea_simplified_results_gata3_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_gata3_4wpc.RData')
-
-gata3_entrez_gene_list_4wpc <- entrez_gene_list
-save(gata3_entrez_gene_list_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_gata3_4wpc.RData')
-
-nrow(gsea_results_gata3_4wpc)  #  796 GO terms/pathways
-nrow(gsea_simplified_results_gata3_4wpc)  # 296 GO terms/pathways
 
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_gata3_4wpc.RData')
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_gata3_4wpc.RData')
-load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_gata3_4wpc.RData')
-
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_gata31wpc.RData')
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <-
-  as_tibble(gsea_simplified_results_gata3_4wpc) %>%
+  as_tibble(heart_gsea_simplified_results_gata3_4wpc) %>%
   filter(NES > 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_gata3_4wpc) %>%
+  as_tibble(heart_gsea_simplified_results_gata3_4wpc) %>%
   filter(NES < 0) %>%
   arrange(desc(setSize)) %>%
-  top_n(10, wt = setSize) %>%  # only 3 downregulated terms
+  top_n(10, wt = setSize) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 low_high_nes_gata3_4wpc <-
@@ -367,7 +371,7 @@ low_high_nes_gata3_4wpc %>%
 
 y_gata3_4wpc <-
   gsePathway(
-    gata3_entrez_gene_list_4wpc,
+    heart_entrez_gene_list_gata3_4wpc,
     # the gsea_formatting function removes the duplicates from this object
     pvalueCutoff = .2,
     pAdjustMethod = 'BH',
@@ -377,16 +381,15 @@ y_gata3_4wpc <-
   )
 
 as_tibble(y_gata3_4wpc) %>% arrange(NES) %>% print(n = 100)
-as_tibble(y_gata3_4wpc) %>% filter(NES < 0) %>% print(n = 100)
 
 gata3_4wpc_pathways <- as_tibble(y_gata3_4wpc) %>% 
   arrange(NES) %>% 
   dplyr::select(., Description, NES) %>%
   mutate(NES = sprintf('%.3f', NES))  # format NES to 3 decimal places
 
-viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = gata3_entrez_gene_list_4wpc)
-viewPathway('Activation of NF-kappaB in B cells', readable = T, foldChange = gata3_entrez_gene_list_4wpc)
-viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = gata3_entrez_gene_list_4wpc)
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = heart_entrez_gene_list_gata3_4wpc)
+viewPathway('Antigen processing-Cross presentation', readable = T, foldChange = heart_entrez_gene_list_gata3_4wpc)
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = heart_entrez_gene_list_gata3_4wpc)
 
 write_tsv(
   gata3_4wpc_pathways,
@@ -406,18 +409,22 @@ cat(markdown_table(data), sep = "\n")
 
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(res_ivhd_vs_conu_4wpc, 'ivhd', '4wpc')
-save(gsea_results_ivhd_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_ivhd_4wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/heart_res_ivhd_vs_conu_4wpc.RData')
 
-gsea_simplified_results_ivhd_4wpc <-
-  simplify(gsea_results_ivhd_4wpc)  # simplifying GO terms to reduce redundancy
-save(gsea_simplified_results_ivhd_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_ivhd_4wpc.RData')
+gsea_formatting(heart_res_ivhd_vs_conu_4wpc, 'heart', 'ivhd', '4wpc')
+save(heart_gsea_results_ivhd_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_ivhd_4wpc.RData')
 
-ivhd_entrez_gene_list_4wpc <- entrez_gene_list
-save(ivhd_entrez_gene_list_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_ivhd_4wpc.RData')
+heart_gsea_simplified_results_ivhd_4wpc <-
+  simplify(heart_gsea_results_ivhd_4wpc)  # simplifying GO terms to reduce redundancy
+save(heart_gsea_simplified_results_ivhd_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_ivhd_4wpc.RData')
 
-nrow(gsea_results_ivhd_4wpc)  #   GO terms/pathways
-nrow(gsea_simplified_results_ivhd_4wpc)  #  GO terms/pathways
+heart_entrez_gene_list_ivhd_4wpc <- entrez_gene_list
+save(heart_entrez_gene_list_ivhd_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_ivhd_4wpc.RData')
+
+nrow(heart_gsea_results_ivhd_4wpc)  # 1274 GO terms/pathways
+nrow(heart_gsea_simplified_results_ivhd_4wpc)  # 380 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
 
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_ivhd_4wpc.RData')
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_ivhd_4wpc.RData')
@@ -425,14 +432,14 @@ load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/resu
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <-
-  as_tibble(gsea_simplified_results_ivhd_4wpc) %>%
+  as_tibble(heart_gsea_simplified_results_ivhd_4wpc) %>%
   filter(NES > 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_ivhd_4wpc) %>%
+  as_tibble(heart_gsea_simplified_results_ivhd_4wpc) %>%
   filter(NES < 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = setSize) %>%
@@ -452,14 +459,14 @@ low_high_nes_ivhd_4wpc %>%
     color = 'red'
   ) +
   geom_point(aes(color = Count, size = Count), shape = 16) +
-  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(2, 300)) +
+  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(2, 1.1*max(low_high_nes_ivhd_4wpc$Count))) +
   scale_size_continuous(
     'Set size',
     range = c(2, 10),
     guide = 'legend',
     limits = c(2, max(low_high_nes_ivhd_4wpc$setSize))
   ) +
-  scale_x_continuous(limits = c(0, 300)) +
+  scale_x_continuous(limits = c(0, 1.1*max(low_high_nes_ivhd_4wpc$Count))) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +
@@ -493,9 +500,12 @@ low_high_nes_ivhd_4wpc %>%
     ))) +
     facet_grid(. ~ Regulation)
     
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_definitive_plots/ivhd_4wpc.png', width = 1000, height = 1023, units = "px", dpi = 72)
+
+
 y_ivhd_4wpc <-
   gsePathway(
-    ivhd_entrez_gene_list_4wpc,
+    heart_entrez_gene_list_ivhd_4wpc,
     pvalueCutoff = .2,
     pAdjustMethod = 'BH',
     eps = 1e-300,
@@ -520,32 +530,38 @@ write_tsv(
 
 options(ggrepel.max.overlaps = Inf)
 
-viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('ROS and RNS production in phagocytes', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('Antigen processing-Cross presentation', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('Signaling by CSF1 (M-CSF) in myeloid cells', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('Activation of IRF3, IRF7 mediated by TBK1, IKKε (IKBKE)', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('Cytokine Signaling in Immune system', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
-viewPathway('TRAF3-dependent IRF activation pathway', readable = T, foldChange = ivhd_entrez_gene_list_4wpc)
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = heart_entrez_gene_list_ivhd_4wpc)
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/ivhd_interferon_alpha-beta_signaling.png', width = 1600, height = 1000, units = "px", dpi = 72)
 
+viewPathway('ROS and RNS production in phagocytes', readable = T, foldChange = heart_entrez_gene_list_ivhd_4wpc)
+viewPathway('Antigen processing-Cross presentation', readable = T, foldChange = heart_entrez_gene_list_ivhd_4wpc)
 
-# Convert to a Markdown table 
+# Convert to a Markdown table ---
+data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/ivhd_4wpc_gsePathways.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+cat(markdown_table(data), sep = "\n")
+
 ## IV-LD ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(res_ivld_vs_conu_4wpc, 'ivld', '4wpc')
-save(gsea_results_ivld_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_ivld_4wpc.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/heart_res_ivld_vs_conu_4wpc.RData')
 
-gsea_simplified_results_ivld_4wpc <-
-  simplify(gsea_results_ivld_4wpc)  # simplifying GO terms to reduce redundancy
-save(gsea_simplified_results_ivld_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_ivld_4wpc.RData')
+gsea_formatting(heart_res_ivld_vs_conu_4wpc, 'heart', 'ivld', '4wpc')
+save(heart_gsea_results_ivld_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_results_ivld_4wpc.RData')
 
-ivld_entrez_gene_list_4wpc <- entrez_gene_list
-save(ivld_entrez_gene_list_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_ivld_4wpc.RData')
+heart_gsea_simplified_results_ivld_4wpc <-
+  simplify(heart_gsea_results_ivld_4wpc)  # simplifying GO terms to reduce redundancy
+save(heart_gsea_simplified_results_ivld_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_gsea_simplified_results_ivld_4wpc.RData')
 
-nrow(gsea_results_ivld_4wpc)  # 1543 GO terms/pathways
-nrow(gsea_simplified_results_ivld_4wpc)  # 418 GO terms/pathways
+heart_entrez_gene_list_ivld_4wpc <- entrez_gene_list
+save(heart_entrez_gene_list_ivld_4wpc, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_results_tables/heart_entrez_gene_list_ivld_4wpc.RData')
+
+nrow(heart_gsea_results_ivld_4wpc)  # 1521 GO terms/pathways
+nrow(heart_gsea_simplified_results_ivld_4wpc)  # 409 GO terms/pathways
 
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
 
@@ -555,14 +571,14 @@ load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/resu
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <-
-  as_tibble(gsea_simplified_results_ivld_4wpc) %>%
+  as_tibble(heart_gsea_simplified_results_ivld_4wpc) %>%
   filter(NES > 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_ivld_4wpc) %>%
+  as_tibble(heart_gsea_simplified_results_ivld_4wpc) %>%
   filter(NES < 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = setSize) %>%
@@ -582,14 +598,14 @@ low_high_nes_ivld_4wpc %>%
     color = 'red'
   ) +
   geom_point(aes(color = Count, size = Count), shape = 16) +
-  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(2, 300)) +
+  scale_color_viridis_c('Gene count', guide = 'legend', limits = c(2, 1.1*max(low_high_nes_ivld_4wpc$Count))) +
   scale_size_continuous(
     'Set size',
     range = c(2, 10),
     guide = 'legend',
     limits = c(2, max(low_high_nes_ivld_4wpc$setSize))
   ) +
-  scale_x_continuous(limits = c(0, 300)) +
+  scale_x_continuous(limits = c(0, 350)) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +
@@ -623,9 +639,12 @@ low_high_nes_ivld_4wpc %>%
     ))) +
   facet_grid(. ~ Regulation)
 
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/gsea_definitive_plots/ivld_4wpc.png', width = 1000, height = 1023, units = "px", dpi = 72)
+
+
 y_ivld_4wpc <-
   gsePathway(
-    ivld_entrez_gene_list_4wpc,
+    heart_entrez_gene_list_ivld_4wpc,
     pvalueCutoff = .2,
     pAdjustMethod = 'BH',
     eps = 1e-300,
@@ -649,8 +668,48 @@ write_tsv(
 
 options(ggrepel.max.overlaps = Inf)
 
-viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = ivld_entrez_gene_list_4wpc)
-viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = ivld_entrez_gene_list_4wpc)
+viewPathway('Interferon alpha/beta signaling', readable = T, foldChange = heart_entrez_gene_list_ivld_4wpc)
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/ivld_interferon_alpha-beta_signaling.png', width = 1600, height = 1000, units = "px", dpi = 72)
+
+viewPathway('Antigen processing-Cross presentation', readable = T, foldChange = heart_entrez_gene_list_ivld_4wpc)
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/ivld_antigen_processing_cross-presentation.png', width = 1600, height = 1000, units = "px", dpi = 72)
+
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers', readable = T, foldChange = heart_entrez_gene_list_ivld_4wpc)
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/ivld_antigen_BCR_second_messengers.png', width = 1600, height = 1000, units = "px", dpi = 72)
 
 
-# Convert to a Markdown table 
+# Convert to a Markdown table ---
+data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/ivld_4wpc_gsePathways.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+cat(markdown_table(data), sep = "\n")
+
+improved_data_wrangling(heart_res_ivld_vs_conu_4wpc, 'ivld', '4wpc')
+#############################
+# Experimenting with shrunk data ----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
