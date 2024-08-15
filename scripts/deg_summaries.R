@@ -242,11 +242,11 @@ for (i in 1:length(results_files)) {
 }
 
 # Renaming GE objects to match filename
-objects <- ls(pattern = '^res_.*_conu_4wpc')
-for (obj in objects) {
-  assign(paste0('heart_', obj), get(obj))
-}
-rm(list = objects)
+# objects <- ls(pattern = '^res_.*_conu_4wpc')
+# for (obj in objects) {
+#   assign(paste0('heart_', obj), get(obj))
+# }
+# rm(list = objects)
 
 
 # Create empty list to store results
@@ -339,12 +339,7 @@ deg_regulation_summary_4wpc %>%
     linetype = 'dotted',
     linewidth = 0.2
   ) +
-  geom_hline(yintercept = 0, size = 0.2) 
-
-
-
-
-
+  geom_hline(yintercept = 0, linewidth = 0.2) 
 
 
 # Spleen ----
@@ -999,12 +994,18 @@ EnhancedVolcano(results_dnavaccine_4wpc,
                 y = 'pvalue',
                 FCcutoff = 1,
                 title = 'DNA vaccine',
-                subtitle = bquote(italic('4WPC')))
+                subtitle = bquote(italic('4WPC'))) + 
+  theme(text = element_text(size = 8, family = 'Times New Roman')) +
+  theme(plot.title = element_text(hjust = .5),
+        plot.subtitle = element_text(hjust = .5))
+
 
 # IV-LD 4WPC volcano plot ----
 # converting DESeq2 result table rownames to human orthologs
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/heart_res_ivld_vs_conu_4wpc.RData')
+
 orth_hs <- gorth(
-  query = rownames(res_ivld_vs_conu_4wpc),
+  query = rownames(heart_res_ivld_vs_conu_4wpc),
   source_organism = 'ssalar',
   target_organism = 'hsapiens',
   mthreshold = 1,
@@ -1012,7 +1013,7 @@ orth_hs <- gorth(
 )
 
 # rownames to column to be able to use left_join
-df <- as.data.frame(res_ivld_vs_conu_4wpc) %>% rownames_to_column(var = 'ensembl')
+df <- as.data.frame(heart_res_ivld_vs_conu_4wpc) %>% rownames_to_column(var = 'ensembl')
 
 # join results table with human ortholog names
 results_ivld_4wpc <- df %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>% na.omit() %>% 
@@ -1032,13 +1033,18 @@ EnhancedVolcano(results_ivld_4wpc,
                 y = 'pvalue',
                 FCcutoff = 1,
                 title = 'IV-LD',
-                subtitle = bquote(italic('4WPC')))
+                subtitle = bquote(italic('4WPC'))) +
+  theme(text = element_text(size = 8, family = 'Times New Roman')) +
+  theme(plot.title = element_text(hjust = .5),
+        plot.subtitle = element_text(hjust = .5))
 
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/volcanoplot_shrunk_ivld.png', width = 1000, height = 632, units = "px", dpi = 72)
 # IV-HD 4WPC volcano plot ----
 # converting DESeq2 result table rownames to human orthologs
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/heart_res_ivhd_vs_conu_4wpc.RData')
+
 orth_hs <- gorth(
-  query = rownames(res_ivhd_vs_conu_4wpc),
+  query = rownames(heart_res_ivhd_vs_conu_4wpc),
   source_organism = 'ssalar',
   target_organism = 'hsapiens',
   mthreshold = 1,
@@ -1046,7 +1052,7 @@ orth_hs <- gorth(
 )
 
 # rownames to column to be able to use left_join
-df <- as.data.frame(res_ivhd_vs_conu_4wpc) %>% rownames_to_column(var = 'ensembl')
+df <- as.data.frame(heart_res_ivhd_vs_conu_4wpc) %>% rownames_to_column(var = 'ensembl')
 
 # join results table with human ortholog names
 results_ivhd_4wpc <- df %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>% na.omit() %>% 
@@ -1066,13 +1072,18 @@ EnhancedVolcano(results_ivhd_4wpc,
                 y = 'pvalue',
                 FCcutoff = 1,
                 title = 'IV-HD',
-                subtitle = bquote(italic('4WPC')))
+                subtitle = bquote(italic('4WPC'))) +
+  theme(text = element_text(size = 8, family = 'Times New Roman')) +
+  theme(plot.title = element_text(hjust = .5),
+        plot.subtitle = element_text(hjust = .5))
 
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/volcanoplot_shrunk_ivhd.png', width = 1000, height = 632, units = "px", dpi = 72)
 # EOMES 4WPC volcano plot ----
 # converting DESeq2 result table rownames to human orthologs
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/heart_res_eomes_vs_conu_4wpc.RData')
+
 orth_hs <- gorth(
-  query = rownames(res_eomes_vs_conu_4wpc),
+  query = rownames(heart_res_eomes_vs_conu_4wpc),
   source_organism = 'ssalar',
   target_organism = 'hsapiens',
   mthreshold = 1,
@@ -1080,7 +1091,7 @@ orth_hs <- gorth(
 )
 
 # rownames to column to be able to use left_join
-df <- as.data.frame(res_eomes_vs_conu_4wpc) %>% rownames_to_column(var = 'ensembl')
+df <- as.data.frame(heart_res_eomes_vs_conu_4wpc) %>% rownames_to_column(var = 'ensembl')
 
 # join results table with human ortholog names
 results_eomes_4wpc <- df %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>% na.omit() %>% 
@@ -1100,12 +1111,19 @@ EnhancedVolcano(results_eomes_4wpc,
                 y = 'pvalue',
                 FCcutoff = 1,
                 title = 'EOMES',
-                subtitle = bquote(italic('4WPC')))
+                subtitle = bquote(italic('4WPC'))) +
+  theme(text = element_text(size = 8, family = 'Times New Roman')) +
+  theme(plot.title = element_text(hjust = .5),
+        plot.subtitle = element_text(hjust = .5))
+
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/volcanoplot_shrunk_eomes.png', width = 1000, height = 632, units = "px", dpi = 72)
 
 # GATA3 4WPC volcano plot ----
 # converting DESeq2 result table rownames to human orthologs
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/heart_res_gata3_vs_conu_4wpc.RData')
+
 orth_hs <- gorth(
-  query = rownames(res_gata3_vs_conu_4wpc),
+  query = rownames(heart_res_gata3_vs_conu_4wpc),
   source_organism = 'ssalar',
   target_organism = 'hsapiens',
   mthreshold = 1,
@@ -1113,7 +1131,7 @@ orth_hs <- gorth(
 )
 
 # rownames to column to be able to use left_join
-df <- as.data.frame(res_gata3_vs_conu_4wpc) %>% rownames_to_column(var = 'ensembl')
+df <- as.data.frame(heart_res_gata3_vs_conu_4wpc) %>% rownames_to_column(var = 'ensembl')
 
 # join results table with human ortholog names
 results_gata3_4wpc <- df %>% left_join(orth_hs, by = c('ensembl' = 'input')) %>% na.omit() %>% 
@@ -1133,4 +1151,9 @@ EnhancedVolcano(results_gata3_4wpc,
                 y = 'pvalue',
                 FCcutoff = 1,
                 title = 'GATA3',
-                subtitle = bquote(italic('4WPC')))
+                subtitle = bquote(italic('4WPC'))) +
+  theme(text = element_text(size = 8, family = 'Times New Roman')) +
+  theme(plot.title = element_text(hjust = .5),
+        plot.subtitle = element_text(hjust = .5))
+
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/volcanoplot_shrunk_gata3.png', width = 1000, height = 632, units = "px", dpi = 72)
