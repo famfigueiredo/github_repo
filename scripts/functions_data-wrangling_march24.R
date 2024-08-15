@@ -117,7 +117,7 @@ filter_rows_by_GO_term <- function(df1, df2, id_column_name) {
 
 # running gsea starting from a DESeq results table
 gsea_formatting <-
-  function(results_table, treatment, sampling_point) {
+  function(results_table, tissue, treatment, sampling_point) {
     # Install and load required packages
     required_packages <-
       c('dplyr', 'gprofiler2', 'clusterProfiler', 'org.Hs.eg.db')
@@ -185,12 +185,12 @@ gsea_formatting <-
       pAdjustMethod = 'BH',
       verbose = T,
       eps = 1e-300,
-      nPermSimple = 100000
+      nPermSimple = 10000
     )
     
     # Assign the results to a variable including treatment and sampling_point in the name
     results_name <-
-      paste0('gsea_results_', treatment, '_', sampling_point)
+      paste0(tissue, '_', 'gsea_results_', treatment, '_', sampling_point)
     assign(results_name, gsea_results, envir = .GlobalEnv)
     
     return(gsea_results)
