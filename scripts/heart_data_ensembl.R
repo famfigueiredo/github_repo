@@ -28,7 +28,7 @@ source(
 
 # directory containing HTSeq count files
 directory <-
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/ensembl_htseq-count'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/readcounts/ensembl_htseq-count'
 
 # Creating count matrix ####
 sampleFiles <- grep('readcount', list.files(directory), value = T)
@@ -166,7 +166,7 @@ pca
 
 # Creating DESeqDataSet object and modelling with ~group ####
 load(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/sampleTable.Rda'
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable.Rda'
 )
 
 sampleTable %>%
@@ -192,19 +192,18 @@ ddsGroup <-
   ddsGroup[keep, ]
 
 
-ddsGroup_ensembl <-
+ddsDGE_grouped_heart <-
   DESeq(ddsGroup, parallel = T)
 
 save(
-  ddsGroup_ensembl,
-  file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/ddsGroup_ensembl.RData'
-)  # Saving DESeqDataSet object
+  ddsDGE_grouped_heart,
+  file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_grouped_heart.RData') # Saving DESeqDataSet object
 
-save(sampleTable_group_ensembl,
-     file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/quantseq_dataAnalysis/deseq2_january2024/scripts/objects/sampleTable_group_ensembl.Rda')
+save(sampleTable_grouped_heart,
+     file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/sampleTable_grouped_heart.RData')
 
 ## Exploratory analysis, part II ####
-vst_counts <- vst(ddsGroupDGE, blind = T)
+vst_counts <- vst(ddsDGE_grouped_heart, blind = T)
 
 PCA <-
   plotPCA(vst_counts,
