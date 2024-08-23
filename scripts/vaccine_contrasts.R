@@ -8,7 +8,7 @@ library('clusterProfiler')
 library('gprofiler2')
 library('org.Hs.eg.db')
 library('BiocParallel')
-MulticoreParam(8) # setting number of available cores for 'parallel'
+MulticoreParam(10) # setting number of available cores for 'parallel'
 
 ## Loading data - HEART ----
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_grouped_heart.RData')
@@ -315,22 +315,20 @@ for (i in 1:length(obj)) {
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_grouped_hkidney.RData')
 
 ## Treatment contrasts within sampling points - 10wpi ----
-### Using CONU as the reference ----
-
 ## IVLD
-hkidney_res_ivld_vs_conu_10wpi <- results(ddsDGE_grouped_hkidney, contrast=c("group","ivld.10wpi","conu.10wpi"), parallel = T)
+hkidney_res_ivld_vs_conu_10wpi <- lfcShrink(ddsDGE_grouped_hkidney, contrast=c("group","ivld.10wpi","conu.10wpi"), type = 'ashr', parallel = T)
 
 ## IVHD
-hkidney_res_ivhd_vs_conu_10wpi <- results(ddsDGE_grouped_hkidney, contrast=c("group","ivhd.10wpi","conu.10wpi"), parallel = T)
+hkidney_res_ivhd_vs_conu_10wpi <- lfcShrink(ddsDGE_grouped_hkidney, contrast=c("group","ivhd.10wpi","conu.10wpi"), type = 'ashr',parallel = T)
 
 ### GATA3 
-hkidney_res_gata3_vs_conu_10wpi <- results(ddsDGE_grouped_hkidney, contrast=c("group","gata3.10wpi","conu.10wpi"), parallel = T)
+hkidney_res_gata3_vs_conu_10wpi <- lfcShrink(ddsDGE_grouped_hkidney, contrast=c("group","gata3.10wpi","conu.10wpi"), type = 'ashr',parallel = T)
 
 ### EOMES
-hkidney_res_eomes_vs_conu_10wpi <- results(ddsDGE_grouped_hkidney, contrast=c("group","eomes.10wpi","conu.10wpi"), parallel = T)
+hkidney_res_eomes_vs_conu_10wpi <- lfcShrink(ddsDGE_grouped_hkidney, contrast=c("group","eomes.10wpi","conu.10wpi"), type = 'ashr',parallel = T)
 
 ### DNA vaccine
-hkidney_res_dnavaccine_vs_conu_10wpi <- results(ddsDGE_grouped_hkidney, contrast=c("group","dnavaccine.10wpi","conu.10wpi"), parallel = T)
+hkidney_res_dnavaccine_vs_conu_10wpi <- lfcShrink(ddsDGE_grouped_hkidney, contrast=c("group","dnavaccine.10wpi","conu.10wpi"), type = 'ashr', parallel = T)
 
 
 # Saving results files
@@ -344,25 +342,22 @@ for (i in 1:length(obj)) {
        file = paste(obj[i], ".RData", sep = ""))
 }
 
-
 ## Treatment contrasts within sampling points - 4wpc ----
-### Using CONU as the reference ----
+### Using CONU as the reference
 ### IVLD
-hkidney_res_ivld_vs_conu_4wpc <- results(ddsDGE_grouped_hkidney, contrast = c('group', 'ivld.4wpc', 'conu.4wpc'), parallel = T)
+hkidney_res_ivld_vs_conu_4wpc <- lfcShrink(ddsDGE_grouped_hkidney, contrast = c('group', 'ivld.4wpc', 'conu.4wpc'), type = 'ashr', parallel = T)
 
 ### IVHD
-hkidney_res_ivhd_vs_conu_4wpc <- results(ddsDGE_grouped_hkidney, contrast = c('group', 'ivhd.4wpc', 'conu.4wpc'), parallel = T)
+hkidney_res_ivhd_vs_conu_4wpc <- lfcShrink(ddsDGE_grouped_hkidney, contrast = c('group', 'ivhd.4wpc', 'conu.4wpc'), type = 'ashr', parallel = T)
 
 ### GATA3 
-hkidney_res_gata3_vs_conu_4wpc <- results(ddsDGE_grouped_hkidney, contrast = c('group', 'gata3.4wpc', 'conu.4wpc'), parallel = T)
+hkidney_res_gata3_vs_conu_4wpc <- lfcShrink(ddsDGE_grouped_hkidney, contrast = c('group', 'gata3.4wpc', 'conu.4wpc'), type = 'ashr', parallel = T)
 
 ### EOMES
-hkidney_res_eomes_vs_conu_4wpc <- results(ddsDGE_grouped_hkidney, contrast = c('group', 'eomes.4wpc', 'conu.4wpc'), parallel = T)
+hkidney_res_eomes_vs_conu_4wpc <- lfcShrink(ddsDGE_grouped_hkidney, contrast = c('group', 'eomes.4wpc', 'conu.4wpc'), type = 'ashr', parallel = T)
 
 ### DNA vaccine
-hkidney_res_dnavaccine_vs_conu_4wpc <- results(ddsDGE_grouped_hkidney, contrast = c('group', 'dnavaccine.4wpc', 'conu.4wpc'), parallel = T)
-
-hkidney_shrunk_dnavaccine_vs_conu_4wpc <- lfcShrink(ddsDGE_grouped_hkidney, contrast = c('group', 'dnavaccine.4wpc', 'conu.4wpc'), type = 'ashr', parallel = T)
+hkidney_res_dnavaccine_vs_conu_4wpc <- lfcShrink(ddsDGE_grouped_hkidney, contrast = c('group', 'dnavaccine.4wpc', 'conu.4wpc'), type = 'ashr', parallel = T)
 
 # Saving results files
 setwd(
