@@ -29,13 +29,26 @@ for (i in 1:length(results_files)) {
 ## DNA vaccine ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(spleen_res_dnavaccine_vs_conu_10wpi, 'dnavaccine', '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/spleen_res_dnavaccine_vs_conu_10wpi.RData')
 
-gsea_simplified_results_dnavaccine_10wpi <- simplify(gsea_results_dnavaccine_10wpi)  # simplifying GO terms to reduce redundancy
+gsea_formatting(spleen_res_dnavaccine_vs_conu_10wpi, 'spleen', 'dnavaccine', '10wpi')
+save(spleen_gsea_results_dnavaccine_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_results_dnavaccine_10wpi.RData')
 
-nrow(gsea_results_dnavaccine_10wpi)  # 760 GO terms/pathways
+spleen_gsea_simplified_results_dnavaccine_10wpi <-
+  clusterProfiler::simplify(spleen_gsea_results_dnavaccine_10wpi)  # simplifying GO terms to reduce redundancy
+save(spleen_gsea_simplified_results_dnavaccine_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_simplified_results_dnavaccine_10wpi.RData')
 
-nrow(gsea_simplified_results_dnavaccine_10wpi)  # 259 GO terms/pathways
+spleen_entrez_gene_list_dnavaccine_10wpi <- entrez_gene_list
+save(spleen_entrez_gene_list_dnavaccine_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_entrez_gene_list_dnavaccine_10wpi.RData')
+
+nrow(spleen_gsea_results_dnavaccine_10wpi)  # 1 GO terms/pathways
+nrow(spleen_gsea_simplified_results_dnavaccine_10wpi)  # 1 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_results_dnavaccine_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_simplified_results_dnavaccine_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_entrez_gene_list_dnavaccine_10wpi.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES 
 top10_high_nes <- 
@@ -137,24 +150,36 @@ cat(markdown_table(data), sep = "\n")
 ## EOMES ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(spleen_res_eomes_vs_conu_10wpi, 'eomes', '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/spleen_res_eomes_vs_conu_10wpi.RData')
 
-gsea_simplified_results_eomes_10wpi <- simplify(gsea_results_eomes_10wpi)  # simplifying GO terms to reduce redundancy
+gsea_formatting(spleen_res_eomes_vs_conu_10wpi, 'spleen', 'eomes', '10wpi')
+save(spleen_gsea_results_eomes_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_results_eomes_10wpi.RData')
 
-nrow(gsea_results_eomes_10wpi)  # 2407 GO terms/pathways
+spleen_gsea_simplified_results_eomes_10wpi <-
+  clusterProfiler::simplify(spleen_gsea_results_eomes_10wpi)  # simplifying GO terms to reduce redundancy
+save(spleen_gsea_simplified_results_eomes_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_simplified_results_eomes_10wpi.RData')
 
-nrow(gsea_simplified_results_eomes_10wpi)  # 577 GO terms/pathways
+spleen_entrez_gene_list_eomes_10wpi <- entrez_gene_list
+save(spleen_entrez_gene_list_eomes_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_entrez_gene_list_eomes_10wpi.RData')
 
+nrow(spleen_gsea_results_eomes_10wpi)  # 2616 GO terms/pathways
+nrow(spleen_gsea_simplified_results_eomes_10wpi)  # 602 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_results_eomes_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_simplified_results_eomes_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_entrez_gene_list_eomes_10wpi.RData')
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES 
 top10_high_nes <- 
-  as_tibble(gsea_simplified_results_eomes_10wpi) %>%
+  as_tibble(spleen_gsea_simplified_results_eomes_10wpi) %>%
   filter(NES > 0) %>% 
   arrange(desc(setSize)) %>% 
   top_n(20, wt = NES) %>% 
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_eomes_10wpi) %>%
+  as_tibble(spleen_gsea_simplified_results_eomes_10wpi) %>%
   filter(NES < 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = setSize) %>% # only 5 downregulated terms
@@ -260,23 +285,37 @@ cat(markdown_table(data), sep = "\n")
 
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(spleen_res_gata3_vs_conu_10wpi, 'gata3', '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/spleen_res_gata3_vs_conu_10wpi.RData')
 
-gsea_simplified_results_gata3_10wpi <- simplify(gsea_results_gata3_10wpi)  # simplifying GO terms to reduce redundancy
+gsea_formatting(spleen_res_gata3_vs_conu_10wpi, 'spleen', 'gata3', '10wpi')
+save(spleen_gsea_results_gata3_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_results_gata3_10wpi.RData')
 
-nrow(gsea_results_gata3_10wpi)  # 1703 GO terms/pathways
-nrow(gsea_simplified_results_gata3_10wpi)  # 478 GO terms/pathways
+spleen_gsea_simplified_results_gata3_10wpi <-
+  clusterProfiler::simplify(spleen_gsea_results_gata3_10wpi)  # simplifying GO terms to reduce redundancy
+save(spleen_gsea_simplified_results_gata3_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_simplified_results_gata3_10wpi.RData')
+
+spleen_entrez_gene_list_gata3_10wpi <- entrez_gene_list
+save(spleen_entrez_gene_list_gata3_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_entrez_gene_list_gata3_10wpi.RData')
+
+nrow(spleen_gsea_results_gata3_10wpi)  # 1751 GO terms/pathways
+nrow(spleen_gsea_simplified_results_gata3_10wpi)  # 481 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_results_gata3_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_simplified_results_gata3_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_entrez_gene_list_gata3_10wpi.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES 
 top10_high_nes <- 
-  as_tibble(gsea_simplified_results_gata3_10wpi) %>%
+  as_tibble(spleen_gsea_simplified_results_gata3_10wpi) %>%
   filter(NES > 0) %>% 
   arrange(desc(setSize)) %>% 
   top_n(10, wt = NES) %>% 
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
-bottom10_high_nes <- 
-  as_tibble(gsea_simplified_results_gata3_10wpi) %>%
+bottom10_low_nes <- 
+  as_tibble(spleen_gsea_simplified_results_gata3_10wpi) %>%
   filter(NES < 0) %>% 
   arrange(desc(setSize)) %>% 
   top_n(10, wt = NES) %>% 
@@ -293,8 +332,8 @@ low_high_nes_gata3_10wpi %>%
   geom_point(aes(color = Count, size = Count), shape = 16) +
   # scale_color_viridis_c('Gene set') +
   scale_color_viridis_c('Gene count', guide = 'legend', breaks = seq(0, 300, by = 50)) +
-  scale_size_continuous('Set size', range = c(2, 10), guide = 'legend', breaks = seq(0, max(low_high_nes_eomes_10wpi$setSize), by = 50)) +
-  scale_x_continuous(limits = c(0, max(low_high_nes_eomes_10wpi$Count * 1.1))) +
+  scale_size_continuous('Set size', range = c(2, 10), guide = 'legend', breaks = seq(0, max(low_high_nes_gata3_10wpi$setSize), by = 50)) +
+  scale_x_continuous(limits = c(0, max(low_high_nes_gata3_10wpi$Count * 1.1))) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +  
@@ -318,6 +357,8 @@ low_high_nes_gata3_10wpi %>%
     size = guide_legend(override.aes = list(shape =1, fill = NA, stroke = .5, color = 'red'))  # show only borders in set size legend
   ) +
   facet_grid(. ~ Regulation)
+
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_definitive_plots/gata3_10wpi.png', width = 1000, height = 1023, units = "px", dpi = 72)
 
 
 y_gata3 <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes the duplicates from this object
@@ -368,26 +409,37 @@ cat(markdown_table(data), sep = "\n")
 
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(spleen_res_ivhd_vs_conu_10wpi, 'ivhd', '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/spleen_res_ivhd_vs_conu_10wpi.RData')
 
-nrow(gsea_results_ivhd_10wpi)  # 1899 GO terms/pathways
+gsea_formatting(spleen_res_ivhd_vs_conu_10wpi, 'spleen', 'ivhd', '10wpi')
+save(spleen_gsea_results_ivhd_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_results_ivhd_10wpi.RData')
 
-gsea_simplified_results_ivhd_10wpi <- simplify(gsea_results_ivhd_10wpi)  # simplify output from enrichGO and gseGO by removing redundancy of enriched GO terms
+spleen_gsea_simplified_results_ivhd_10wpi <-
+  clusterProfiler::simplify(spleen_gsea_results_ivhd_10wpi)  # simplifying GO terms to reduce redundancy
+save(spleen_gsea_simplified_results_ivhd_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_simplified_results_ivhd_10wpi.RData')
 
-nrow(gsea_simplified_results_ivhd_10wpi)  # 515 GO terms/pathways
+spleen_entrez_gene_list_ivhd_10wpi <- entrez_gene_list
+save(spleen_entrez_gene_list_ivhd_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_entrez_gene_list_ivhd_10wpi.RData')
 
-as_tibble(gsea_simplified_results_ivhd_10wpi) %>% arrange(NES) %>% print(n = 100)
+nrow(spleen_gsea_results_ivhd_10wpi)  # 1949 GO terms/pathways
+nrow(spleen_gsea_simplified_results_ivhd_10wpi)  # 518 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_results_ivhd_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_simplified_results_ivhd_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_entrez_gene_list_ivhd_10wpi.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES 
 top10_high_nes <- 
-  as_tibble(gsea_simplified_results_ivhd_10wpi) %>%
+  as_tibble(spleen_gsea_simplified_results_ivhd_10wpi) %>%
   filter(NES > 0) %>% 
   arrange(desc(setSize)) %>% 
   top_n(10, wt = NES) %>% 
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <- 
-  as_tibble(gsea_simplified_results_ivhd_10wpi) %>%
+  as_tibble(spleen_gsea_simplified_results_ivhd_10wpi) %>%
   filter(NES < 0) %>% 
   arrange(desc(setSize)) %>% 
   top_n(10, wt = setSize) %>% 
@@ -473,26 +525,37 @@ cat(markdown_table(data), sep = "\n")
 
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(spleen_res_ivld_vs_conu_10wpi, 'ivld', '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/spleen_res_ivld_vs_conu_10wpi.RData')
 
-nrow(gsea_results_ivld_10wpi)  # 590 GO terms/pathways
+gsea_formatting(spleen_res_ivld_vs_conu_10wpi, 'spleen', 'ivld', '10wpi')
+save(spleen_gsea_results_ivld_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_results_ivld_10wpi.RData')
 
-gsea_simplified_results_ivld_10wpi <- simplify(gsea_results_ivld_10wpi)  # simplify output from enrichGO and gseGO by removing redundancy of enriched GO terms
+spleen_gsea_simplified_results_ivld_10wpi <-
+  clusterProfiler::simplify(spleen_gsea_results_ivld_10wpi)  # simplifying GO terms to reduce redundancy
+save(spleen_gsea_simplified_results_ivld_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_simplified_results_ivld_10wpi.RData')
 
-nrow(gsea_simplified_results_ivld_10wpi)  # 246 GO terms/pathways
+spleen_entrez_gene_list_ivld_10wpi <- entrez_gene_list
+save(spleen_entrez_gene_list_ivld_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_entrez_gene_list_ivld_10wpi.RData')
 
-as_tibble(gsea_simplified_results_ivld_10wpi) %>% arrange(NES) %>% print(n = 100)
+nrow(spleen_gsea_results_ivld_10wpi)  # 575 GO terms/pathways
+nrow(spleen_gsea_simplified_results_ivld_10wpi)  # 232 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_results_ivld_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_gsea_simplified_results_ivld_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_results_tables/spleen_entrez_gene_list_ivld_10wpi.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES 
 top10_high_nes <- 
-  as_tibble(gsea_simplified_results_ivld_10wpi) %>%
+  as_tibble(spleen_gsea_simplified_results_ivld_10wpi) %>%
   filter(NES > 0) %>% 
   arrange(desc(setSize)) %>% 
   top_n(10, wt = NES) %>% 
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <- 
-  as_tibble(gsea_simplified_results_ivld_10wpi) %>%
+  as_tibble(spleen_gsea_simplified_results_ivld_10wpi) %>%
   filter(NES < 0) %>% 
   arrange(desc(setSize)) %>% 
   top_n(10, wt = setSize) %>% 

@@ -403,9 +403,9 @@ deg_regulation_summary_10wpi_spleen <-
   as_tibble(bind_rows(deg_regulation_summary, .id = 'Treatment')) %>% mutate(tissue = 'spleen')
 
 # Reordering factors to plot
-deg_regulation_summary_10wpi$Treatment <-
+deg_regulation_summary_10wpi_spleen$Treatment <-
   factor(
-    deg_regulation_summary_10wpi$Treatment,
+    deg_regulation_summary_10wpi_spleen$Treatment,
     levels = c(
       'IV-LD',
       'IV-HD',
@@ -416,7 +416,7 @@ deg_regulation_summary_10wpi$Treatment <-
   )
 
 ### Plotting
-deg_regulation_summary_10wpi %>%
+deg_regulation_summary_10wpi_spleen %>%
   ggplot(aes(x = Treatment, y = n, fill = Regulation)) +
   geom_bar(
     stat = 'identity',

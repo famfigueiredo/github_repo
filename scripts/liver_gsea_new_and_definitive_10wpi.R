@@ -22,25 +22,37 @@ load_results('^liver_.*_conu_10wpi')  # regex matching results files
 ## DNA vaccine ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(liver_res_dnavaccine_vs_conu_10wpi, 'dnavaccine', '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/liver_res_dnavaccine_vs_conu_10wpi.RData')
 
-gsea_simplified_results_dnavaccine_10wpi <-
-  simplify(gsea_results_dnavaccine_10wpi)  # simplifying GO terms to reduce redundancy
+gsea_formatting(liver_res_dnavaccine_vs_conu_10wpi, 'liver', 'dnavaccine', '10wpi')
+save(liver_gsea_results_dnavaccine_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_results_dnavaccine_10wpi.RData')
 
-nrow(gsea_results_dnavaccine_10wpi)  # 653 GO terms/pathways
+liver_gsea_simplified_results_dnavaccine_10wpi <-
+  clusterProfiler::simplify(liver_gsea_results_dnavaccine_10wpi)  # simplifying GO terms to reduce redundancy
+save(liver_gsea_simplified_results_dnavaccine_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_simplified_results_dnavaccine_10wpi.RData')
 
-nrow(gsea_simplified_results_dnavaccine_10wpi)  # 245 GO terms/pathways
+liver_entrez_gene_list_dnavaccine_10wpi <- entrez_gene_list
+save(liver_entrez_gene_list_dnavaccine_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_entrez_gene_list_dnavaccine_10wpi.RData')
+
+nrow(liver_gsea_results_dnavaccine_10wpi)  # 636 GO terms/pathways
+nrow(liver_gsea_simplified_results_dnavaccine_10wpi)  # 237 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_results_dnavaccine_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_simplified_results_dnavaccine_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_entrez_gene_list_dnavaccine_10wpi.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <-
-  as_tibble(gsea_simplified_results_dnavaccine_10wpi@result) %>%
+  as_tibble(liver_gsea_simplified_results_dnavaccine_10wpi) %>%
   filter(NES > 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_dnavaccine_10wpi@result) %>%
+  as_tibble(liver_gsea_simplified_results_dnavaccine_10wpi) %>%
   filter(NES < 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = NES) %>%
@@ -101,71 +113,43 @@ low_high_nes_dnavaccine_10wpi %>%
              ))) +
   facet_grid(. ~ Regulation)
 
-
-y_dnavaccine <-
-  gsePathway(
-    entrez_gene_list,
-    # the gsea_formatting function removes the duplicates from this object
-    pvalueCutoff = .2,
-    pAdjustMethod = 'BH',
-    eps = 1e-300,
-    nPermSimple = 100000,
-    verbose = F
-  )
-
-as_tibble(y_dnavaccine) %>% arrange(NES) %>% print(n = 100)
-
-viewPathway(
-  'Interleukin-12 family signaling',
-  readable = T,
-  foldChange = entrez_gene_list
-)  # up
-
-liver_dnavaccine_pathways <- as_tibble(y_dnavaccine) %>%
-  arrange(NES) %>%
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>%
-  dplyr::select(., Description, NES, setSize, Count)
-
-write_tsv(
-  liver_dnavaccine_pathways,
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/pathways/liver_dnavaccine_pathways.tsv'
-)
-
-# Convert to a Markdown table ----
-# Read the TSV file
-data <-
-  read.delim(
-    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/pathways/liver_dnavaccine_pathways.tsv',
-    header = TRUE,
-    sep = "\t"
-  )
-
-# Print the Markdown table
-cat(markdown_table(data), sep = "\n")
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_definitive_plots/dnavaccine_10wpi.png', width = 1000, height = 1023, units = "px", dpi = 72)
 
 
 ## EOMES ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(liver_res_eomes_vs_conu_10wpi, 'eomes', '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/liver_res_eomes_vs_conu_10wpi.RData')
 
-gsea_simplified_results_eomes_10wpi <-
-  simplify(gsea_results_eomes_10wpi)  # simplifying GO terms to reduce redundancy
+gsea_formatting(liver_res_eomes_vs_conu_10wpi, 'liver', 'eomes', '10wpi')
+save(liver_gsea_results_eomes_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_results_eomes_10wpi.RData')
 
-nrow(gsea_results_eomes_10wpi)  # 2379 GO terms/pathways
-nrow(gsea_simplified_results_eomes_10wpi)  # 551 GO terms/pathways
+liver_gsea_simplified_results_eomes_10wpi <-
+  clusterProfiler::simplify(liver_gsea_results_eomes_10wpi)  # simplifying GO terms to reduce redundancy
+save(liver_gsea_simplified_results_eomes_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_simplified_results_eomes_10wpi.RData')
+
+liver_entrez_gene_list_eomes_10wpi <- entrez_gene_list
+save(liver_entrez_gene_list_eomes_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_entrez_gene_list_eomes_10wpi.RData')
+
+nrow(liver_gsea_results_eomes_10wpi)  # 2343 GO terms/pathways
+nrow(liver_gsea_simplified_results_eomes_10wpi)  # 547 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_results_eomes_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_simplified_results_eomes_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_entrez_gene_list_eomes_10wpi.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <-
-  as_tibble(gsea_simplified_results_eomes_10wpi) %>%
+  as_tibble(liver_gsea_simplified_results_eomes_10wpi) %>%
   filter(NES > 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_eomes_10wpi) %>%
+  as_tibble(liver_gsea_simplified_results_eomes_10wpi) %>%
   filter(NES < 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = setSize) %>%
@@ -226,74 +210,45 @@ low_high_nes_eomes_10wpi %>%
              ))) +
   facet_grid(. ~ Regulation)
 
-
-y_eomes <-
-  gsePathway(
-    entrez_gene_list,
-    pvalueCutoff = .2,
-    pAdjustMethod = 'BH',
-    eps = 1e-300,
-    nPermSimple = 100000,
-    verbose = F
-  )
-
-as_tibble(y_eomes) %>% arrange(NES) %>% print(n = 100)
-
-viewPathway(
-  'Interleukin-4 and Interleukin-13 signaling',
-  readable = T,
-  foldChange = entrez_gene_list
-)  # up
-
-liver_eomes_pathways <- as_tibble(y_eomes) %>%
-  arrange(NES) %>%
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>%
-  dplyr::select(., Description, NES, setSize, Count)
-
-write_tsv(
-  liver_eomes_pathways,
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/pathways/liver_eomes_pathways.tsv'
-)
-
-# Convert to a Markdown table ----
-# Read the TSV file
-data <-
-  read.delim(
-    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/pathways/liver_eomes_pathways.tsv',
-    header = TRUE,
-    sep = "\t"
-  )
-
-# Print the Markdown table
-cat(markdown_table(data), sep = "\n")
-
-
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_definitive_plots/eomes_10wpi.png', width = 1000, height = 1023, units = "px", dpi = 72)
 
 ## GATA3 ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(liver_res_gata3_vs_conu_10wpi, 'gata3', '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/liver_res_gata3_vs_conu_10wpi.RData')
 
-gsea_simplified_results_gata3_10wpi <-
-  simplify(gsea_results_gata3_10wpi)  # simplifying GO terms to reduce redundancy
+gsea_formatting(liver_res_gata3_vs_conu_10wpi, 'liver', 'gata3', '10wpi')
+save(liver_gsea_results_gata3_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_results_gata3_10wpi.RData')
 
-nrow(gsea_results_gata3_10wpi)  # 2940 GO terms/pathways
-nrow(gsea_simplified_results_gata3_10wpi)  # 627 GO terms/pathways
+liver_gsea_simplified_results_gata3_10wpi <-
+  clusterProfiler::simplify(liver_gsea_results_gata3_10wpi)  # simplifying GO terms to reduce redundancy
+save(liver_gsea_simplified_results_gata3_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_simplified_results_gata3_10wpi.RData')
+
+liver_entrez_gene_list_gata3_10wpi <- entrez_gene_list
+save(liver_entrez_gene_list_gata3_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_entrez_gene_list_gata3_10wpi.RData')
+
+nrow(liver_gsea_results_gata3_10wpi)  # 2995 GO terms/pathways
+nrow(liver_gsea_simplified_results_gata3_10wpi)  # 633 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_results_gata3_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_simplified_results_gata3_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_entrez_gene_list_gata3_10wpi.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <-
-  as_tibble(gsea_simplified_results_gata3_10wpi) %>%
+  as_tibble(liver_gsea_simplified_results_gata3_10wpi) %>%
   filter(NES > 0) %>%
   arrange(desc(setSize)) %>%
   top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_gata3_10wpi) %>%
+  as_tibble(liver_gsea_simplified_results_gata3_10wpi) %>%
   filter(NES < 0) %>%
   arrange(desc(setSize)) %>%
-  top_n(10, wt = setSize) %>%  # only 3 downregulated terms
+  top_n(10, wt = setSize) %>% 
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 low_high_nes_gata3_10wpi <-
@@ -352,76 +307,39 @@ low_high_nes_gata3_10wpi %>%
              ))) +
   facet_grid(. ~ Regulation)
 
-
-y_gata3 <-
-  gsePathway(
-    entrez_gene_list,
-    # the gsea_formatting function removes the duplicates from this object
-    pvalueCutoff = .2,
-    pAdjustMethod = 'BH',
-    eps = 1e-300,
-    nPermSimple = 1000000,
-    verbose = F
-  )
-
-as_tibble(y_gata3) %>% arrange(NES) %>% print(n = 100)
-
-liver_gata3_pathways <-
-  as_tibble(y_gata3) %>%
-  arrange(NES) %>%
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>%
-  dplyr::select(., Description, NES, setSize, Count)
-
-write_tsv(
-  liver_gata3_pathways,
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/pathways/liver_gata3_pathways.tsv'
-)
-
-# Convert to a Markdown table ----
-# Read the TSV file
-data <-
-  read.delim(
-    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/pathways/liver_gata3_pathways.tsv',
-    header = TRUE,
-    sep = "\t"
-  )
-
-# Print the Markdown table
-cat(markdown_table(data), sep = "\n")
-
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_definitive_plots/gata3_10wpi.png', width = 1000, height = 1023, units = "px", dpi = 72)
 
 ## IV-HD ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(liver_res_ivhd_vs_conu_10wpi, 'ivhd', '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/liver_res_ivhd_vs_conu_10wpi.RData')
 
-gsea_simplified_results_ivhd_10wpi <-
-  simplify(gsea_results_ivhd_10wpi)  # simplify output from enrichGO and gseGO by removing redundancy of enriched GO terms
+gsea_formatting(liver_res_ivhd_vs_conu_10wpi, 'liver', 'ivhd', '10wpi')
+save(liver_gsea_results_ivhd_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_results_ivhd_10wpi.RData')
 
-nrow(gsea_results_ivhd_10wpi)  # 514 GO terms/pathways
+liver_gsea_simplified_results_ivhd_10wpi <-
+  clusterProfiler::simplify(liver_gsea_results_ivhd_10wpi)  # simplifying GO terms to reduce redundancy
+save(liver_gsea_simplified_results_ivhd_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_simplified_results_ivhd_10wpi.RData')
 
-nrow(gsea_simplified_results_ivhd_10wpi)  # 190 GO terms/pathways
+liver_entrez_gene_list_ivhd_10wpi <- entrez_gene_list
+save(liver_entrez_gene_list_ivhd_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_entrez_gene_list_ivhd_10wpi.RData')
+
+nrow(liver_gsea_results_ivhd_10wpi)  # 2499 GO terms/pathways
+nrow(liver_gsea_simplified_results_ivhd_10wpi)  # 542 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_results_ivhd_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_simplified_results_ivhd_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_entrez_gene_list_ivhd_10wpi.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <-
-  as_tibble(gsea_simplified_results_ivhd_10wpi) %>%
-  filter(NES > 0) %>%
-  arrange(desc(setSize)) %>%
-  top_n(10, wt = NES) %>%
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+  as_tibble(liver_gsea_simplified_results_ivhd_10wpi) %>%
+  top_n(20, wt = NES) %>%
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))  # only terms > 0 were enriched
 
-bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_ivhd_10wpi) %>%
-  filter(NES < 0) %>%
-  arrange(desc(setSize)) %>%
-  top_n(10, wt = setSize) %>%
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
-
-low_high_nes_ivhd_10wpi <-
-  bind_rows(top10_high_nes, bottom10_low_nes)
-
-low_high_nes_ivhd_10wpi %>%
+top10_high_nes %>%
   mutate(Regulation = ifelse(NES > 0, 'Upregulated', 'Downregulated')) %>%
   mutate(Description = fct_reorder(Description, Count)) %>%
   ggplot(aes(Count, Description)) +
@@ -432,18 +350,18 @@ low_high_nes_ivhd_10wpi %>%
     color = 'red'
   ) +
   geom_point(aes(color = Count, size = Count), shape = 16) +
-  scale_color_viridis_c('Gene count', guide = 'colourbar', limits = c(2, max(low_high_nes_ivhd_10wpi$Count))) +
+  scale_color_viridis_c('Gene count', guide = 'colourbar', limits = c(2, max(top10_high_nes$Count))) +
   scale_size_continuous(
     'Set size',
     range = c(2, 10),
     guide = 'legend',
-    limits = c(2, max(low_high_nes_ivhd_10wpi$setSize))
+    limits = c(2, max(top10_high_nes$setSize))
   ) +
-  scale_x_continuous(limits = c(0, max(low_high_nes_ivhd_10wpi$Count * 1.1))) +
+  scale_x_continuous(limits = c(0, max(top10_high_nes$Count * 1.1))) +
   scale_y_discrete() +
   xlab('Gene count') +
   ylab(NULL) +
-  ggtitle('GSEA, downregulated vs upregulated genes',
+  ggtitle('GSEA, upregulated genes',
           subtitle = 'IV-HD, 10WPI, liver, human orths') +
   theme_bw(base_size = 14) +
   theme(
@@ -473,85 +391,45 @@ low_high_nes_ivhd_10wpi %>%
     ))) +
   facet_grid(. ~ Regulation)
 
-y_ivhd <-
-  gsePathway(
-    entrez_gene_list,
-    pvalueCutoff = .2,
-    pAdjustMethod = 'BH',
-    verbose = F
-  )
-
-as_tibble(y_ivhd) %>% arrange(NES) %>% print(n = 100)
-
-liver_ivhd_pathways <-
-  as_tibble(y_ivhd) %>%
-  arrange(NES) %>%
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>%
-  dplyr::select(., Description, NES, setSize, Count)
-
-write_tsv(
-  liver_ivhd_pathways,
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/pathways/liver_ivhd_pathways.tsv'
-)
-
-viewPathway('Interleukin-4 and Interleukin-13 signaling',
-            readable = T,
-            foldChange = entrez_gene_list)  # down
-
-# Convert to a Markdown table ----
-# Read the TSV file
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/pathways/liver_ivhd_pathways.tsv', header = TRUE, sep = "\t")
-
-markdown_table <- function(data) {
-  # Get the header
-  header <-
-    paste("|", paste(names(data), collapse = " | "), "|")
-  
-  # Get the separator line
-  separator <-
-    paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-  
-  # Get the table rows
-  rows <-
-    apply(data, 1, function(row) {
-      paste("|", paste(row, collapse = " | "), "|")
-    })
-  
-  # Combine header, separator, and rows
-  c(header, separator, rows)
-}
-
-# Print the Markdown table
-cat(markdown_table(data), sep = "\n")
-
-
-
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_definitive_plots/ivhd_upregulated_10wpi.png', width = 1000, height = 1023, units = "px", dpi = 72)
 
 ## IV-LD ----
 ### all genes ###
 # gsea formatting starting from a DESeq results table
-gsea_formatting(liver_res_ivld_vs_conu_10wpi, 'ivld', '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/liver_res_ivld_vs_conu_10wpi.RData')
 
-gsea_simplified_results_ivld_10wpi <-
-  simplify(gsea_results_ivld_10wpi)
+gsea_formatting(liver_res_ivld_vs_conu_10wpi, 'liver', 'ivld', '10wpi')
+save(liver_gsea_results_ivld_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_results_ivld_10wpi.RData')
 
-nrow(gsea_simplified_results_ivld_10wpi)  # 21 GO terms/pathways
-nrow(gsea_results_ivld_10wpi)  # 11 GO terms/pathways
+liver_gsea_simplified_results_ivld_10wpi <-
+  clusterProfiler::simplify(liver_gsea_results_ivld_10wpi)  # simplifying GO terms to reduce redundancy
+save(liver_gsea_simplified_results_ivld_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_simplified_results_ivld_10wpi.RData')
 
-as_tibble(gsea_simplified_results_ivld_10wpi) %>% arrange(NES) %>% print(n = 100)
+liver_entrez_gene_list_ivld_10wpi <- entrez_gene_list
+save(liver_entrez_gene_list_ivld_10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_entrez_gene_list_ivld_10wpi.RData')
+
+nrow(liver_gsea_results_ivld_10wpi)  # 1961 GO terms/pathways
+nrow(liver_gsea_simplified_results_ivld_10wpi)  # 473 GO terms/pathways
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_results_ivld_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_gsea_simplified_results_ivld_10wpi.RData')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_results_tables/liver_entrez_gene_list_ivld_10wpi.RData')
 
 # Convert the GSEA results to a tibble and retrieve top 10 highest and lowest NES
 top10_high_nes <-
-  as_tibble(gsea_simplified_results_ivld_10wpi) %>%
+  as_tibble(liver_gsea_simplified_results_ivld_10wpi) %>%
   filter(NES > 0) %>%
   arrange(desc(setSize)) %>%
+  top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 bottom10_low_nes <-
-  as_tibble(gsea_simplified_results_ivld_10wpi) %>%
+  as_tibble(liver_gsea_simplified_results_ivld_10wpi) %>%
   filter(NES < 0) %>%
   arrange(desc(setSize)) %>%
+  top_n(10, wt = NES) %>%
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
 
 low_high_nes_ivld_10wpi <-
@@ -568,7 +446,7 @@ low_high_nes_ivld_10wpi %>%
     color = 'red'
   ) +
   geom_point(aes(color = Count, size = Count), shape = 16) +
-  scale_color_viridis_c('Gene count', guide = 'colourbar', limits = c(2, max(low_high_nes_ivld_10wpi$Count))) +
+  scale_color_viridis_c('Gene count', guide = 'colourbar', limits = c(2, max(low_high_nes_ivld_10wpi$Count * 1.1))) +
   scale_size_continuous(
     'Set size',
     range = c(2, 10),
@@ -610,61 +488,6 @@ low_high_nes_ivld_10wpi %>%
   facet_grid(. ~ Regulation
   )
 
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_definitive_plots/ivld_10wpi.png', width = 1000, height = 1023, units = "px", dpi = 72)
 
-y_ivld <-
-  gsePathway(
-    entrez_gene_list,
-    # the gsea_formatting function removes the duplicates from this object
-    pvalueCutoff = .2,
-    pAdjustMethod = 'BH',
-    verbose = T
-  )
 
-as_tibble(y_ivld) %>% arrange(NES) %>% print(n = 100)
-
-viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers',
-            readable = T,
-            foldChange = entrez_gene_list)  # down
-
-liver_ivld_pathways <-
-  as_tibble(y_ivld) %>%
-  arrange(NES) %>%
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>%
-  dplyr::select(., Description, NES, setSize, Count)
-
-write_tsv(
-  liver_ivld_pathways,
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/pathways/liver_ivld_pathways.tsv'
-)
-
-# Convert to a Markdown table ----
-# Read the TSV file
-data <-
-  read.delim(
-    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/pathways/liver_ivld_pathways.tsv',
-    header = TRUE,
-    sep = "\t"
-  )
-
-markdown_table <-
-  function(data) {
-    # Get the header
-    header <-
-      paste("|", paste(names(data), collapse = " | "), "|")
-    
-    # Get the separator line
-    separator <-
-      paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-    
-    # Get the table rows
-    rows <-
-      apply(data, 1, function(row) {
-        paste("|", paste(row, collapse = " | "), "|")
-      })
-    
-    # Combine header, separator, and rows
-    c(header, separator, rows)
-  }
-
-# Print the Markdown table
-cat(markdown_table(data), sep = "\n")

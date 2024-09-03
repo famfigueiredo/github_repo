@@ -1,7 +1,7 @@
 # Loading functions ####
 # Significant genes grabs a DESeq2 result table, subsets the genes with padj < 0.05, and selects the ID, log2FoldChange, and padj columns. Also arranges log2FC in a descending manner.
 significant_genes <- function(results_files) {
-  b <- as.data.frame(subset(results_files, padj < 0.05)) %>%
+  b <- as.data.frame(subset(results_files, padj < 0.1)) %>%
     rownames_to_column(var = 'ID') %>%
     as_tibble()
   
@@ -14,7 +14,7 @@ significant_genes <- function(results_files) {
 
 # Significant genes metrics creates a table with information about number of up/down significantly regulated genes
 sig_genes_metrics <- function(significant_genes) {
-  as.data.frame(significant_genes) %>% filter(adjusted_p.val < 0.05) %>%
+  as.data.frame(significant_genes) %>% filter(adjusted_p.val < 0.1) %>%
     dplyr::mutate(Regulation = ifelse(
       log2FC < 0,
       'downregulated',
