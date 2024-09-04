@@ -85,7 +85,7 @@ deg_regulation_summary_10wpi$Treatment <-
   )
 
 ### Plotting
-deg_regulation_summary_10wpi %>%
+deg_regulation_summary_10wpi_heart %>%
   ggplot(aes(x = Treatment, y = n, fill = Regulation)) +
   geom_bar(
     stat = 'identity',
@@ -115,6 +115,11 @@ deg_regulation_summary_10wpi %>%
   ) +
   geom_hline(yintercept = 0, size = 0.2) 
 
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/deg_heart_10wpi.png', 
+       width = 850, 
+       height = 800, 
+       units = 'px', 
+       dpi = 100)
 
 # 1WPC ----
 ## Loading results files
