@@ -449,7 +449,13 @@ deg_regulation_summary_10wpi_spleen %>%
     linetype = 'dotted',
     linewidth = 0.2
   ) +
-  geom_hline(yintercept = 0, size = 0.2) 
+  geom_hline(yintercept = 0, linewidth = 0.2)
+
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/deg_spleen_10wpi.png', 
+       width = 850, 
+       height = 800, 
+       units = 'px', 
+       dpi = 100)
 
 # 4 WPC ----
 setwd(
@@ -616,9 +622,9 @@ deg_regulation_summary_10wpi_liver <-
   as_tibble(bind_rows(deg_regulation_summary, .id = 'Treatment')) %>% mutate(tissue = 'liver')
 
 # Reordering factors to plot
-deg_regulation_summary_10wpi$Treatment <-
+deg_regulation_summary_10wpi_liver$Treatment <-
   factor(
-    deg_regulation_summary_10wpi$Treatment,
+    deg_regulation_summary_10wpi_liver$Treatment,
     levels = c(
       'IV-LD',
       'IV-HD',
@@ -629,7 +635,7 @@ deg_regulation_summary_10wpi$Treatment <-
   )
 
 ### Plotting
-deg_regulation_summary_10wpi %>%
+deg_regulation_summary_10wpi_liver %>%
   ggplot(aes(x = Treatment, y = n, fill = Regulation)) +
   geom_bar(
     stat = 'identity',
@@ -658,6 +664,12 @@ deg_regulation_summary_10wpi %>%
     linewidth = 0.2
   ) +
   geom_hline(yintercept = 0, size = 0.2) 
+
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/deg_liver_10wpi.png',
+       width = 1000,
+       height = 700,
+       units = 'px',
+       dpi = 100)
 
 # 4 WPC ----
 setwd(
@@ -818,9 +830,9 @@ deg_regulation_summary_10wpi_hkidney <-
   as_tibble(bind_rows(deg_regulation_summary, .id = 'Treatment')) %>% mutate(tissue = 'hkidney')
 
 # Reordering factors to plot
-deg_regulation_summary_10wpi$Treatment <-
+deg_regulation_summary_10wpi_hkidney$Treatment <-
   factor(
-    deg_regulation_summary_10wpi$Treatment,
+    deg_regulation_summary_10wpi_hkidney$Treatment,
     levels = c(
       'IV-LD',
       'DNA vaccine'
@@ -828,7 +840,7 @@ deg_regulation_summary_10wpi$Treatment <-
   )
 
 ### Plotting
-deg_regulation_summary_10wpi %>%
+deg_regulation_summary_10wpi_hkidney %>%
   ggplot(aes(x = Treatment, y = n, fill = Regulation)) +
   geom_bar(
     stat = 'identity',
@@ -852,11 +864,19 @@ deg_regulation_summary_10wpi %>%
   theme(text = element_text(size = 14, family = 'serif')) +
   theme(axis.text.x = element_text(angle = 320, vjust = 0.5)) +
   geom_vline(
-    xintercept = c(1.5, 2.5, 3.5, 4.5, 6.5, 7.5, 8.5),
+    xintercept = c(1.5),
     linetype = 'dotted',
     linewidth = 0.2
   ) +
-  geom_hline(yintercept = 0, size = 0.2) 
+  geom_hline(yintercept = 0, size = 0.2)
+
+
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_10wpi/deg_hkidney_10wpi.png',
+       width = 1000,
+       height = 700,
+       units = 'px',
+       dpi = 100)
+
 
 # 4 WPC ----
 setwd(
