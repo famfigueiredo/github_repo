@@ -1,6 +1,6 @@
 # Heart
 
-<img src="/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/deg_heart_10wpi.png" alt="deg_heart_10wpi" style="zoom:80%;" />
+<img src="/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/deg_heart_10wpi.png" alt="deg_heart_10wpi"  />
 
 
 
@@ -165,9 +165,76 @@
 
 ----
 
+## Venn diagrams
+
+#### Downregulated
+
+![venn_downregulated_heart](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/venn_diagrams/venn_downregulated_heart.png)
 
 
 
+
+
+
+
+<table class="table table" style="font-size: 14px; color: black; margin-left: auto; margin-right: auto; color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:center;font-style: italic;"> Salmon ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Human ortholog </th>
+   <th style="text-align:center;font-style: italic;"> Human ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Description </th>
+   <th style="text-align:center;font-style: italic;"> Intersection </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000003797 </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> InterPro: Interferon alpha-inducible protein IFI6/IFI-27-like </td>
+   <td style="text-align:center;"> DNA vaccine vs IV-LD </td>
+  </tr>
+</tbody>
+</table>
+
+
+
+
+
+#### Upregulated
+
+![venn_upregulated_heart](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/venn_diagrams/venn_upregulated_heart.png)
+
+
+
+<table class="table table" style="font-size: 14px; color: black; margin-left: auto; margin-right: auto; color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:center;font-style: italic;"> Salmon ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Human ortholog </th>
+   <th style="text-align:center;font-style: italic;"> Human ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Description </th>
+   <th style="text-align:center;font-style: italic;"> Intersection </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000114648 </td>
+   <td style="text-align:center;"> AHSG </td>
+   <td style="text-align:center;"> ENSG00000145192 </td>
+   <td style="text-align:center;"> alpha 2-HS glycoprotein [Source:HGNC Symbol;Acc:HGNC:349] </td>
+   <td style="text-align:center;"> EOMES vs GATA3 vs IV-LD </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000058180 </td>
+   <td style="text-align:center;"> FABP1 </td>
+   <td style="text-align:center;"> ENSG00000163586 </td>
+   <td style="text-align:center;"> fatty acid binding protein 1 [Source:HGNC Symbol;Acc:HGNC:3555] </td>
+   <td style="text-align:center;"> EOMES vs IV-LD </td>
+  </tr>
+</tbody>
+</table>
 
 
 
@@ -179,7 +246,7 @@
 
 # Spleen
 
-![dge_spleen_10wpi](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/dge_spleen_10wpi.png)
+![dge_spleen_10wpi](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/deg_spleen_10wpi.png)
 
 
 
@@ -645,6 +712,172 @@
 
 
 
+## Venn diagrams
+
+#### Downregulated
+
+![venn_downregulated_spleen](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/venn_downregulated_spleen.png)
+
+
+
+
+
+<table class="table table" style="font-size: 14px; color: black; margin-left: auto; margin-right: auto; color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:center;font-style: italic;"> Salmon ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Human ortholog </th>
+   <th style="text-align:center;font-style: italic;"> Human ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Description </th>
+   <th style="text-align:center;font-style: italic;"> Intersection </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000041220 </td>
+   <td style="text-align:center;"> SUMO3 </td>
+   <td style="text-align:center;"> ENSG00000184900 </td>
+   <td style="text-align:center;"> small ubiquitin like modifier 3 [Source:HGNC Symbol;Acc:HGNC:11124] </td>
+   <td style="text-align:center;"> EOMES vs GATA3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000115227 </td>
+   <td style="text-align:center;"> APOA1 </td>
+   <td style="text-align:center;"> ENSG00000118137 </td>
+   <td style="text-align:center;"> apolipoprotein A1 [Source:HGNC Symbol;Acc:HGNC:600] </td>
+   <td style="text-align:center;"> EOMES vs GATA3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000076499 </td>
+   <td style="text-align:center;"> SERPINA4 </td>
+   <td style="text-align:center;"> ENSG00000100665 </td>
+   <td style="text-align:center;"> serpin family A member 4 [Source:HGNC Symbol;Acc:HGNC:8948] </td>
+   <td style="text-align:center;"> EOMES vs GATA3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000077341 </td>
+   <td style="text-align:center;"> C9 </td>
+   <td style="text-align:center;"> ENSG00000113600 </td>
+   <td style="text-align:center;"> complement C9 [Source:HGNC Symbol;Acc:HGNC:1358] </td>
+   <td style="text-align:center;"> EOMES vs GATA3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000064384 </td>
+   <td style="text-align:center;"> LTF </td>
+   <td style="text-align:center;"> ENSG00000012223 </td>
+   <td style="text-align:center;"> lactotransferrin [Source:HGNC Symbol;Acc:HGNC:6720] </td>
+   <td style="text-align:center;"> EOMES vs GATA3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000067877 </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> InterPro: Serpin superfamily </td>
+   <td style="text-align:center;"> EOMES vs GATA3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000007048 </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> InterPro: Apolipoprotein A-II </td>
+   <td style="text-align:center;"> EOMES vs GATA3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000002670 </td>
+   <td style="text-align:center;"> CREB3L3 </td>
+   <td style="text-align:center;"> ENSG00000060566 </td>
+   <td style="text-align:center;"> cAMP responsive element binding protein 3 like 3 [Source:HGNC Symbol;Acc:HGNC:18855] </td>
+   <td style="text-align:center;"> EOMES vs GATA3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000008352 </td>
+   <td style="text-align:center;"> TM2D2 </td>
+   <td style="text-align:center;"> ENSG00000169490 </td>
+   <td style="text-align:center;"> TM2 domain containing 2 [Source:HGNC Symbol;Acc:HGNC:24127] </td>
+   <td style="text-align:center;"> EOMES vs DNA vaccine </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000008986 </td>
+   <td style="text-align:center;"> NKX2-3 </td>
+   <td style="text-align:center;"> ENSG00000119919 </td>
+   <td style="text-align:center;"> NK2 homeobox 3 [Source:HGNC Symbol;Acc:HGNC:7836] </td>
+   <td style="text-align:center;"> EOMES vs DNA vaccine </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000118117 </td>
+   <td style="text-align:center;"> PDLIM3 </td>
+   <td style="text-align:center;"> ENSG00000154553 </td>
+   <td style="text-align:center;"> PDZ and LIM domain 3 [Source:HGNC Symbol;Acc:HGNC:20767] </td>
+   <td style="text-align:center;"> EOMES vs DNA vaccine </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000084311 </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> novel gene: lncRNA </td>
+   <td style="text-align:center;"> DNA vaccine vs IV-LD </td>
+  </tr>
+</tbody>
+</table>
+
+
+
+
+
+
+#### Upregulated
+
+
+![venn_upregulated_spleen](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/venn_upregulated_spleen.png)
+
+
+
+
+
+
+
+<table class="table table" style="font-size: 14px; color: black; margin-left: auto; margin-right: auto; color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:center;font-style: italic;"> Salmon ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Human ortholog </th>
+   <th style="text-align:center;font-style: italic;"> Human ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Description </th>
+   <th style="text-align:center;font-style: italic;"> Intersection </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000001430 </td>
+   <td style="text-align:center;"> IL2RB </td>
+   <td style="text-align:center;"> ENSG00000100385 </td>
+   <td style="text-align:center;"> interleukin 2 receptor subunit beta [Source:HGNC Symbol;Acc:HGNC:6009] </td>
+   <td style="text-align:center;"> GATA3 vs DNA vaccine </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000099468 </td>
+   <td style="text-align:center;"> U2SURP </td>
+   <td style="text-align:center;"> ENSG00000163714 </td>
+   <td style="text-align:center;"> U2 snRNP associated SURP domain containing [Source:HGNC Symbol;Acc:HGNC:30855] </td>
+   <td style="text-align:center;"> GATA3 vs DNA vaccine </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000105404 </td>
+   <td style="text-align:center;"> MKNK2 </td>
+   <td style="text-align:center;"> ENSG00000099875 </td>
+   <td style="text-align:center;"> MAPK interacting serine/threonine kinase 2 [Source:HGNC Symbol;Acc:HGNC:7111] </td>
+   <td style="text-align:center;"> GATA3 vs IV-LD </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000073461 </td>
+   <td style="text-align:center;"> CANX </td>
+   <td style="text-align:center;"> ENSG00000127022 </td>
+   <td style="text-align:center;"> calnexin [Source:HGNC Symbol;Acc:HGNC:1473] </td>
+   <td style="text-align:center;"> DNA vaccine vs IV-LD </td>
+  </tr>
+</tbody>
+</table>
+
 
 
 
@@ -1019,11 +1252,120 @@
 
 
 
+## Venn diagrams
 
 
 
 
 
+
+
+#### Downregulated
+
+
+
+
+
+
+
+![venn_downregulated_liver](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/venn_downregulated_liver.png)
+
+
+
+<table class="table table" style="font-size: 14px; color: black; margin-left: auto; margin-right: auto; color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:center;font-style: italic;"> Salmon ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Human ortholog </th>
+   <th style="text-align:center;font-style: italic;"> Human ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Description </th>
+   <th style="text-align:center;font-style: italic;"> Intersection </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000090325 </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> InterPro: C2 domain superfamily </td>
+   <td style="text-align:center;"> EOMES vs IV-LD </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000096535 </td>
+   <td style="text-align:center;"> CTRL </td>
+   <td style="text-align:center;"> ENSG00000141086 </td>
+   <td style="text-align:center;"> chymotrypsin like [Source:HGNC Symbol;Acc:HGNC:2524] </td>
+   <td style="text-align:center;"> EOMES vs IV-LD </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000066820 </td>
+   <td style="text-align:center;"> CPB1 </td>
+   <td style="text-align:center;"> ENSG00000153002 </td>
+   <td style="text-align:center;"> carboxypeptidase B1 [Source:HGNC Symbol;Acc:HGNC:2299] </td>
+   <td style="text-align:center;"> EOMES vs IV-LD </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000043820 </td>
+   <td style="text-align:center;"> NAT10 </td>
+   <td style="text-align:center;"> ENSG00000135372 </td>
+   <td style="text-align:center;"> N-acetyltransferase 10 [Source:HGNC Symbol;Acc:HGNC:29830] </td>
+   <td style="text-align:center;"> IV-LD vs DNA vaccine </td>
+  </tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+#### Upregulated
+
+
+
+
+
+![venn_upregulated_liver](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/venn_diagrams/venn_upregulated_liver.png)
+
+<table class="table table" style="font-size: 14px; color: black; margin-left: auto; margin-right: auto; color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:center;font-style: italic;"> Salmon ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Human ortholog </th>
+   <th style="text-align:center;font-style: italic;"> Human ENSEMBL </th>
+   <th style="text-align:center;font-style: italic;"> Description </th>
+   <th style="text-align:center;font-style: italic;"> Intersection </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000003797 </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> 2 splice variants. InterPro: IFNa-inducible protein IFI6/IFI27-like  </td>
+   <td style="text-align:center;"> EOMES vs IV-LD </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000041408 </td>
+   <td style="text-align:center;"> RNF213 </td>
+   <td style="text-align:center;"> ENSG00000173821 </td>
+   <td style="text-align:center;"> ring finger protein 213 [Source:HGNC Symbol;Acc:HGNC:14539] </td>
+   <td style="text-align:center;"> IV-LD vs DNA vaccine </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> ENSSSAG00000119965 </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> N/A </td>
+   <td style="text-align:center;"> InterPro: Mis18 domain </td>
+   <td style="text-align:center;"> IV-LD vs DNA vaccine </td>
+  </tr>
+</tbody>
+</table>
 
 
 
@@ -1203,6 +1545,16 @@
 
 
 ​	No enriched KEGG or Reactome pathways.
+
+
+
+## Venn diagrams
+
+No overlaps.
+
+
+
+
 
 
 
