@@ -634,7 +634,7 @@ cat(markdown_table(reactome_data), sep = "\n")
 
 
 
-# liver
+# liver ----
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
 ## dna vaccine ----
 load(
@@ -1069,8 +1069,9 @@ cat(markdown_table(reactome_data), sep = "\n")
 
 
 
-# hkidney 
+# hkidney ----
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
+
 ## dna vaccine ----
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_10wpi/gsea_results_tables/hkidney_entrez_gene_list_dnavaccine_10wpi.RData')
 
@@ -1297,7 +1298,7 @@ as_tibble(reactome_gata3_10wpi_hkidney)
 
 
 
-# heart
+# heart ----
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
 
 ## dna vaccine ----
