@@ -2,11 +2,14 @@ library(knitr)
 library(kableExtra)
 library(tidyverse)
 library(gprofiler2)
+library(biomaRt)
 
 ## Loading functions ----
 source(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/scripts/functions_data-wrangling_march24.R'
 )
+
+rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
 
 ### spleen ----
 setwd(
@@ -593,7 +596,41 @@ downregulated_common_genes_heart <- bind_rows(downregulated_DNAvaccvEOMES,
                                               downregulated_IVLDvEOMES, 
                                               downregulated_IVLDvGATA3)
 
-c
+na_orthologs_vector_downregulated <- as.vector(downregulated_common_genes$ssalar_ensembl[downregulated_common_genes$hsapiens_ortholog == "N/A"])
+
+# Query for InterPro domains associated with the gene with not hsapiens ortholog
+ensembl <- useMart("ensembl", dataset = "ssalar_gene_ensembl")
+
+# Query for InterPro domains associated with the gene
+interpro_results <- getBM(
+  attributes = c('ensembl_gene_id', 'interpro_description', 'description'),
+  filters = 'ensembl_gene_id',
+  values = na_orthologs_vector_downregulated,
+  mart = ensembl
+)
+
+# Display the results
+print(interpro_results)
+
+unique <- interpro_results[!duplicated(interpro_results$ensembl_gene_id), ]
+
+# Rename the column in 'unique' to match 'upregulated_common_genes'
+unique_renamed <- unique %>%
+  rename(ssalar_ensembl = ensembl_gene_id)
+
+# Merge the data frames
+merged_df <- downregulated_common_genes %>%
+  left_join(unique_renamed %>% dplyr::select(ssalar_ensembl, interpro_description, description), 
+            by = "ssalar_ensembl")
+
+# Update the 'description' column
+merged_df <- merged_df %>%
+  mutate(description = case_when(
+    !is.na(description.x) & description.x != "N/A" ~ description.x,
+    is.na(interpro_description) ~ "novel gene: lncRNA",
+    TRUE ~ paste("InterPro:", interpro_description)
+  )) %>%
+  dplyr::select(ssalar_ensembl, hsapiens_ortholog, hsapiens_ensembl, description, intersection)
 
 # View the updated merged data frame
 print(merged_df)
@@ -615,8 +652,6 @@ table_md <- merged_df %>%
   kable_styling(full_width = F)
 
 writeLines(table_md, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/venn_diagrams/downregulated_common_genes.md')
-
-unique_GATA3vEOMES
 
 # upregulated ----
 c <- list(
@@ -859,15 +894,6 @@ table_md <- merged_df %>%
 writeLines(table_md, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/venn_diagrams/upregulated_common_genes.md')
 
 
-
-
-
-
-
-
-
-
-
 ### liver ----
 setwd(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc'
@@ -888,34 +914,36 @@ improved_data_wrangling(liver_res_ivld_vs_conu_4wpc, 'ivld', '4wpc')
 
 rm(list  = ls(pattern = '^liver'))
 
-# downregulated
+# downregulated ----
 b <- list(
   A = results_dnavaccine_4wpc[results_dnavaccine_4wpc$log2FC < 0, ]$ID,
   B = results_eomes_4wpc[results_eomes_4wpc$log2FC < 0, ]$ID,
-  C = results_ivhd_4wpc[results_ivhd_4wpc$log2FC < 0, ]$ID,
-  D = results_ivld_4wpc[results_ivld_4wpc$log2FC < 0, ]$ID
+  C = results_gata3_4wpc[results_gata3_4wpc$log2FC < 0, ]$ID,
+  D = results_ivhd_4wpc[results_ivhd_4wpc$log2FC < 0, ]$ID,
+  E = results_ivld_4wpc[results_ivld_4wpc$log2FC < 0, ]$ID
 )
 
 # add treatment names
 names(b) <-
-  c('DNA vaccine', 'EOMES', 'IVHD', 'IVLD')
+  c('DNA vaccine', 'EOMES', 'GATA3', 'IVHD', 'IVLD')
 
 # remove NA values from each element in the list 'b'
 b_clean <- lapply(b, function(x) x[!is.na(x)])
 b <- b_clean
 
 png('venn_downregulated_liver.png', width = 800, height = 800, res = 100)
+
 display_venn(
   b_clean,
-  fill = c('#cdb4db', '#bde0fe', '#d4a373', '#f08080'),
+  fill = c('#cdb4db', '#bde0fe', '#ccd5ae', '#d4a373', '#f08080'),
   lwd = 1,
   cex = 1,
   cat.cex = 1,
   cat.fontfamily = 'serif',
   # cat.fontface = 'bold',
   cat.default.pos = 'outer',
-  cat.dist = c(0.20, 0.20, 0.10, 0.08),
-  cat.pos = c(340, 380, 330, 370)
+  cat.dist = c(0.20, 0.20, 0.22, 0.20,.20),
+  cat.pos = c(360, 360, 250, 90, 360)
 )
 dev.off()
 
@@ -926,7 +954,7 @@ kableExtra::kable((sapply(b, length)), col.names = c('count'))
 EOMESvIVLD <- intersect(b$EOMES, b$IVLD)
 
 unique_EOMESvIVLD <- setdiff(EOMESvIVLD,
-                             c(b$`DNA vaccine`, b$IVHD))
+                             c(b$`DNA vaccine`, b$IVHD, b$GATA3))
 
 
 downregulated_EOMESvIVLD <- gorth(
@@ -951,7 +979,7 @@ downregulated_EOMESvIVLD <- gorth(
 IVLDvDNAvacc <- intersect(b$`DNA vaccine`, b$IVLD)
 
 unique_IVLDvDNAvacc <- setdiff(IVLDvDNAvacc,
-                               c(b$IVHD, b$EOMES))
+                               c(b$IVHD, b$EOMES, b$GATA3))
 
 downregulated_IVLDvDNAvacc <- gorth(
   query = unique_IVLDvDNAvacc,
@@ -971,9 +999,95 @@ downregulated_IVLDvDNAvacc <- gorth(
                       description = description
                     ) %>% mutate(intersection = 'IV-LD vs DNA vaccine' )
 
-downregulated_common_genes <- bind_rows(downregulated_EOMESvIVLD, downregulated_IVLDvDNAvacc)
 
-table_md <- downregulated_common_genes %>%
+EOMESvDNAvacc <- intersect(b$`DNA vaccine`, b$EOMES)
+
+unique_EOMESvDNAvacc <- setdiff(EOMESvDNAvacc,
+                               c(b$IVHD, b$GATA3, b$IVLD))
+
+downregulated_EOMESvDNAvacc <- gorth(
+  query = unique_EOMESvDNAvacc,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+) %>% dplyr::select(.,
+                    input,
+                    ortholog_name,
+                    ortholog_ensg,
+                    description) %>% dplyr::rename(
+                      .,
+                      ssalar_ensembl = input,
+                      hsapiens_ortholog = ortholog_name,
+                      hsapiens_ensembl = ortholog_ensg,
+                      description = description
+                    ) %>% mutate(intersection = 'EOMES vs DNA vaccine')
+
+
+EOMES_GATA3 <- intersect(b$EOMES, b$GATA3)
+
+unique_EOMES_GATA3 <- setdiff(EOMES_GATA3,
+                              c(b$`DNA vaccine`, b$IVHD, b$IVLD))
+
+downregulated_EOMES_GATA3 <- gorth(
+  query = unique_EOMES_GATA3,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+) %>% dplyr::select(.,
+                    input,
+                    ortholog_name,
+                    ortholog_ensg,
+                    description) %>% dplyr::rename(
+                      .,
+                      ssalar_ensembl = input,
+                      hsapiens_ortholog = ortholog_name,
+                      hsapiens_ensembl = ortholog_ensg,
+                      description = description
+                    ) %>% mutate(intersection = 'EOMES vs GATA3')
+
+
+
+downregulated_common_genes <- bind_rows(downregulated_EOMESvIVLD, downregulated_EOMES_GATA3, downregulated_EOMESvDNAvacc, downregulated_IVLDvDNAvacc)
+
+na_orthologs_vector_downregulated <- as.vector(downregulated_common_genes$ssalar_ensembl[downregulated_common_genes$hsapiens_ortholog == "N/A"])
+
+# Query for InterPro domains associated with the gene with not hsapiens ortholog
+ensembl <- useMart("ensembl", dataset = "ssalar_gene_ensembl")
+
+# Query for InterPro domains associated with the gene
+interpro_results <- getBM(
+  attributes = c('ensembl_gene_id', 'interpro_description', 'description'),
+  filters = 'ensembl_gene_id',
+  values = na_orthologs_vector_downregulated,
+  mart = ensembl
+)
+
+# Display the results
+print(interpro_results)
+
+unique <- interpro_results[!duplicated(interpro_results$ensembl_gene_id), ]
+
+# Rename the column in 'unique' to match 'upregulated_common_genes'
+unique_renamed <- unique %>%
+  rename(ssalar_ensembl = ensembl_gene_id)
+
+# Merge the data frames
+merged_df <- downregulated_common_genes %>%
+  left_join(unique_renamed %>% dplyr::select(ssalar_ensembl, interpro_description, description), 
+            by = "ssalar_ensembl")
+
+# Update the 'description' column
+merged_df <- merged_df %>%
+  mutate(description = case_when(
+    !is.na(description.x) & description.x != "N/A" ~ description.x,
+    is.na(interpro_description) ~ "novel gene: lncRNA",
+    TRUE ~ paste("InterPro:", interpro_description)
+  )) %>%
+  dplyr::select(ssalar_ensembl, hsapiens_ortholog, hsapiens_ensembl, description, intersection)
+
+table_md <- merged_df %>%
   kableExtra::kable(
     booktabs = TRUE,
     col.names = c(
@@ -989,35 +1103,37 @@ table_md <- downregulated_common_genes %>%
   kableExtra::kable_styling(font_size = 14) %>% 
   kable_styling(full_width = F)
 
-writeLines(table_md, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/venn_diagrams/downregulated_common_genes.md')
-
-# gene IDs
-gene_ids <- ('ENSSSAG00000090325') ## unidentified geneIDs from downregulated liver venn diagram
-
-# Query for InterPro domains associated with the gene
-interpro_results <- getBM(
-  attributes = c('ensembl_gene_id', 'interpro', 'interpro_description'),
-  filters = 'ensembl_gene_id',
-  values = gene_ids,
-  mart = ensembl
-)
-
-# Display the results
-print(interpro_results)
+writeLines(table_md, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/venn_diagrams/downregulated_common_genes.md')
 
 
 
-# upregulated
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# upregulated ----
 c <- list(
   A = results_dnavaccine_4wpc[results_dnavaccine_4wpc$log2FC > 0, ]$ID,
   B = results_eomes_4wpc[results_eomes_4wpc$log2FC > 0, ]$ID,
-  C = results_ivhd_4wpc[results_ivhd_4wpc$log2FC > 0, ]$ID,
-  D = results_ivld_4wpc[results_ivld_4wpc$log2FC > 0, ]$ID
+  C = results_gata3_4wpc[results_gata3_4wpc$log2FC > 0, ]$ID,
+  D = results_ivhd_4wpc[results_ivhd_4wpc$log2FC > 0, ]$ID,
+  E = results_ivld_4wpc[results_ivld_4wpc$log2FC > 0, ]$ID
 )
 
 # add treatment names
 names(c) <-
-  c('DNA vaccine', 'EOMES', 'IVHD', 'IVLD')
+  c('DNA vaccine', 'EOMES', 'GATA3', 'IVHD', 'IVLD')
 
 # remove NA values from each element in the list 'b'
 c_clean <- lapply(c, function(x) x[!is.na(x)])
@@ -1028,29 +1144,29 @@ kableExtra::kable((sapply(c, length)), col.names = c('count'))
 
 png('venn_upregulated_liver.png', width = 800, height = 800, res = 100)
 display_venn(
-  c,
-  fill = c('#cdb4db', '#bde0fe', '#d4a373', '#f08080'),
+  c_clean,
+  fill = c('#cdb4db', '#bde0fe', '#ccd5ae', '#d4a373', '#f08080'),
   lwd = 1,
   cex = 1,
   cat.cex = 1,
   cat.fontfamily = 'serif',
   # cat.fontface = 'bold',
   cat.default.pos = 'outer',
-  cat.dist = c(0.20, 0.20, 0.10, 0.08),
-  cat.pos = c(340, 380, 330, 370)
-)
+  cat.dist = c(0.20, 0.20, 0.22, 0.20,.20),
+  cat.pos = c(360, 360, 250, 90, 360))
 dev.off()
 
 # check gene counts per treatment
 kableExtra::kable((sapply(c, length)), col.names = c('count'))
 
 # common genes
-EOMESvIVLD <- intersect(c$EOMES, c$IVLD)
+EOMES_GATA3 <- intersect(c$EOMES, c$GATA3)
 
-unique_EOMESvIVLD <- EOMESvIVLD  # no other overlaps, no need to setdiff
+unique_EOMES_GATA3 <- setdiff(EOMES_GATA3,
+                               c(c$`DNA vaccine`, c$IVHD, c$IVLD))
 
-upregulated_EOMESvIVLD <- gorth(
-  query = unique_EOMESvIVLD,
+upregulated_EOMES_GATA3 <- gorth(
+  query = unique_EOMES_GATA3,
   source_organism = 'ssalar',
   target_organism = 'hsapiens',
   mthreshold = 1,
@@ -1065,16 +1181,16 @@ upregulated_EOMESvIVLD <- gorth(
                       hsapiens_ortholog = ortholog_name,
                       hsapiens_ensembl = ortholog_ensg,
                       description = description
-                    ) %>% mutate(intersection = 'EOMES vs IV-LD' )
+                    ) %>% mutate(intersection = 'EOMES vs GATA3')
 
 
-IVLDvDNAvacc <- intersect(c$`DNA vaccine`, c$IVLD)
+EOMES_DNAvacc <- intersect(c$EOMES, c$`DNA vaccine`)
 
-unique_IVLDvDNAvacc <- setdiff(IVLDvDNAvacc,
-                               c(c$EOMES, c$IVHD))
+unique_EOMES_DNAvacc <- setdiff(EOMES_DNAvacc,
+                              c(c$GATA3, c$IVHD, c$IVLD))
 
-upregulated_IVLDvDNAvacc <- gorth(
-  query = unique_IVLDvDNAvacc,
+upregulated_EOMES_DNAvacc <- gorth(
+  query = unique_EOMES_DNAvacc,
   source_organism = 'ssalar',
   target_organism = 'hsapiens',
   mthreshold = 1,
@@ -1089,12 +1205,77 @@ upregulated_IVLDvDNAvacc <- gorth(
                       hsapiens_ortholog = ortholog_name,
                       hsapiens_ensembl = ortholog_ensg,
                       description = description
-                    ) %>% mutate(intersection = 'IV-LD vs DNA vaccine' )
+                    ) %>% mutate(intersection = 'EOMES vs DNA vaccine')
 
 
-upregulated_common_genes <- bind_rows(upregulated_EOMESvIVLD, upregulated_IVLDvDNAvacc)
 
-table_md <- upregulated_common_genes %>%
+GATA3_DNAvacc <- intersect(c$GATA3, c$`DNA vaccine`)
+
+unique_GATA3_DNAvacc <- setdiff(GATA3_DNAvacc,
+                                c(c$EOMES, c$IVHD, c$IVLD))
+
+upregulated_GATA3_DNAvacc <- gorth(
+  query = unique_GATA3_DNAvacc,
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = F
+) %>% dplyr::select(.,
+                    input,
+                    ortholog_name,
+                    ortholog_ensg,
+                    description) %>% dplyr::rename(
+                      .,
+                      ssalar_ensembl = input,
+                      hsapiens_ortholog = ortholog_name,
+                      hsapiens_ensembl = ortholog_ensg,
+                      description = description
+                    ) %>% mutate(intersection = 'GATA3 vs DNA vaccine')
+
+
+
+upregulated_common_genes <- bind_rows(upregulated_EOMES_DNAvacc, upregulated_EOMES_GATA3, upregulated_GATA3_DNAvacc)
+
+na_orthologs_vector_upregulated <- as.vector(upregulated_common_genes$ssalar_ensembl[upregulated_common_genes$hsapiens_ortholog == "N/A"])
+
+# Query for InterPro domains associated with the gene with not hsapiens ortholog
+ensembl <- useMart("ensembl", dataset = "ssalar_gene_ensembl")
+
+# Query for InterPro domains associated with the gene
+interpro_results <- getBM(
+  attributes = c('ensembl_gene_id', 'interpro_description', 'description'),
+  filters = 'ensembl_gene_id',
+  values = na_orthologs_vector_upregulated,
+  mart = ensembl
+)
+
+# Display the results
+print(interpro_results)
+
+unique <- interpro_results[!duplicated(interpro_results$ensembl_gene_id), ]
+
+# Rename the column in 'unique' to match 'upregulated_common_genes'
+unique_renamed <- unique %>%
+  rename(ssalar_ensembl = ensembl_gene_id)
+
+# Merge the data frames
+merged_df <- upregulated_common_genes %>%
+  left_join(unique_renamed %>% dplyr::select(ssalar_ensembl, interpro_description, description), 
+            by = "ssalar_ensembl")
+
+# Update the 'description' column
+merged_df <- merged_df %>%
+  mutate(description = case_when(
+    !is.na(description.x) & description.x != "N/A" ~ description.x,
+    is.na(interpro_description) ~ "novel gene: lncRNA",
+    TRUE ~ paste("InterPro:", interpro_description)
+  )) %>%
+  dplyr::select(ssalar_ensembl, hsapiens_ortholog, hsapiens_ensembl, description, intersection)
+
+# View the updated merged data frame
+print(merged_df)
+
+table_md <- merged_df %>%
   kableExtra::kable(
     booktabs = TRUE,
     col.names = c(
@@ -1112,25 +1293,6 @@ table_md <- upregulated_common_genes %>%
 
 writeLines(table_md, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/venn_diagrams/upregulated_common_genes.md')
 
-
-library(biomaRt)
-
-# Select the Ensembl dataset (use your specific species if necessary)
-ensembl <- useMart("ensembl", dataset = "ssalar_gene_ensembl")
-
-# gene IDs
-gene_ids <- c('ENSSSAG00000003797', 'ENSSSAG00000119965') ## unidentified geneIDs from upregulated liver venn diagram
-
-# Query for InterPro domains associated with the gene
-interpro_results <- getBM(
-  attributes = c('ensembl_gene_id', 'interpro', 'interpro_description'),
-  filters = 'ensembl_gene_id',
-  values = gene_ids,
-  mart = ensembl
-)
-
-# Display the results
-print(interpro_results)
 
 ### hkidney ----
 setwd(
