@@ -101,51 +101,11 @@ low_high_nes_dnavaccine_10wpi %>%
   ) +
   facet_grid(. ~ Regulation)
 
-y_dnavaccine <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes the duplicates from this object
-                           pvalueCutoff = .2,
-                           pAdjustMethod = 'BH',
-                           verbose = F)
-
-as_tibble(y_dnavaccine) %>% arrange(-NES) %>% print(n = 100)
-
-viewPathway('TRAF6 mediated IRF7 activation', readable = T, foldChange = entrez_gene_list)  # down
-viewPathway('Negative regulation of MAPK pathway', readable = T, foldChange = entrez_gene_list)  # down
-viewPathway('Regulation of Complement cascade', readable = T, foldChange = entrez_gene_list)  # up
-
-
-spleen_dnavaccine_pathways <- 
-  as_tibble(y_dnavaccine) %>% 
-  arrange(NES) %>% 
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
-  dplyr::select(., Description, NES, setSize, Count) 
-
-write_tsv(spleen_dnavaccine_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_dnavaccine_pathways.tsv')
-
-# Convert to a Markdown table ----
-# Read the TSV file
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_dnavaccine_pathways.tsv', header = TRUE, sep = "\t")
-
-markdown_table <- function(data) {
-  # Get the header
-  header <- paste("|", paste(names(data), collapse = " | "), "|")
-  
-  # Get the separator line
-  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-  
-  # Get the table rows
-  rows <- apply(data, 1, function(row) {
-    paste("|", paste(row, collapse = " | "), "|")
-  })
-  
-  # Combine header, separator, and rows
-  c(header, separator, rows)
-}
-
-# Print the Markdown table
-cat(markdown_table(data), sep = "\n")
-
-
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_definitive_plots/dnavaccine_10wpi.png',
+       width = 1100,
+       height = 1000,
+       units = 'px',
+       dpi = 100)
 
 ## EOMES ----
 ### all genes ###
@@ -237,49 +197,11 @@ low_high_nes_eomes_10wpi %>%
              ))) +  # show only borders in set size legend) 
              facet_grid(. ~ Regulation)
 
-y_eomes <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes the duplicates from this object
-                      pvalueCutoff = .2,
-                      pAdjustMethod = 'BH',
-                      nPermSimple = 1000000,
-                      verbose = F)
-
-as_tibble(y_eomes) %>% arrange(-NES) %>% print(n = 100)
-
-viewPathway('Regulation of Complement cascade', readable = T, foldChange = entrez_gene_list)  # down
-viewPathway('Complement cascade', readable = T, foldChange = entrez_gene_list)  # down
-viewPathway('Signaling by ALK', readable = T, foldChange = entrez_gene_list)  # up
-
-
-spleen_eomes_pathways <- as_tibble(y_eomes) %>% 
-  arrange(-NES) %>%   
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
-  dplyr::select(., Description, NES, setSize, Count) 
-
-write_tsv(spleen_eomes_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_eomes_pathways.tsv')
-
-# Convert to a Markdown table ----
-# Read the TSV file
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_eomes_pathways.tsv', header = TRUE, sep = "\t")
-
-markdown_table <- function(data) {
-  # Get the header
-  header <- paste("|", paste(names(data), collapse = " | "), "|")
-  
-  # Get the separator line
-  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-  
-  # Get the table rows
-  rows <- apply(data, 1, function(row) {
-    paste("|", paste(row, collapse = " | "), "|")
-  })
-  
-  # Combine header, separator, and rows
-  c(header, separator, rows)
-}
-
-# Print the Markdown table
-cat(markdown_table(data), sep = "\n")
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_definitive_plots/eomes_10wpi.png',
+       width = 1100,
+       height = 1000,
+       units = 'px',
+       dpi = 100)
 
 ## GATA3 ----
 
@@ -358,52 +280,11 @@ low_high_nes_gata3_10wpi %>%
   ) +
   facet_grid(. ~ Regulation)
 
-ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_definitive_plots/gata3_10wpi.png', width = 1000, height = 1023, units = "px", dpi = 72)
-
-
-y_gata3 <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes the duplicates from this object
-                      pvalueCutoff = .2,
-                      pAdjustMethod = 'BH',
-                      verbose = F)
-
-as_tibble(y_gata3) %>% arrange(-NES) %>% print(n = 100)
-
-viewPathway('Regulation of Complement cascade', readable = T, foldChange = entrez_gene_list)  # down
-viewPathway('Complement cascade', readable = T, foldChange = entrez_gene_list)  # down
-viewPathway('CD209 (DC-SIGN) signaling', readable = T, foldChange = entrez_gene_list)  # up
-
-
-spleen_gata3_pathways <- as_tibble(y_gata3) %>% 
-  arrange(-NES) %>%   
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
-  dplyr::select(., Description, NES, setSize, Count) 
-
-write_tsv(spleen_gata3_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_gata3_pathways.tsv')
-
-# Convert to a Markdown table ----
-# Read the TSV file
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_gata3_pathways.tsv', header = TRUE, sep = "\t")
-
-markdown_table <- function(data) {
-  # Get the header
-  header <- paste("|", paste(names(data), collapse = " | "), "|")
-  
-  # Get the separator line
-  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-  
-  # Get the table rows
-  rows <- apply(data, 1, function(row) {
-    paste("|", paste(row, collapse = " | "), "|")
-  })
-  
-  # Combine header, separator, and rows
-  c(header, separator, rows)
-}
-
-# Print the Markdown table
-cat(markdown_table(data), sep = "\n")
-
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_definitive_plots/gata3_10wpi.png', 
+       width = 1000, 
+       height = 1023, 
+       units = "px", 
+       dpi = 100)
 
 ## IV-HD ----
 
@@ -480,46 +361,11 @@ low_high_nes_ivhd_10wpi %>%
   ) +
   facet_grid(. ~ Regulation)
 
-
-y_ivhd <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes the duplicates from this object
-                     pvalueCutoff = .2,
-                     pAdjustMethod = 'BH',
-                     verbose = F)
-
-as_tibble(y_ivhd) %>% arrange(NES) %>% print(n = 100)
-
-viewPathway('', readable = T, foldChange = entrez_gene_list)
-
-spleen_ivhd_pathways <- as_tibble(y_ivhd) %>% 
-  arrange(-NES) %>%   
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
-  dplyr::select(., Description, NES, setSize, Count) 
-
-write_tsv(spleen_ivhd_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_ivhd_pathways.tsv')
-
-# Convert to a Markdown table ----
-# Read the TSV file
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/results_10wpi/pathways/ivhd_pathways.tsv', header = TRUE, sep = "\t")
-
-markdown_table <- function(data) {
-  # Get the header
-  header <- paste("|", paste(names(data), collapse = " | "), "|")
-  
-  # Get the separator line
-  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-  
-  # Get the table rows
-  rows <- apply(data, 1, function(row) {
-    paste("|", paste(row, collapse = " | "), "|")
-  })
-  
-  # Combine header, separator, and rows
-  c(header, separator, rows)
-}
-
-# Print the Markdown table
-cat(markdown_table(data), sep = "\n")
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_definitive_plots/ivhd_10wpi.png',
+       width = 1100,
+       height = 1000,
+       units = 'px',
+       dpi = 100)
 
 ## IV-LD ----
 
@@ -597,44 +443,11 @@ low_high_nes_ivld_10wpi %>%
   facet_grid(. ~ Regulation)
 
 
-y_ivld <- gsePathway(entrez_gene_list,  # the gsea_formatting function removes the duplicates from this object
-                     pvalueCutoff = .2,
-                     pAdjustMethod = 'BH',
-                     verbose = T)
-
-as_tibble(y_ivld) %>% arrange(NES) %>% print(n = 100)
-
-# viewPathway('', readable = T, foldChange = entrez_gene_list)
-
-spleen_ivld_pathways <- as_tibble(y_ivld) %>% 
-  arrange(NES) %>%   
-  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
-  dplyr::select(., Description, NES, setSize, Count) 
-
-write_tsv(spleen_ivld_pathways, '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_ivld_pathways.tsv')
-
-# Convert to a Markdown table ----
-# Read the TSV file
-data <- read.delim('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/pathways/spleen_ivld_pathways.tsv', header = TRUE, sep = "\t")
-
-markdown_table <- function(data) {
-  # Get the header
-  header <- paste("|", paste(names(data), collapse = " | "), "|")
-  
-  # Get the separator line
-  separator <- paste("|", paste(rep("---", ncol(data)), collapse = " | "), "|")
-  
-  # Get the table rows
-  rows <- apply(data, 1, function(row) {
-    paste("|", paste(row, collapse = " | "), "|")
-  })
-  
-  # Combine header, separator, and rows
-  c(header, separator, rows)
-}
-
-# Print the Markdown table
-cat(markdown_table(data), sep = "\n")
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_definitive_plots/ivld_10wpi.png',
+       width = 1100,
+       height = 1000,
+       units = 'px',
+       dpi = 100)
 
 
 
