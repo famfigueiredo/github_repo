@@ -375,7 +375,7 @@ kegg_eomes_4wpc_spleen <- gseKEGG(
   spleen_entrez_gene_list_eomes_4wpc,
   organism = "hsa",
   keyType = "ncbi-geneid",
-  pvalueCutoff = 0.05,
+  pvalueCutoff = .05,
   pAdjustMethod = "BH",
   verbose = TRUE,
   seed = FALSE,
@@ -384,92 +384,22 @@ kegg_eomes_4wpc_spleen <- gseKEGG(
 )
 
 as_tibble(kegg_eomes_4wpc_spleen) %>% arrange(NES) %>% print(n = Inf)
-as_tibble(kegg_eomes_4wpc_spleen)
-
-setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/kegg'
-)
-
-pathview(
-  gene.data = spleen_entrez_gene_list_eomes_4wpc,
-  species = 'hsa',
-  pathway.id = '04610',
-  kegg.native = T,
-  limit = list(gene = 1, cpd = 1),
-  out.suffix = 'eomes_complement_and_coagulation_cascades'
-)
 
 reactome_eomes_4wpc_spleen <-
   gsePathway(
     spleen_entrez_gene_list_eomes_4wpc,
     # the gsea_formatting function removes the duplicates from this object
-    pvalueCutoff = .2,
+    pvalueCutoff = .05,
     pAdjustMethod = 'BH',
     eps = 1e-300,
-    nPermSimple = 1000000,
+    nPermSimple = 100000,
     verbose = F
   )
 
 as_tibble(reactome_eomes_4wpc_spleen) %>% arrange(NES) %>% print(n = Inf)
 
-
-viewPathway('Complement cascade',
-            readable = T,
-            foldChange = spleen_entrez_gene_list_eomes_4wpc)  # downregulated
-
-ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/reactome/eomes_complement_cascade.png',
-  width = 1000,
-  height = 648,
-  units = "px",
-  dpi = 100,
-  bg = 'white'
-)
-
-viewPathway('Regulation of Complement cascade',
-            readable = T,
-            foldChange = spleen_entrez_gene_list_eomes_4wpc)  # downregulated
-
-ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/reactome/eomes_regulation_complement_cascade.png',
-  width = 1000,
-  height = 648,
-  units = "px",
-  dpi = 100,
-  bg = 'white'
-)
-
-
-viewPathway('Response to elevated platelet cytosolic Ca2+',
-            readable = T,
-            foldChange = spleen_entrez_gene_list_eomes_4wpc)  # downregulated
-
-ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/reactome/eomes_response_to_elevated_platelet_cytosolic_ca2.png',
-  width = 1000,
-  height = 648,
-  units = "px",
-  dpi = 100,
-  bg = 'white'
-)
-
-viewPathway('TNFR1-induced NF-kappa-B signaling pathway',
-            readable = T,
-            foldChange = spleen_entrez_gene_list_eomes_4wpc)  # upregulated
-
-ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/reactome/eomes_tnfr1_induced_nfkb_signaling_pathway.png',
-  width = 1000,
-  height = 648,
-  units = "px",
-  dpi = 100,
-  bg = 'white'
-)
-
-kegg_pathways <-
-  as_tibble(kegg_eomes_4wpc_spleen) %>% arrange(NES) %>% dplyr::select(., Description, NES)
-reactome_pathways <-
-  as_tibble(reactome_eomes_4wpc_spleen) %>% dplyr::select(., Description, NES) %>% arrange(NES)
+kegg_pathways <- get_top_bottom_pathways(kegg_eomes_4wpc_spleen, n = 10, 'kegg')
+reactome_pathways <- get_top_bottom_pathways(reactome_eomes_4wpc_spleen, n = 10, 'reactome')
 
 write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/kegg/kegg_spleen_4wpc_eomes.tsv')
 write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/reactome/reactome_spleen_4wpc_eomes.tsv')
@@ -490,6 +420,8 @@ reactome_data <-
     sep = "\t"
   )
 cat(markdown_table(reactome_data), sep = "\n")
+
+
 ## gata3 ----
 
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
@@ -514,77 +446,24 @@ kegg_gata3_4wpc_spleen <- gseKEGG(
   eps = 0
 )
 
-kegg_pathways <-
-  as_tibble(kegg_gata3_4wpc_spleen) %>% arrange(NES) %>% dplyr::select(., Description, NES) %>% headtail(.)
+as_tibble(kegg_gata3_4wpc_spleen) %>% arrange(NES)
 
-setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/kegg'
-)
-
-pathview(
-  gene.data = spleen_entrez_gene_list_gata3_4wpc,
-  species = 'hsa',
-  pathway.id = '04610',
-  kegg.native = T,
-  limit = list(gene = 1, cpd = 1),
-  out.suffix = 'gata3_complement_and_coagulation_cascades'
-)
 
 reactome_gata3_4wpc_spleen <-
   gsePathway(
     spleen_entrez_gene_list_gata3_4wpc,
     # the gsea_formatting function removes the duplicates from this object
-    pvalueCutoff = .2,
+    pvalueCutoff = .05,
     pAdjustMethod = 'BH',
     eps = 1e-300,
     nPermSimple = 100000,
     verbose = F
   )
 
-reactome_pathways <-
-  as_tibble(reactome_gata3_4wpc_spleen) %>% dplyr::select(., Description, NES) %>% arrange(NES) %>% headtail(.)
+as_tibble(reactome_gata3_4wpc_spleen) %>% dplyr::select(., Description, NES) %>% arrange(NES)
 
-
-viewPathway('Regulation of Complement cascade',
-            readable = T,
-            foldChange = spleen_entrez_gene_list_gata3_4wpc)  # downregulated
-
-ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/reactome/gata3_regulation_complement_cascade.png',
-  width = 1000,
-  height = 648,
-  units = "px",
-  dpi = 100,
-  bg = 'white'
-)
-
-viewPathway('Response to elevated platelet cytosolic Ca2+',
-            readable = T,
-            foldChange = spleen_entrez_gene_list_gata3_4wpc)  # downregulated
-
-ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/reactome/gata3_response_to_elevated_platelet_cytosolic_ca2.png',
-  width = 1000,
-  height = 648,
-  units = "px",
-  dpi = 100,
-  bg = 'white'
-)
-
-viewPathway('CD209 (DC-SIGN) signaling',
-            readable = T,
-            foldChange = spleen_entrez_gene_list_gata3_4wpc)  # upregulated
-
-ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/reactome/gata3_cd209_signaling.png',
-  width = 1000,
-  height = 648,
-  units = "px",
-  dpi = 100,
-  bg = 'white'
-)
-
-
+kegg_pathways <- get_top_bottom_pathways(kegg_gata3_4wpc_spleen, n = 10, 'kegg')
+reactome_pathways <- get_top_bottom_pathways(reactome_gata3_4wpc_spleen, n = 10, 'reactome')
 
 write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/kegg/kegg_spleen_4wpc_gata3.tsv')
 write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_4wpc/pathways/reactome/reactome_spleen_4wpc_gata3.tsv')
@@ -605,8 +484,6 @@ reactome_data <-
     sep = "\t"
   )
 cat(markdown_table(reactome_data), sep = "\n")
-
-
 
 # liver ----
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
