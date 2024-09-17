@@ -22,7 +22,7 @@
 | Fanconi anemia pathway |  1.882263 |
 | Mismatch repair |  1.846566 |
 | Influenza A |  1.825314 |
-| RIG-I-like receptor signaling pathway |  1.815758 |
+| **RIG-I-like receptor signaling pathway** |  1.815758 |
 | Cellular senescence |  1.800831 |
 | Porphyrin metabolism | -2.210195 |
 | Chemical carcinogenesis - DNA adducts | -1.899617 |
@@ -73,7 +73,7 @@
 
 | Description - KEGG pathways | NES |
 | --- | --- |
-| Complement and coagulation cascades | 1.93435 |
+| **Complement and coagulation cascades** | 1.93435 |
 
 
 
@@ -268,9 +268,9 @@
 
 | Description - Reactome pathways                              | NES       |
 | ------------------------------------------------------------ | --------- |
-| Regulation of Complement cascade                             | -2.321164 |
+| **Regulation of Complement cascade**                         | -2.321164 |
 | Amyloid fiber formation                                      | -2.154164 |
-| Complement cascade                                           | -2.053698 |
+| **Complement cascade**                                       | -2.053698 |
 | Striated Muscle Contraction                                  | -1.942230 |
 | Neurotransmitter release cycle                               | -1.838851 |
 | Post-translational modification: synthesis of GPI-anchored proteins | -1.831238 |
@@ -278,8 +278,8 @@
 | RHOD GTPase cycle                                            | 1.847138  |
 | Disassembly of the destruction complex and recruitment of AXIN to the membrane | 1.847536  |
 | PKMTs methylate histone lysines                              | 1.867089  |
-| Negative regulation of MAPK pathway                          | 1.885750  |
-| TRAF6 mediated IRF7 activation                               | 1.977245  |
+| **Negative regulation of MAPK pathway**                      | 1.885750  |
+| **TRAF6 mediated IRF7 activation**                           | 1.977245  |
 
 
 
@@ -321,7 +321,7 @@
 
 | Description - KEGG pathways                     | NES       |
 | ----------------------------------------------- | --------- |
-| Complement and coagulation cascades             | -2.181305 |
+| **Complement and coagulation cascades**         | -2.181305 |
 | Protein digestion and absorption                | -2.030811 |
 | Staphylococcus aureus infection                 | -1.991287 |
 | Pathways in cancer                              | 1.456408  |
@@ -365,11 +365,7 @@
 | Description - KEGG pathways | NES |
 | --- | --- |
 | Cardiac muscle contraction | -2.735683 |
-| Complement and coagulation cascades | -2.670461 |
-| Systemic lupus erythematosus | -2.224615 |
-| Staphylococcus aureus infection | -2.174637 |
-| Cardiac muscle contraction | -2.735683 |
-| Complement and coagulation cascades | -2.670461 |
+| **Complement and coagulation cascades** | -2.670461 |
 | Systemic lupus erythematosus | -2.224615 |
 | Staphylococcus aureus infection | -2.174637 |
 
@@ -390,8 +386,8 @@
 | Description - Reactome pathways | NES |
 | --- | --- |
 | Striated Muscle Contraction | -2.482113 |
-| Complement cascade | -2.481003 |
-| Regulation of Complement cascade | -2.404745 |
+| **Complement cascade** | -2.481003 |
+| **Regulation of Complement cascade** | -2.404745 |
 | Response to elevated platelet cytosolic Ca2+ | -2.052531 |
 | Signaling by Rho GTPases, Miro GTPases and RHOBTB3 |  1.552321 |
 | Signaling by Rho GTPases |  1.556847 |
@@ -440,7 +436,7 @@
 | Description - KEGG pathways | NES |
 | --- | --- |
 | Calcium signaling pathway | 1.250327 |
-| Cytokine-cytokine receptor interaction | 1.269492 |
+| **Cytokine-cytokine receptor interaction** | 1.269492 |
 | Oxytocin signaling pathway | 1.305506 |
 | Arrhythmogenic right ventricular cardiomyopathy | 1.350096 |
 | Neuroactive ligand-receptor interaction | 1.351747 |
@@ -468,7 +464,7 @@
 | Description - Reactome pathways | NES |
 | --- | --- |
 | Diseases associated with glycosylation precursor biosynthesis | -2.244946 |
-| Regulation of Complement cascade | -2.083062 |
+| **Regulation of Complement cascade** | -2.083062 |
 | Signaling by GPCR |  1.214259 |
 | GPCR downstream signalling |  1.220151 |
 | Class A/1 (Rhodopsin-like receptors) |  1.229174 |
@@ -517,7 +513,7 @@
 
 | Description - KEGG pathways | NES |
 | --- | --- |
-| Complement and coagulation cascades | -3.163987 |
+| **Complement and coagulation cascades** | -3.163987 |
 | Cytoskeleton in muscle cells |  1.389519 |
 
 
@@ -535,8 +531,8 @@
 
 | Description - Reactome pathways | NES |
 | --- | --- |
-| Complement cascade | -2.829193 |
-| Regulation of Complement cascade | -2.767827 |
+| **Complement cascade** | -2.829193 |
+| **Regulation of Complement cascade** | -2.767827 |
 | Formation of Fibrin Clot (Clotting Cascade) | -2.658337 |
 | Intrinsic Pathway of Fibrin Clot Formation | -2.347485 |
 | Common Pathway of Fibrin Clot Formation | -2.328734 |
@@ -555,7 +551,7 @@
 | Sensory processing of sound by inner hair cells of the cochlea |  1.530759 |
 | Signaling by ERBB4 |  1.534234 |
 | Sensory processing of sound |  1.545699 |
-| TNFR1-induced NF-kappa-B signaling pathway |  1.553138 |
+| **TNFR1-induced NF-kappa-B signaling pathway** |  1.553138 |
 | Voltage gated Potassium channels |  1.567896 |
 | Signaling by ALK |  1.650420 |
 
@@ -607,7 +603,7 @@
 
 | Description - KEGG pathways | NES |
 | --- | --- |
-| Complement and coagulation cascades | -3.169400 |
+| **Complement and coagulation cascades** | -3.169400 |
 | Staphylococcus aureus infection | -2.017935 |
 | Galactose metabolism | -1.984770 |
 | Systemic lupus erythematosus | -1.914295 |
@@ -653,8 +649,8 @@
 | Description - Reactome pathways | NES |
 | --- | --- |
 | Formation of Fibrin Clot (Clotting Cascade) | -2.738842 |
-| Regulation of Complement cascade | -2.551870 |
-| Complement cascade | -2.549572 |
+| **Regulation of Complement cascade** | -2.551870 |
+| **Complement cascade** | -2.549572 |
 | Intrinsic Pathway of Fibrin Clot Formation | -2.444343 |
 | Common Pathway of Fibrin Clot Formation | -2.369362 |
 | Platelet degranulation | -2.223613 |
@@ -962,10 +958,10 @@
 | Signaling by RAS mutants |  1.927032 |
 | Paradoxical activation of RAF signaling by kinase inactive BRAF |  1.927032 |
 | Signaling downstream of RAS mutants |  1.927032 |
-| RHO GTPase Effectors |  1.938515 |
+| **RHO GTPase Effectors** |  1.938515 |
 | RHOQ GTPase cycle |  1.968760 |
 | Resolution of Sister Chromatid Cohesion |  1.980973 |
-| RHOB GTPase cycle |  2.085184 |
+| **RHOB GTPase cycle** |  2.085184 |
 
 
 
@@ -1030,16 +1026,16 @@
 | Peroxisome | -1.493604 |
 | Endocytosis |  1.331019 |
 | PI3K-Akt signaling pathway |  1.354297 |
-| Natural killer cell mediated cytotoxicity |  1.829698 |
-| Phagosome |  1.836063 |
+| **Natural killer cell mediated cytotoxicity** |  1.829698 |
+| **Phagosome** |  1.836063 |
 | Cytoskeleton in muscle cells |  1.836596 |
 | Osteoclast differentiation |  1.842146 |
-| B cell receptor signaling pathway |  1.848043 |
+| **B cell receptor signaling pathway** |  1.848043 |
 | Yersinia infection |  1.851001 |
-| Fc gamma R-mediated phagocytosis |  1.858563 |
+| **Fc gamma R-mediated phagocytosis** |  1.858563 |
 | Rap1 signaling pathway |  1.885473 |
-| Fc epsilon RI signaling pathway |  1.955706 |
-| Leukocyte transendothelial migration |  1.983467 |
+| **Fc epsilon RI signaling pathway** |  1.955706 |
+| **Leukocyte transendothelial migration** |  1.983467 |
 
 
 
@@ -1106,7 +1102,7 @@
 
 
 
-<img src="/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_definitive_plots/ivhd_upregulated_10wpi.png" alt="ivhd_upregulated_10wpi" style="zoom:80%;" />
+<img src="/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_definitive_plots/ivhd_upregulated_10wpi.png" alt="ivhd_upregulated_10wpi"  />
 
 
 | Description - KEGG pathways | NES |
@@ -1141,7 +1137,7 @@
 | Aminoacyl-tRNA biosynthesis | -2.007770 |
 | Histidine metabolism | -1.887959 |
 | PI3K-Akt signaling pathway |  1.362620 |
-| MAPK signaling pathway |  1.376782 |
+| **MAPK signaling pathway** |  1.376782 |
 | Shigellosis |  1.378879 |
 | Pathogenic Escherichia coli infection |  1.424434 |
 | Hepatocellular carcinoma |  1.438238 |
@@ -1266,8 +1262,6 @@
 
 
 
-
-
 ![venn_downregulated_liver](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/venn_downregulated_liver.png)
 
 
@@ -1368,7 +1362,7 @@
 </table>
 
 
-
+Wrong intersection. It's not EOMES.IVLD, it's all treatments.
 
 
 
@@ -1472,14 +1466,14 @@
 | Ubiquitin Mediated Degradation of Phosphorylated Cdc25A | 2.007737 |
 | p53-Independent DNA Damage Response | 2.007737 |
 | p53-Independent G1/S DNA damage checkpoint | 2.007737 |
-| Vpu mediated degradation of CD4 | 2.011823 |
+| **Vpu mediated degradation of CD4** | 2.011823 |
 | Hh mutants are degraded by ERAD | 2.014938 |
 | AUF1 (hnRNP D0) binds and destabilizes mRNA | 2.020982 |
 | Cytosolic iron-sulfur cluster assembly | 2.021762 |
 | Ubiquitin-dependent degradation of Cyclin D | 2.029364 |
-| Dectin-1 mediated noncanonical NF-kB signaling | 2.029881 |
+| **Dectin-1 mediated noncanonical NF-kB signaling** | 2.029881 |
 | Regulation of activated PAK-2p34 by proteasome mediated degradation | 2.032196 |
-| NIK-->noncanonical NF-kB signaling | 2.038608 |
+| **NIK-->noncanonical NF-kB signaling** | 2.038608 |
 | Defective CFTR causes cystic fibrosis | 2.062345 |
 | Regulation of RUNX3 expression and activity | 2.072428 |
 | Regulation of PTEN stability and activity | 2.151477 |
