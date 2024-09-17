@@ -1,3 +1,6 @@
+## Loading libraries ----
+library(tidyverse)
+
 ## Loading functions ----
 source(
   '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/github_repo/scripts/functions_data-wrangling_march24.R'
@@ -772,9 +775,13 @@ deg_regulation_summary_4wpc %>%
     linetype = 'dotted',
     linewidth = 0.2
   ) +
-  geom_hline(yintercept = 0, size = 0.2) 
+  geom_hline(yintercept = 0, linewidth = 0.2) 
 
-
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/deg_liver_4wpc.png',
+       width = 1100,
+       height = 1000,
+       units = 'px',
+       dpi = 100)
 # Head-kidney ----
 # 10 WPI ----
 setwd(
