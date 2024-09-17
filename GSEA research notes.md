@@ -4878,11 +4878,7 @@ In this case, I arranged them in ascending NES, as the downregulated pathways we
 
 # Interpretation of GSEA Results
 
-
-
-From ChatGPT when prompted to explain a negative *Normalised Enrichment Score* (NES):
-
-*In summary, a negative NES in GSEA indicates that the gene set is  significantly downregulated in the condition of interest compared to the control, reflecting a negative correlation with the phenotype being  studied. This information can provide valuable insights into the  biological processes that are less active or suppressed in the  experimental condition.*
+*In summary, a negative NES in GSEA indicates that the gene set is  significantly downregulated in the condition of interest compared to the control, reflecting a negative correlation with the phenotype being studied. This information can provide valuable insights into the  biological processes that are less active or suppressed in the  experimental condition.*
 
 
 - **Positive NES:**
