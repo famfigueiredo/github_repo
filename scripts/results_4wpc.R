@@ -22,11 +22,6 @@ markdown_table <- function(data) {
   c(header, separator, rows)
 }
 
-# Helper function to select top and bottom 10
-headtail <- function(x) {
-  rbind(head(x, n=10), tail(x, n=10))
-}
-
 # Improved helper function to select top and bottom 10
 get_top_bottom_pathways <- function(data, n = 10, database) {
   # Get the top N pathways with positive NES
@@ -515,38 +510,40 @@ setwd(
 pathview(
   gene.data = liver_entrez_gene_list_dnavaccine_4wpc,
   species = 'hsa',
-  pathway.id = '04064',
+  pathway.id = '04670',
   kegg.native = T,
   limit = list(gene = 1, cpd = 1),
-  out.suffix = 'NF-kB_signaling_pathway_downregulated'
+  out.suffix = 'dnavaccine_leukocyte_transendothelial_migration_downregulated'
 )
 
 pathview(
   gene.data = liver_entrez_gene_list_dnavaccine_4wpc,
   species = 'hsa',
-  pathway.id = '04062',
+  pathway.id = '04010',
   kegg.native = T,
   limit = list(gene = 1, cpd = 1),
-  out.suffix = 'chemokine_signaling_pathway_upregulated'
+  out.suffix = 'dnavaccine_mapk_signaling_pathway_downregulated'
 )
 
 reactome_dnavaccine_4wpc_liver <-
   gsePathway(
     liver_entrez_gene_list_dnavaccine_4wpc,
     # the gsea_formatting function removes the duplicates from this object
-    pvalueCutoff = .2,
+    pvalueCutoff = .05,
     pAdjustMethod = 'BH',
     eps = 1e-300,
     nPermSimple = 10000,
     verbose = F
   )
 
-viewPathway('RHO GTPase Effectors',
+as_tibble(reactome_dnavaccine_4wpc_liver) %>% arrange(NES) %>% pull(Description)
+
+viewPathway('Interleukin-4 and Interleukin-13 signaling',
             readable = T,
-            foldChange = liver_entrez_gene_list_dnavaccine_4wpc)  # upregulated
+            foldChange = liver_entrez_gene_list_dnavaccine_4wpc)  # downregulated
 
 ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/dnavaccine_rho_gtpase_effectors_upregulated.png',
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/dnavaccine_Interleukin-4_and_Interleukin-13_signaling.png',
   width = 1500,
   height = 1000,
   units = "px",
@@ -554,12 +551,12 @@ ggsave(
   bg = 'white'
 )
 
-viewPathway('RHOQ GTPase cycle',
+viewPathway('RAF-independent MAPK1/3 activation',
             readable = T,
-            foldChange = liver_entrez_gene_list_dnavaccine_4wpc)  # upregulated
+            foldChange = liver_entrez_gene_list_dnavaccine_4wpc)  # downregulated
 
 ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/dnavaccine_rhoq_gtpase_cycle_upregulated.png',
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/dnavaccine_RAF-independent_MAPK1-3_activation.png',
   width = 1500,
   height = 1000,
   units = "px",
@@ -567,12 +564,12 @@ ggsave(
   bg = 'white'
 )
 
-viewPathway('RHOB GTPase cycle',
+viewPathway('Viral mRNA Translation',
             readable = T,
             foldChange = liver_entrez_gene_list_dnavaccine_4wpc)  # upregulated
 
 ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/dnavaccine_rhob_gtpase_cycle_upregulated.png',
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/dnavaccine_Viral_mRNA_Translation.png',
   width = 1500,
   height = 1000,
   units = "px",
@@ -580,10 +577,8 @@ ggsave(
   bg = 'white'
 )
 
-kegg_pathways <-
-  as_tibble(kegg_dnavaccine_4wpc_liver) %>% arrange(NES) %>% dplyr::select(., Description, NES) %>% headtail(.)
-reactome_pathways <-
-  as_tibble(reactome_dnavaccine_4wpc_liver) %>% arrange(NES) %>% dplyr::select(., Description, NES) %>% headtail(.)
+kegg_pathways <- get_top_bottom_pathways(kegg_dnavaccine_4wpc_liver, n = 10, 'kegg')
+reactome_pathways <- get_top_bottom_pathways(reactome_dnavaccine_4wpc_liver, n = 10, 'reactome')
 
 write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/kegg/kegg_liver_4wpc_dnavaccine.tsv')
 write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/reactome_liver_4wpc_dnavaccine.tsv')
@@ -638,30 +633,11 @@ setwd(
 pathview(
   gene.data = liver_entrez_gene_list_ivld_4wpc,
   species = 'hsa',
-  pathway.id = '04670',
+  pathway.id = '04062',
   kegg.native = T,
   limit = list(gene = 1, cpd = 1),
-  out.suffix = 'ivld_leukocyte_transendothelial_migration_upregulated'
+  out.suffix = 'ivld_Chemokine_signaling_pathway'
 )
-
-pathview(
-  gene.data = liver_entrez_gene_list_ivld_4wpc,
-  species = 'hsa',
-  pathway.id = '04664',
-  kegg.native = T,
-  limit = list(gene = 1, cpd = 1),
-  out.suffix = 'ivld_fc_epsilon_RI_signaling_pathway_upregulated'
-)
-
-pathview(
-  gene.data = liver_entrez_gene_list_ivld_4wpc,
-  species = 'hsa',
-  pathway.id = '04662',
-  kegg.native = T,
-  limit = list(gene = 1, cpd = 1),
-  out.suffix = 'ivld_Bcell_receptor_signaling_pathway_upregulated'
-)
-
 
 reactome_ivld_4wpc_liver <-
   gsePathway(
@@ -674,14 +650,14 @@ reactome_ivld_4wpc_liver <-
     verbose = F
   )
 
-as_tibble(reactome_ivld_4wpc_liver) %>% arrange(NES) %>% headtail(.)
+as_tibble(reactome_ivld_4wpc_liver) %>% arrange(NES) %>% print(n = Inf)
 
-viewPathway('ROS and RNS production in phagocytes',
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers',
             readable = T,
-            foldChange = liver_entrez_gene_list_ivld_4wpc)  # upregulated
+            foldChange = liver_entrez_gene_list_ivld_4wpc)  # downregulated
 
 ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/ivld_ros_and_rns_production_in_phagocytes_upregulated.png',
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/ivld_Antigen_activates_B_Cell_Receptor_(BCR)_leading_to_generation_of_second_messengers.png',
   width = 1500,
   height = 1000,
   units = "px",
@@ -689,12 +665,24 @@ ggsave(
   bg = 'white'
 )
 
+viewPathway('Fcgamma receptor (FCGR) dependent phagocytosis',
+            readable = T,
+            foldChange = liver_entrez_gene_list_ivld_4wpc)  # downregulated
 
-kegg_pathways <-
-  as_tibble(kegg_ivld_4wpc_liver) %>% arrange(NES) %>% dplyr::select(., Description, NES) %>% arrange(NES)
-reactome_pathways <-
-  as_tibble(reactome_ivld_4wpc_liver) %>% dplyr::select(., Description, NES) %>% arrange(NES)
 
+options(ggrepel.max.overlaps = Inf)
+
+ggsave(
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/ivld_Fcgamma_receptor_(FCGR)_dependent_phagocytosis.png',
+  width = 1500,
+  height = 1000,
+  units = "px",
+  dpi = 100,
+  bg = 'white'
+)
+
+kegg_pathways <- get_top_bottom_pathways(kegg_ivld_4wpc_liver, n = 10, 'kegg')
+reactome_pathways <- get_top_bottom_pathways(reactome_ivld_4wpc_liver, n = 10, 'reactome')
 
 write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/kegg/kegg_liver_4wpc_ivld.tsv')
 write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/reactome_liver_4wpc_ivld.tsv')
@@ -737,7 +725,7 @@ kegg_ivhd_4wpc_liver <- gseKEGG(
   seed = FALSE
 )
 
-as_tibble(kegg_ivhd_4wpc_liver) %>% arrange(NES) %>% print(n = Inf)  # no immune related pathways
+as_tibble(kegg_ivhd_4wpc_liver) %>% arrange(NES) %>% print(n = Inf)  # no enriched pathways
 
 reactome_ivhd_4wpc_liver <-
   gsePathway(
@@ -750,26 +738,28 @@ reactome_ivhd_4wpc_liver <-
     verbose = F
   )
 
-as_tibble(reactome_ivhd_4wpc_liver) %>% arrange(NES) %>% print(n = Inf)  # no enriched pathways
+as_tibble(reactome_ivhd_4wpc_liver) %>% arrange(NES) %>% print(n = Inf)  
 
-viewPathway('Regulation of Complement cascade',
+viewPathway('Interleukin-4 and Interleukin-13 signaling',
             readable = T,
             foldChange = liver_entrez_gene_list_ivhd_4wpc)  # downregulated
 
 ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/ivhd_regulation_complement_cascade.png',
-  width = 1000,
-  height = 648,
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/ivhd_Interleukin-4_and_Interleukin-13_signaling.png',
+  width = 1300,
+  height = 1000,
   units = "px",
   dpi = 100,
   bg = 'white'
 )
 
-kegg_pathways <-
-  as_tibble(kegg_ivhd_4wpc_liver) %>% arrange(NES) %>% dplyr::select(., Description, NES)
+kegg_pathways <- get_top_bottom_pathways(kegg_ivhd_4wpc_liver, n = 10, 'kegg')
 
 write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/kegg/kegg_liver_4wpc_ivhd.tsv')
 
+reactome_pathways <- get_top_bottom_pathways(reactome_ivhd_4wpc_liver, n = 10, 'reactome')
+
+write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/reactome_liver_4wpc_ivhd.tsv')
 # Convert to a Markdown table ---
 kegg_data <-
   read.delim(
@@ -778,6 +768,15 @@ kegg_data <-
     sep = "\t"
   )
 cat(markdown_table(kegg_data), sep = "\n")
+
+reactome_data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/reactome_liver_4wpc_ivhd.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+cat(markdown_table(reactome_data), sep = "\n")
+
 
 ## eomes ----
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
@@ -802,20 +801,15 @@ kegg_eomes_4wpc_liver <- gseKEGG(
   eps = 0
 )
 
-as_tibble(kegg_eomes_4wpc_liver) %>% arrange(NES) %>% headtail()
-as_tibble(kegg_eomes_4wpc_liver)
-
-setwd(
-  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/kegg'
-)
+as_tibble(kegg_eomes_4wpc_liver) %>% arrange(NES) %>% print(n = Inf)
 
 pathview(
   gene.data = liver_entrez_gene_list_eomes_4wpc,
   species = 'hsa',
-  pathway.id = '04610',
+  pathway.id = '04662',
   kegg.native = T,
   limit = list(gene = 1, cpd = 1),
-  out.suffix = 'eomes_complement_and_coagulation_cascades'
+  out.suffix = 'eomes_B_cell_receptor_signaling_pathway'
 )
 
 reactome_eomes_4wpc_liver <-
@@ -829,18 +823,28 @@ reactome_eomes_4wpc_liver <-
     verbose = F
   )
 
-as_tibble(reactome_eomes_4wpc_liver) %>% arrange(NES) %>% headtail()
+viewPathway('Interleukin-4 and Interleukin-13 signaling',
+            readable = T,
+            foldChange = liver_entrez_gene_list_eomes_4wpc)  # downregulated
+
+ggsave(
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/eomes_Interleukin-4_and_Interleukin-13_signaling.png',
+  width = 1500,
+  height = 1000,
+  units = "px",
+  dpi = 100,
+  bg = 'white'
+)
 
 
-kegg_pathways <-
-  as_tibble(kegg_eomes_4wpc_liver) %>% arrange(NES) %>% dplyr::select(., Description, NES)
-reactome_pathways <-
-  as_tibble(reactome_eomes_4wpc_liver) %>% dplyr::select(., Description, NES) %>% arrange(NES) %>% headtail(.)
+as_tibble(reactome_eomes_4wpc_liver) %>% arrange(NES) %>% print(n = Inf)
+
+kegg_pathways <- get_top_bottom_pathways(kegg_eomes_4wpc_liver, n = 10, 'kegg')
+reactome_pathways <- get_top_bottom_pathways(reactome_eomes_4wpc_liver, n = 10, 'reactome')
 
 write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/kegg/kegg_liver_4wpc_eomes.tsv')
 write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/reactome_liver_4wpc_eomes.tsv')
 
-kegg_pathways %>% print(n = Inf)
 
 # Convert to a Markdown table ---
 kegg_data <-
@@ -882,7 +886,17 @@ kegg_gata3_4wpc_liver <- gseKEGG(
 )
 
 kegg_pathways <-
-  as_tibble(kegg_gata3_4wpc_liver) %>% arrange(NES) %>% dplyr::select(., Description, NES) %>% headtail(.)
+  as_tibble(kegg_gata3_4wpc_liver) %>% arrange(-NES) %>% dplyr::select(., Description, NES)
+
+pathview(
+  gene.data = liver_entrez_gene_list_gata3_4wpc,
+  species = 'hsa',
+  pathway.id = '04062',
+  kegg.native = T,
+  limit = list(gene = 1, cpd = 1),
+  out.suffix = 'gata3_chemokine_signaling_pathway'
+)
+
 
 reactome_gata3_4wpc_liver <-
   gsePathway(
@@ -896,7 +910,7 @@ reactome_gata3_4wpc_liver <-
   )
 
 reactome_pathways <-
-  as_tibble(reactome_gata3_4wpc_liver) %>% dplyr::select(., Description, NES) %>% arrange(NES)
+  as_tibble(reactome_gata3_4wpc_liver) %>% dplyr::select(., Description, NES) %>% arrange(-NES)
 
 write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/kegg/kegg_liver_4wpc_gata3.tsv')
 write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_4wpc/pathways/reactome/reactome_liver_4wpc_gata3.tsv')
@@ -919,7 +933,6 @@ reactome_data <-
 cat(markdown_table(reactome_data), sep = "\n")
 
 
-
 # hkidney ----
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
 
@@ -938,16 +951,61 @@ kegg_dnavaccine_4wpc_hkidney <- gseKEGG(
   nPermSimple = 100000
 )
 
+
+as_tibble(kegg_dnavaccine_4wpc_hkidney) %>% dplyr::select(., Description, NES) %>% arrange(-NES) %>% print(n = Inf)
+
+
 reactome_dnavaccine_4wpc_hkidney <-
   gsePathway(
     hkidney_entrez_gene_list_dnavaccine_4wpc,
     # the gsea_formatting function removes the duplicates from this object
-    pvalueCutoff = .2,
+    pvalueCutoff = .05,
     pAdjustMethod = 'BH',
     eps = 1e-300,
     nPermSimple = 100000,
     verbose = F
   )
+
+as_tibble(reactome_dnavaccine_4wpc_hkidney) %>% dplyr::select(., Description, NES) %>% arrange(-NES) %>% print(n = Inf)
+
+viewPathway('NRAGE signals death through JNK',
+            readable = T,
+            foldChange = hkidney_entrez_gene_list_dnavaccine_4wpc)  # downregulated
+
+
+ggsave(
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/dnavaccine_NRAGE_signals_death_through_JNK.png',
+  width = 1500,
+  height = 1000,
+  units = "px",
+  dpi = 100,
+  bg = 'white'
+)
+
+
+kegg_pathways <- as_tibble(kegg_dnavaccine_4wpc_hkidney) %>% dplyr::select(., Description, NES) %>% arrange(-NES)
+reactome_pathways <- get_top_bottom_pathways(reactome_dnavaccine_4wpc_hkidney, n = 10, 'reactome')
+
+write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/kegg/kegg_hkidney_4wpc_dnavaccine.tsv')
+write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/reactome_hkidney_4wpc_dnavaccine.tsv')
+
+# Convert to a Markdown table ---
+kegg_data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/kegg/kegg_hkidney_4wpc_dnavaccine.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+cat(markdown_table(kegg_data), sep = "\n")
+
+reactome_data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/reactome_hkidney_4wpc_dnavaccine.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+cat(markdown_table(reactome_data), sep = "\n")
+
 
 ## iv-ld ----
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/gsea_results_tables/hkidney_entrez_gene_list_ivld_4wpc.RData')
@@ -964,6 +1022,10 @@ kegg_ivld_4wpc_hkidney <- gseKEGG(
   nPermSimple = 10000
 )
 
+
+kegg_pathways <- as_tibble(kegg_ivld_4wpc_hkidney) %>% arrange(-NES) %>% dplyr::select(., Description, NES)
+
+
 reactome_ivld_4wpc_hkidney <-
   gsePathway(
     hkidney_entrez_gene_list_ivld_4wpc,
@@ -975,35 +1037,18 @@ reactome_ivld_4wpc_hkidney <-
     verbose = F
   )
 
+# No Reactome pathways enriched at either p < 0.05 or p < 0.2
 
-viewPathway('FCERI mediated NF-kB activation',
-            readable = T,
-            foldChange = hkidney_entrez_gene_list_ivld_4wpc)  # downregulated
+write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/kegg/kegg_hkidney_4wpc_dnavaccine.tsv')
 
-
-ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/ivld_fceri_mediated_nfkb_activation_downregulated.png',
-  width = 1500,
-  height = 1000,
-  units = "px",
-  dpi = 100,
-  bg = 'white'
-)
-
-viewPathway('Downstream signaling events of B Cell Receptor (BCR)',
-            readable = T,
-            foldChange = hkidney_entrez_gene_list_ivld_4wpc)  # downregulated
-
-
-ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/ivld_downstream_signaling_events_of_bcr_downregulated.png',
-  width = 1500,
-  height = 1000,
-  units = "px",
-  dpi = 100,
-  bg = 'white'
-)
-
+# Convert to a Markdown table ---
+kegg_data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/kegg/kegg_hkidney_4wpc_dnavaccine.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+cat(markdown_table(kegg_data), sep = "\n")
 ## iv-hd ----
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/gsea_results_tables/hkidney_entrez_gene_list_ivhd_4wpc.RData')
 
@@ -1016,9 +1061,23 @@ kegg_ivhd_4wpc_hkidney <- gseKEGG(
   verbose = TRUE,
   seed = FALSE,
   eps = 0,
-  nPermSimple = 10000
+  nPermSimple = 100000
 )
-as_tibble(kegg_ivhd_4wpc_hkidney)
+
+kegg_pathways <- as_tibble(kegg_ivhd_4wpc_hkidney) %>% arrange(-NES) %>% dplyr::select(., Description, NES)
+
+write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/kegg/kegg_hkidney_4wpc_ivhd.tsv')
+
+setwd('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/kegg')
+
+pathview(
+  gene.data = hkidney_entrez_gene_list_ivhd_4wpc,
+  species = 'hsa',
+  pathway.id = '04061',
+  kegg.native = T,
+  limit = list(gene = 1, cpd = 1),
+  out.suffix = 'ivhd_viral_protein_interaction_with_cytokine_and_cytokine_receptor'
+)
 
 reactome_ivhd_4wpc_hkidney <-
   gsePathway(
@@ -1027,21 +1086,21 @@ reactome_ivhd_4wpc_hkidney <-
     pvalueCutoff = .05,
     pAdjustMethod = 'BH',
     eps = 1e-300,
-    nPermSimple = 10000,
+    nPermSimple = 100000,
     verbose = F
   )
-as_tibble(reactome_ivhd_4wpc_hkidney)
 
-reactome_pathways <-
-  as_tibble(reactome_ivhd_4wpc_hkidney) %>% arrange(NES) %>% dplyr::select(., Description, NES) %>% tail(n = 20)
+as_tibble(reactome_ivhd_4wpc_hkidney) %>% arrange(-NES) %>% dplyr::select(., Description, NES) %>% print(n = Inf)
+
+reactome_pathways <- get_top_bottom_pathways(reactome_ivhd_4wpc_hkidney, n = 10, 'reactome')
 
 
-viewPathway('NIK-->noncanonical NF-kB signaling',
+viewPathway('Interleukin-6 family signaling',
             readable = T,
-            foldChange = hkidney_entrez_gene_list_ivhd_4wpc)  # upregulated
+            foldChange = hkidney_entrez_gene_list_ivhd_4wpc)  # downregulated
 
 ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/ivhd_nik-noncanonical_nfkb_signaling_upregulated.png',
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/ivhd_Interleukin-6_family_signaling.png',
   width = 1500,
   height = 1000,
   units = "px",
@@ -1050,25 +1109,12 @@ ggsave(
 )
 
 
-viewPathway('Dectin-1 mediated noncanonical NF-kB signaling',
+viewPathway('Signaling by CSF1 (M-CSF) in myeloid cells',
             readable = T,
-            foldChange = hkidney_entrez_gene_list_ivhd_4wpc)  # upregulated
+            foldChange = hkidney_entrez_gene_list_ivhd_4wpc)  # downregulated
 
 ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/ivhd_dectin-1_mediated_noncanonical_nfkb_signaling_upregulated.png',
-  width = 1500,
-  height = 1000,
-  units = "px",
-  dpi = 100,
-  bg = 'white'
-)
-
-viewPathway('Vpu mediated degradation of CD4',
-            readable = T,
-            foldChange = hkidney_entrez_gene_list_ivhd_4wpc)  # upregulated
-
-ggsave(
-  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/ivhd_vpu_mediated_degradation_of_cd4_upregulated.png',
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/ivhd_Signaling_by_CSF1_(M-CSF)_in_myeloid_cells.png',
   width = 1500,
   height = 1000,
   units = "px",
@@ -1079,6 +1125,16 @@ ggsave(
 write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/reactome_hkidney_4wpc_ivhd.tsv')
 
 # Convert to a Markdown table ---
+kegg_data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/kegg_hkidney_4wpc_ivhd.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+
+cat(markdown_table(kegg_data), sep = "\n")
+
+
 reactome_data <-
   read.delim(
     '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/reactome_hkidney_4wpc_ivhd.tsv',
@@ -1103,7 +1159,10 @@ kegg_eomes_4wpc_hkidney <- gseKEGG(
   eps = 0,
   nPermSimple = 100000
 )
-as_tibble(kegg_eomes_4wpc_hkidney)
+
+kegg_pathways <- as_tibble(kegg_eomes_4wpc_hkidney) %>% arrange(-NES) %>% dplyr::select(., Description, NES)
+write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/kegg/kegg_hkidney_4wpc_eomes.tsv')
+
 
 reactome_eomes_4wpc_hkidney <-
   gsePathway(
@@ -1112,11 +1171,34 @@ reactome_eomes_4wpc_hkidney <-
     pvalueCutoff = .05,
     pAdjustMethod = 'BH',
     eps = 1e-300,
-    nPermSimple = 10000,
+    nPermSimple = 100000,
     verbose = F
   )
 
-as_tibble(reactome_eomes_4wpc_hkidney)
+reactome_pathways <- get_top_bottom_pathways(reactome_eomes_4wpc_hkidney, n = 10, 'reactome')
+write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/reactome_hkidney_4wpc_eomes.tsv')
+
+
+kegg_data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/kegg/kegg_hkidney_4wpc_eomes.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+
+cat(markdown_table(kegg_data), sep = "\n")
+
+
+reactome_data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/reactome_hkidney_4wpc_eomes.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+
+cat(markdown_table(reactome_data), sep = "\n")
+
+
 
 ## gata3 ----
 load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/gsea_results_tables/hkidney_entrez_gene_list_gata3_4wpc.RData')
@@ -1132,7 +1214,12 @@ kegg_gata3_4wpc_hkidney <- gseKEGG(
   eps = 0,
   nPermSimple = 100000
 )
+
+
 as_tibble(kegg_gata3_4wpc_hkidney)
+kegg_pathways <- as_tibble(kegg_gata3_4wpc_hkidney) %>% arrange(-NES) %>% dplyr::select(., Description, NES)
+write_tsv(kegg_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/kegg/kegg_hkidney_4wpc_gata3.tsv')
+
 
 reactome_gata3_4wpc_hkidney <-
   gsePathway(
@@ -1146,6 +1233,30 @@ reactome_gata3_4wpc_hkidney <-
   )
 
 as_tibble(reactome_gata3_4wpc_hkidney)
+reactome_pathways <- get_top_bottom_pathways(reactome_gata3_4wpc_hkidney, n = 10, 'reactome')
+write_tsv(reactome_pathways, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/reactome_hkidney_4wpc_gata3.tsv')
+
+
+
+kegg_data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/kegg/kegg_hkidney_4wpc_gata3.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+
+cat(markdown_table(kegg_data), sep = "\n")
+
+
+reactome_data <-
+  read.delim(
+    '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_4wpc/pathways/reactome/reactome_hkidney_4wpc_gata3.tsv',
+    header = TRUE,
+    sep = "\t"
+  )
+
+cat(markdown_table(reactome_data), sep = "\n")
+
 
 
 
@@ -1168,19 +1279,49 @@ kegg_dnavaccine_4wpc_heart <- gseKEGG(
 )
 
 
-as_tibble(kegg_dnavaccine_4wpc_heart) %>% arrange(NES) %>% print(n = Inf)
+as_tibble(kegg_dnavaccine_4wpc_heart) %>% arrange(-NES) %>% print(n = Inf)
+
+
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/kegg'
+)
+
+pathview(
+  gene.data = heart_entrez_gene_list_dnavaccine_4wpc,
+  species = 'hsa',
+  pathway.id = '04662',
+  kegg.native = T,
+  limit = list(gene = 1, cpd = 1),
+  out.suffix = 'B_cell_receptor_signaling_pathway_downregulated'
+)
 
 
 reactome_dnavaccine_4wpc_heart <-
   gsePathway(
     heart_entrez_gene_list_dnavaccine_4wpc,
     # the gsea_formatting function removes the duplicates from this object
-    pvalueCutoff = .2,
+    pvalueCutoff = .05,
     pAdjustMethod = 'BH',
     eps = 1e-300,
     nPermSimple = 100000,
     verbose = F
   )
+
+
+as_tibble(reactome_dnavaccine_4wpc_heart) %>% arrange(-NES) %>% print(n = Inf)
+
+viewPathway('Antigen activates B Cell Receptor (BCR) leading to generation of second messengers',
+            readable = T,
+            foldChange = heart_entrez_gene_list_dnavaccine_4wpc)  # downregulated
+
+ggsave(
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/reactome/dnavaccine_Antigen_activates_B_Cell_Receptor_(BCR)_leading_to_generation_of_second_messengers.png',
+  width = 1500,
+  height = 1000,
+  units = "px",
+  dpi = 100,
+  bg = 'white'
+)
 
 get_top_bottom_pathways(kegg_dnavaccine_4wpc_heart, n = 10, 'kegg')
 get_top_bottom_pathways(reactome_dnavaccine_4wpc_heart, n = 10, 'reactome')
