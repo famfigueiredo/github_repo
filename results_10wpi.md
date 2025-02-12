@@ -1,10 +1,110 @@
-# Heart
+
+## Summary of sequenced samples
+
+| Treatment          | Sampling point | Individuals | Tissue                      | Sequenced    |
+|:------------------:|:--------------:|:-----------:|:---------------------------:|:------------:|
+| Control            | 10 wpi         | 5           | Head-kidney, liver, spleen   | December-18  |
+| IV-LD              | 10 wpi         | 5           | Head-kidney, liver, spleen   | December-18  |
+| IV-HD              | 10 wpi         | 5           | Head-kidney, liver, spleen   | December-18  |
+| IV-LD + GATA3      | 10 wpi         | 5           | Head-kidney, liver, spleen   | December-18  |
+| IV-LD + Eomes      | 10 wpi         | 5           | Head-kidney, liver, spleen   | December-18  |
+| IV-LD + T-Bet      | 10 wpi         | 5           | Head-kidney, liver, spleen   | December-18  |
+| SAV DNA vaccine    | 10 wpi         | 5           | Head-kidney, liver, spleen   | December-18  |
+| Control            | 10 wpi         | 6           | Heart                       | December-23  |
+| IV-LD              | 10 wpi         | 6           | Heart                       | December-23  |
+| IV-HD              | 10 wpi         | 6           | Heart                       | December-23  |
+| IV-LD + GATA3      | 10 wpi         | 6           | Heart                       | December-23  |
+| IV-LD + Eomes      | 10 wpi         | 6           | Heart                       | December-23  |
+| SAV DNA vaccine    | 10 wpi         | 6           | Heart                       | December-23  |
+| p-TagRFP           | 1 wpc          | 6    | Heart                       | December-23  |
+| CONU               | 1 wpc          | 6           | Heart                       | December-23  |
+| IV-LD              | 1 wpc          | 6           | Heart                       | December-23  |
+| IV-HD              | 1 wpc          | 6           | Heart                       | December-23  |
+| IV-LD + GATA3      | 1 wpc          | 6           | Heart                       | December-23  |
+| IV-LD + Eomes      | 1 wpc          | 6           | Heart                       | December-23  |
+| SAV DNA vaccine    | 1 wpc          | 6           | Heart                       | December-23  |
+| Control            | 4 wpc          | 5           | Head-kidney, liver, spleen   | December-18  |
+| IV-LD              | 4 wpc          | 5           | Head-kidney, liver, spleen   | December-18  |
+| IV-HD              | 4 wpc          | 5           | Head-kidney, liver, spleen   | December-18  |
+| IV-LD + GATA3      | 4 wpc          | 5           | Head-kidney, liver, spleen   | December-18  |
+| IV-LD + Eomes      | 4 wpc          | 5           | Head-kidney, liver, spleen   | December-18  |
+| IV-LD + T-Bet      | 4 wpc          | 5           | Head-kidney, liver, spleen   | December-18  |
+| SAV DNA vaccine    | 4 wpc          | 5           | Head-kidney, liver, spleen   | December-18  |
+| Control            | 4 wpc          | 6           | Heart                       | December-20  |
+| p-TagRFP           | 4 wpc          | 6           | Heart                       | December-20  |
+| IV-LD              | 4 wpc          | 6           | Heart                       | December-20  |
+| IV-HD              | 4 wpc          | 6           | Heart                       | December-20  |
+| IV-LD + GATA3      | 4 wpc          | 6           | Heart                       | December-20  |
+| IV-LD + Eomes      | 4 wpc          | 6           | Heart                       | December-20  |
+| SAV DNA vaccine    | 4 wpc          | 6           | Heart                       | December-20  |
+| Control            | 6 wpc          | 6           | Heart, head-kidney, spleen  | December-20  |
+| p-TagRFP           | 6 wpc          | 6           | Heart, head-kidney, spleen  | December-20  |
+| IV-LD              | 6 wpc          | 6           | Heart, head-kidney, spleen  | December-20  |
+| IV-HD              | 6 wpc          | 6           | Heart, head-kidney, spleen  | December-20  |
+| IV-LD + GATA3      | 6 wpc          | 6           | Heart, head-kidney, spleen  | December-20  |
+| IV-LD + Eomes      | 6 wpc          | 6           | Heart, head-kidney, spleen  | December-20  |
+| SAV DNA vaccine    | 6 wpc          | 6           | Heart, head-kidney, spleen  | December-20  |
+| p-TagRFP           | 10 wpc         | 6           | Heart                       | December-23  |
+| CONU               | 10 wpc         | 6           | Heart                       | December-23  |
+| IV-LD              | 10 wpc         | 6           | Heart                       | December-23  |
+| IV-HD              | 10 wpc         | 6           | Heart                       | December-23  |
+| IV-LD + GATA3      | 10 wpc         | 6           | Heart                       | December-23  |
+| IV-LD + Eomes      | 10 wpc         | 6           | Heart                       | December-23  |
+| SAV DNA vaccine    | 10 wpc         | 6           | Heart                       | December-23  |
+
+
+
+
+
+# Results
+
+​	Pancreas disease (PD) is a serious viral disease, caused by *Salmonid alphavirus* (SAV), that affects salmonid fish farmed in the sea. It is one of the most prevalent diseases in Norwegian salmon aquaculture which, despite being able to remain sub-clinical for extended periods of time, can still develop into an outbreak that causes major economic loss and severely impacts fish welfare. While the number of registered cases of PD outbreak caused by either of the epidemics present in Norway (SAV subtypes 2 and 3) has decreased in recent years, four new cases of SAV2 were detected outside of the endemic zone in 2023 ([Sommerset et al., 2023](https://www.vetinst.no/rapporter-og-publikasjoner/rapporter/2024/fishhealthreport-2023)). A series of measures have been implemented in the last few years in the Norwegian salmon industry, that have contributed to containing the spread of SAV to northern Norway. These, however, are not infallible, and it is likely PD will eventually spread to the rest of the country.
+
+​	Vaccines against PD are commercially available, and are routinely used in Western Norway. Even though vaccination reduces the number of outbreaks and can lower overall mortality derived from PD, possibly through the reduction of virus shedding rate (Skjold et al., 2016), its efficacy is still a cause for debate. Use of adjuvants aims to increase and modulate the immunogenicity of a vaccine ([Coffman et al., 2010](https://doi.org/10.1016/j.immuni.2010.10.002); [Olafsdottir et al., 2016](https://doi.org/10.1038/srep39097); [Christensen, 2016](https://doi.org/10.1080/21645515.2016.1219003)). This is especially important when the antigen fails to trigger an adequate immune response, as can be the case with inactivated vaccines ([Garçon et al., 2011](https://doi.org/10.1016/j.pervac.2011.05.004); [Tafalla et al., 2013](https://doi.org/10.1016/j.fsi.2013.02.029)). Such problem can potentially be solved by administering the vaccine in high and repeated doses ([Reed et al., 2013](https://doi.org/10.1038/nm.3409), [Salgado-Miranda et al., 2013](https://doi.org/10.1586/erv.13.38)). High cost in the production of large quantities of inactivated virus, however, make this vaccination strategy cost-ineffective, and, thus, difficult to adopt in a commercial setting ([Sommerset et al., 2005](https://doi.org/10.1586/14760584.4.1.89)). For this study, two immunity molecular adjuvants ([Marciani, 2003](https://doi.org/10.1016/S1359-6446(03)02864-2)) were developed, which aimed at stimulating the recruitment and effector activities of *T-helper cells 2* (TH2; derived from naïve CD4+ T-cells), and *cytotoxic cells* (derived from naïve CD8+ T-cells). Recruited T-cells are responsible for the production of several interferons, interleukins, and tumor necrosis factors, and cytotoxic cells identify and destroy infected cells. Together, T-helper and cytotoxic cells establish a heightened immune state ([Dembic, 2015](https://doi.org/10.1016/B978-0-12-419998-9.00004-3)), which may increase protection. Because the aim of developing and utilizing molecular adjuvants is to aid in eliciting an immune response, I focus on immune-related genes and/or pathways.
+
+
+
+​	Enrichment analysis was performed on gene lists derived from results tables created in DESeq2. Feature counts were subset by tissue and modelled using a negative binomial distribution ([Love et al., 2014](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8)), which is well-suited to handle the overdispersion that is often seen in RNA-seq count data, as well as accounting for intrinsic biological variability.
+
+​	The genes in these lists were annotated using the latest [ENSEMBL version of Ssal_v3.1](https://www.ensembl.org/Salmo_salar/Info/Index), which is based on the [most recent Atlantic salmon genome assembly](https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_905237065.1/), released in April 2021. To run GSEA ([Subramanian et al., 2005](https://www.pnas.org/doi/full/10.1073/pnas.0506580102)), which is a method of Functional Pathway Analysis ([Khatri et al., 2012](https://raw.githubusercontent.com/hbctraining/In-depth-NGS-Data-Analysis-Course/master/resources/pathway_tools.pdf)), ENSEMBL genes were converted into *Homo sapiens* orthologs and ranked according to log2 fold change. *GSEA aggregates the per gene statistics across genes within a gene set,  therefore making it possible to detect situations where all genes in a  predefined set change in a small but coordinated way. This is important  since it is likely that many relevant phenotypic differences are  manifested by small but consistent changes in a set of genes.* 
+
+​	These ranked lists were compared against two or three separate databases, **Gene Ontology** (GO), **Reactome**, and **KEGG**. **The dotplots illustrate overrepresented pathways (GO terms), number of genes per pathway (Set size), and number of genes in the dataset belonging to the corresponding pathway (Gene count)**. Pathway 'regulation' is defined by the Normalised Enrichment Score (NES), which is a function of Enrichment Score. NES can be positive or negative. A positive NES indicates that the gene set is enriched at the top of the ranked list, suggesting that genes in the set are upregulated in the condition of interest (compared to the control), while a negative NES indicates that the gene set is enriched at the bottom of the ranked list, suggesting that the genes in the set are downregulated in the condition of interest (re-write). Whenever possible, the top 10 (by NES) downregulated and upregulated terms are plotted. The **Reactome**/**KEGG** tables are also top/bottom 10 by NES.
+
+
+
+​	Most studies related to viral infection use qPCR to 'measure' gene expression of target genes in relation to a *housekeeping gene*. The approach of using RNAseq as a tool to study immune responses is inherently different, in the sense that it does not compare gene expression against a housekeeping gene. Instead, it requires using a **reference**, such as a control group (CONU or p-TagRFP). This control group provides the baseline gene expression against which all other groups are compared to.
+
+​	The rationale for using human orthologs instead of salmon genes relates to how extensive and thorough each of these organisms' gene annotation databases are. By using human orthologs, a better understanding of which pathways are differentially regulated is expected. Because with RNAseq one looks at thousands of genes simultaneously, it makes more sense to have a holistic view of gene expression. Any emerging patterns in gene expression tend to stand out during pathway analysis, since pathways, by definition, incorporate hundreds, or even thousands, of differentially regulated genes.
+
+​	One of the functions in **ReactomePA** (*viewPathway*) and enables the plotting a list of genes belonging to specific pathways, together with the direction of their regulation (up or down). The package *pathview* allows the same, but with KEGG pathways.
+
+
+
+## ELISA and VNA
+
+
+
+![ELISA_10wpi_plot](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/poster/ELISA_10wpi_plot.png)
+
+
+
+
+
+![VNA_10wpi_plot](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/poster/VNA_10wpi_plot.png)
+
+
+
+
+
+# Differential Gene Expression
+
+## Heart
 
 <img src="/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/deg_heart_10wpi.png" alt="deg_heart_10wpi"  />
 
 
 
-#### DNA vaccine
+### DNA vaccine
 
 ![heart_dnavaccine_10wpi](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/heart_dnavaccine_10wpi.png)
 
@@ -57,7 +157,7 @@
 
 
 
-#### IV-LD
+### IV-LD
 
 ![heart_ivld_10wpi_upregulated](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/heart_ivld_10wpi_upregulated.png)
 
@@ -82,17 +182,16 @@
 | Formation of Fibrin Clot (Clotting Cascade) | 1.953522 |
 | Intrinsic Pathway of Fibrin Clot Formation | 1.819831 |
 | Regulation of Insulin-like Growth Factor (IGF) transport and uptake by Insulin-like Growth Factor Binding Proteins (IGFBPs) | 1.819189 |
-| Complement cascade | 1.818983 |
+| **Complement cascade** | 1.818983 |
 | Post-translational protein phosphorylation | 1.815423 |
-| Platelet degranulation | 1.787845 |
-| Response to elevated platelet cytosolic Ca2+ | 1.754757 |
+| **Platelet degranulation** | 1.787845 |
+| **Response to elevated platelet cytosolic Ca2+** | 1.754757 |
 | Hemostasis | 1.331732 |
 
 
 
 
-
-#### IV-HD
+### IV-HD
 
 ![heart_ivhd_10wpi_upregulated](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/heart_ivhd_10wpi_upregulated.png)
 
@@ -117,7 +216,7 @@
 
 
 
-#### EOMES
+### EOMES
 
 
 
@@ -141,7 +240,7 @@
 
 
 
-#### GATA3
+### GATA3
 
 ![heart_gata3_10wpi_upregulated](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/heart_gata3_10wpi_upregulated.png)
 
@@ -156,7 +255,7 @@
 | Description - Reactome pathways | NES |
 | --- | --- |
 | Platelet degranulation | 1.762237 |
-| Response to elevated platelet cytosolic Ca2+ | 1.757588 |
+| **Response to elevated platelet cytosolic Ca2+** | 1.757588 |
 | Post-translational protein phosphorylation | 1.748742 |
 | Regulation of Insulin-like Growth Factor (IGF) transport and uptake by Insulin-like Growth Factor Binding Proteins (IGFBPs) | 1.680083 |
 | Hemostasis | 1.321430 |
@@ -167,7 +266,7 @@
 
 ## Venn diagrams
 
-#### Downregulated
+### Downregulated
 
 ![venn_downregulated_heart](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/venn_diagrams/venn_downregulated_heart.png)
 
@@ -202,7 +301,7 @@
 
 
 
-#### Upregulated
+### Upregulated
 
 ![venn_upregulated_heart](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/venn_diagrams/venn_upregulated_heart.png)
 
@@ -244,7 +343,7 @@
 
 
 
-# Spleen
+## Spleen
 
 ![dge_spleen_10wpi](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/deg_spleen_10wpi.png)
 
@@ -252,7 +351,7 @@
 
 
 
-#### DNA vaccine
+### DNA vaccine
 
 <img src="/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_definitive_plots/dnavaccine_10wpi.png" alt="dnavaccine_10wpi"  />
 
@@ -348,7 +447,7 @@
 
 
 
-#### IV-LD
+### IV-LD
 
 
 
@@ -423,7 +522,7 @@
 
 
 
-#### IV-HD
+### IV-HD
 
 
 
@@ -490,21 +589,7 @@
 
 
 
-
-
-
-
-
-
-
-
-#### EOMES
-
-
-
-
-
-
+### EOMES
 
 ![eomes_10wpi](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_definitive_plots/eomes_10wpi.png)
 
@@ -594,7 +679,7 @@
 
 
 
-#### GATA3
+### GATA3
 
 <img src="/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/gsea_definitive_plots/gata3_10wpi.png" alt="gata3_10wpi"  />
 
@@ -710,7 +795,7 @@
 
 ## Venn diagrams
 
-#### Downregulated
+### Downregulated
 
 ![venn_downregulated_spleen](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/venn_downregulated_spleen.png)
 
@@ -821,7 +906,7 @@
 
 
 
-#### Upregulated
+### Upregulated
 
 
 ![venn_upregulated_spleen](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/spleen/results_10wpi/venn_upregulated_spleen.png)
@@ -875,19 +960,7 @@
 </table>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-# Liver
+## Liver
 
 ![deg_liver_10wpi](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/deg_liver_10wpi.png)
 
@@ -895,7 +968,7 @@
 
 
 
-#### DNA vaccine
+### DNA vaccine
 | Description - KEGG pathways | NES |
 | :-: | --- |
 | Protein digestion and absorption | -2.495829 |
@@ -998,9 +1071,7 @@
 
 
 
-
-
-#### IV-LD
+### IV-LD
 
 
 
@@ -1098,7 +1169,7 @@
 
 
 
-#### IV-HD
+### IV-HD
 
 
 
@@ -1117,7 +1188,7 @@
 
 
 
-#### EOMES
+### EOMES
 
 
 
@@ -1191,7 +1262,7 @@
 
 
 
-#### GATA3
+### GATA3
 
 ![gata3_10wpi](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/gsea_definitive_plots/gata3_10wpi.png)
 
@@ -1250,19 +1321,13 @@
 
 ## Venn diagrams
 
+### Downregulated
 
 
 
 
 
-
-#### Downregulated
-
-
-
-
-
-![venn_downregulated_liver](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/venn_downregulated_liver.png)
+![venn_downregulated_liver](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/liver/results_10wpi/venn_diagrams/venn_downregulated_liver.png)
 
 
 
@@ -1310,15 +1375,7 @@
 
 
 
-
-
-
-
-
-
-
-
-#### Upregulated
+### Upregulated
 
 
 
@@ -1338,13 +1395,6 @@
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:center;"> ENSSSAG00000003797 </td>
-   <td style="text-align:center;"> N/A </td>
-   <td style="text-align:center;"> N/A </td>
-   <td style="text-align:center;"> 2 splice variants. InterPro: IFNa-inducible protein IFI6/IFI27-like  </td>
-   <td style="text-align:center;"> EOMES vs IV-LD </td>
-  </tr>
-  <tr>
    <td style="text-align:center;"> ENSSSAG00000041408 </td>
    <td style="text-align:center;"> RNF213 </td>
    <td style="text-align:center;"> ENSG00000173821 </td>
@@ -1362,33 +1412,12 @@
 </table>
 
 
-Wrong intersection. It's not EOMES.IVLD, it's all treatments.
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Head-kidney
+## Head-kidney
 
 <img src="/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_10wpi/deg_hkidney_10wpi.png" alt="deg_hkidney_10wpi"  />
 
@@ -1398,7 +1427,7 @@ Wrong intersection. It's not EOMES.IVLD, it's all treatments.
 
 
 
-#### DNA vaccine
+### DNA vaccine
 
 ​	Two enriched GO Terms:
 
@@ -1417,7 +1446,7 @@ Wrong intersection. It's not EOMES.IVLD, it's all treatments.
 
 
 
-#### IV-LD
+### IV-LD
 
 ​	No enriched GO Terms.
 
@@ -1446,9 +1475,9 @@ Wrong intersection. It's not EOMES.IVLD, it's all treatments.
 
 <center>Figure x: Downstream signaling events of the BCR (left) and FCERI mediated NF-kB activation (right) gene networks from Reactome - downregulated</center>
 
-#### IV-HD
+### IV-HD
 
-![ivhd_10wpi](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_10wpi/gsea_definitive_plots/ivhd_10wpi.png)
+![ivhd_10wpi](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_10wpi/gsea_definitive_plots/ivhd_10wpi_upregulated.png)
 
 
 
@@ -1514,7 +1543,7 @@ Wrong intersection. It's not EOMES.IVLD, it's all treatments.
 
 
 
-#### EOMES
+### EOMES
 
 
 
@@ -1528,7 +1557,7 @@ Wrong intersection. It's not EOMES.IVLD, it's all treatments.
 
 
 
-#### GATA3
+### GATA3
 
 ![gata3_10wpi_upregulated](/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/hkidney/results_10wpi/gsea_definitive_plots/gata3_10wpi_upregulated.png)
 

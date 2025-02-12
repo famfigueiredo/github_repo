@@ -5,15 +5,13 @@ suppressPackageStartupMessages({
   library('DESeq2')
   library('LSD')
   library('BiocParallel')
-  library('ExploreModelMatrix')
-  library('limma')
   library('ashr')
   library('ggrepel')
   library('ggpmisc')
   library('DataCombine')
   library('org.Hs.eg.db')
   library('ggrepel')
-  register(MulticoreParam(8))
+  register(MulticoreParam(10))
 })
 
 

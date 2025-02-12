@@ -75,9 +75,9 @@ deg_regulation_summary_10wpi_heart <-
   as_tibble(bind_rows(deg_regulation_summary, .id = 'Treatment')) %>% mutate(tissue = 'heart')
 
 # Reordering factors to plot
-deg_regulation_summary_10wpi$Treatment <-
+deg_regulation_summary_10wpi_heart$Treatment <-
   factor(
-    deg_regulation_summary_10wpi$Treatment,
+    deg_regulation_summary_10wpi_heart$Treatment,
     levels = c(
       'IV-LD',
       'IV-HD',

@@ -1361,6 +1361,32 @@ kegg_ivld_4wpc_heart <- gseKEGG(
   nPermSimple = 10000
 )
 
+as_tibble(kegg_ivld_4wpc_heart) %>% arrange(-NES) %>% filter(ID == 'hsa04612') %>% dplyr::select(Description)
+
+as_tibble(kegg_ivld_4wpc_heart) %>% arrange(-NES) %>% dplyr::select(., Description, NES) %>% print(n = Inf)
+
+setwd(
+  '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/kegg'
+)
+
+pathview(
+  gene.data = heart_entrez_gene_list_ivld_4wpc,
+  species = 'hsa',
+  pathway.id = '04662',
+  kegg.native = T,
+  limit = list(gene = 1, cpd = 1),
+  out.suffix = 'ivld_B_cell_receptor_signaling'
+)
+
+pathview(
+  gene.data = heart_entrez_gene_list_ivld_4wpc,
+  species = 'hsa',
+  pathway.id = '04612',
+  kegg.native = T,
+  limit = list(gene = 1, cpd = 1),
+  out.suffix = 'ivld_antigen_processing_and_presentation'
+)
+
 reactome_ivld_4wpc_heart <-
   gsePathway(
     heart_entrez_gene_list_ivld_4wpc,
@@ -1371,6 +1397,41 @@ reactome_ivld_4wpc_heart <-
     nPermSimple = 10000,
     verbose = F
   )
+
+
+as_tibble(reactome_ivld_4wpc_heart) %>% arrange(-NES) %>% dplyr::select(., Description, NES) %>% print(n = Inf)
+
+
+viewPathway('Antigen processing-Cross presentation',
+            readable = T,
+            foldChange = heart_entrez_gene_list_ivld_4wpc)  # downregulated
+
+options(ggrepel.max.overlaps = Inf)
+
+ggsave(
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/reactome/ivld_Antigen_processing-Cross_presentation.png',
+  width = 1500,
+  height = 1000,
+  units = "px",
+  dpi = 100,
+  bg = 'white'
+)
+
+
+viewPathway('Interferon alpha/beta signaling',
+            readable = T,
+            foldChange = heart_entrez_gene_list_ivld_4wpc)  # downregulated
+
+options(ggrepel.max.overlaps = Inf)
+
+ggsave(
+  filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_4wpc/pathways/reactome/ivld_Interferon_alpha-beta_signaling.png',
+  width = 1500,
+  height = 1000,
+  units = "px",
+  dpi = 100,
+  bg = 'white'
+)
 
 get_top_bottom_pathways(kegg_ivld_4wpc_heart, n = 10, 'kegg')
 get_top_bottom_pathways(reactome_ivld_4wpc_heart, n = 10, 'reactome')
@@ -1407,9 +1468,11 @@ kegg_ivhd_4wpc_heart <- gseKEGG(
   verbose = TRUE,
   seed = FALSE,
   eps = 0,
-  nPermSimple = 10000
+  nPermSimple = 100000
 )
-as_tibble(kegg_ivhd_4wpc_heart)
+
+
+as_tibble(kegg_ivhd_4wpc_heart) %>% arrange(-NES) %>% dplyr::select(., Description, NES) %>% print(n = Inf)
 
 reactome_ivhd_4wpc_heart <-
   gsePathway(
@@ -1418,9 +1481,12 @@ reactome_ivhd_4wpc_heart <-
     pvalueCutoff = .05,
     pAdjustMethod = 'BH',
     eps = 1e-300,
-    nPermSimple = 10000,
+    nPermSimple = 100000,
     verbose = F
   )
+
+as_tibble(reactome_ivhd_4wpc_heart) %>% arrange(-NES) %>% dplyr::select(., Description, NES) %>% print(n = Inf)
+
 
 get_top_bottom_pathways(kegg_ivhd_4wpc_heart, n = 10, 'kegg')
 get_top_bottom_pathways(reactome_ivhd_4wpc_heart, n = 10, 'reactome')
@@ -1460,6 +1526,7 @@ kegg_eomes_4wpc_heart <- gseKEGG(
   nPermSimple = 100000
 )
 
+as_tibble(kegg_eomes_4wpc_heart) %>% arrange(-NES) %>% dplyr::select(., Description, NES) %>% print(n = Inf)
 
 reactome_eomes_4wpc_heart <-
   gsePathway(
@@ -1468,9 +1535,12 @@ reactome_eomes_4wpc_heart <-
     pvalueCutoff = .05,
     pAdjustMethod = 'BH',
     eps = 1e-300,
-    nPermSimple = 10000,
+    nPermSimple = 100000,
     verbose = F
   )
+
+as_tibble(reactome_eomes_4wpc_heart) %>% arrange(-NES) %>% dplyr::select(., Description, NES) %>% print(n = Inf)
+
 
 get_top_bottom_pathways(kegg_eomes_4wpc_heart, n = 10, 'kegg')
 get_top_bottom_pathways(reactome_eomes_4wpc_heart, n = 10, 'reactome')
@@ -1510,6 +1580,9 @@ kegg_gata3_4wpc_heart <- gseKEGG(
   nPermSimple = 100000
 )
 
+as_tibble(kegg_gata3_4wpc_heart) %>% arrange(-NES) %>% dplyr::select(., Description, NES) %>% print(n = Inf)
+
+
 reactome_gata3_4wpc_heart <-
   gsePathway(
     heart_entrez_gene_list_gata3_4wpc,
@@ -1520,6 +1593,8 @@ reactome_gata3_4wpc_heart <-
     nPermSimple = 100000,
     verbose = F
   )
+
+as_tibble(reactome_gata3_4wpc_heart) %>% arrange(-NES) %>% dplyr::select(., Description, NES) %>% print(n = Inf)
 
 
 get_top_bottom_pathways(kegg_gata3_4wpc_heart, n = 10, 'kegg')
@@ -1544,3 +1619,16 @@ reactome_data <-
     sep = "\t"
   )
 cat(markdown_table(reactome_data), sep = "\n")
+
+
+
+
+
+
+
+
+
+
+
+
+

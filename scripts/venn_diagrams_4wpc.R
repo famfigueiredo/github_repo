@@ -331,7 +331,7 @@ upregulated_common_genes <- bind_rows(upregulated_GATA3vDNAvacc, upregulated_GAT
 
 na_orthologs_vector_upregulated <- as.vector(upregulated_common_genes$ssalar_ensembl[upregulated_common_genes$hsapiens_ortholog == "N/A"])
 
-# Query for InterPro domains associated with the gene with not hsapiens ortholog
+# Query for InterPro domains associated with the genes with no hsapiens ortholog
 ensembl <- useMart("ensembl", dataset = "ssalar_gene_ensembl")
 
 interpro_results <- getBM(
