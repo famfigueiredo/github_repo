@@ -249,11 +249,29 @@ gsea_formatting_significant <-
   }
 
 # Helper function to display Venn diagram
-display_venn <- function(x, ...) {
+display_venn <- function(x, title = NULL, title_y = 0.97, title_size = 16, title_font = "serif", ...) {
   library(VennDiagram)
-  grid.newpage()
+  library(grid)  # Load grid for adding text
+  
+  grid.newpage()  # Clear the plotting area
+  
+  # Add title with adjustable position, size, and font type
+  if (!is.null(title)) {
+    grid.text(
+      title,
+      x = 0.5, 
+      y = title_y,  # Allow user to control Y position
+      gp = gpar(fontsize = title_size, fontfamily = title_font)
+    )
+  }
+  
+  # Generate the Venn diagram object
   venn_object <- venn.diagram(x, filename = NULL, ...)
+  
+  # Shift the Venn diagram slightly down to avoid overlap
+  pushViewport(viewport(y = 0.05, height = 0.88, just = "bottom"))  
   grid.draw(venn_object)
+  popViewport()  # Reset viewport
 }
 
 # Helper function to load results tables
