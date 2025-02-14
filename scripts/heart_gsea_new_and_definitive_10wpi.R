@@ -7,7 +7,7 @@ library('enrichplot')
 library('AnnotationDbi')
 library('ReactomePA')
 
-rm(list = setdiff(ls(), grep("res_", ls(), value = TRUE)))
+rm(list = setdiff(ls(), grep('res_', ls(), value = TRUE)))
 
 ## Loading functions ----
 source(
@@ -109,7 +109,7 @@ res_eomes_vs_conu_10wpi %>% head()
 #              ))) +  
 #              facet_grid(. ~ Regulation)
 # 
-# ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/dnavaccine_10wpi.png', width = 1000, height = 1023, units = "px", dpi = 72)
+# ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/dnavaccine_10wpi.png', width = 1000, height = 1023, units = 'px', dpi = 72)
 # 
 ## EOMES ----
 ### all genes ###
@@ -181,7 +181,7 @@ top20_high_nes %>%
   )
   facet_grid(.~Regulation)
 
-ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/eomes_10wpi_upregulated.png', width = 1000, height = 1023, units = "px", dpi = 72)
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/eomes_10wpi_upregulated.png', width = 1000, height = 1023, units = 'px', dpi = 72)
   
 ## GATA3 ----
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
@@ -252,7 +252,7 @@ top20_high_nes_gata3 %>%
   ) +
   facet_grid(. ~ Regulation)
 
-ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/gata3_10wpi_upregulated.png', width = 1000, height = 1023, units = "px", dpi = 72)
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/gata3_10wpi_upregulated.png', width = 1000, height = 1023, units = 'px', dpi = 72)
 
 ## IV-HD ----
 rm(list = ls()[sapply(ls(), function(x) !is.function(get(x)))])  # delete values, keep functions in GE
@@ -324,7 +324,7 @@ top20_high_nes %>%
   ) +
   facet_grid(. ~ Regulation)
 
-ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/ivhd_10wpi_upregulated.png', width = 1000, height = 1023, units = "px", dpi = 72)
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/ivhd_10wpi_upregulated.png', width = 1000, height = 1023, units = 'px', dpi = 72)
   
 
 ## IV-LD ----
@@ -356,6 +356,15 @@ top20_high_nes_ivld <-
   arrange(desc(setSize)) %>% 
   top_n(20, wt = NES) %>% 
   mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length))
+
+top5_high_nes_ivld <- 
+  as_tibble(heart_gsea_simplified_results_ivld_10wpi) %>%
+  filter(NES > 0) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
+  arrange(desc(Count)) %>% 
+  top_n(5, wt = Count)
+  
+
 
 # bottom10_low_nes <- 
 #   as_tibble(heart_gsea_simplified_results_ivld_10wpi) %>%
@@ -400,20 +409,163 @@ top20_high_nes_ivld %>%
   facet_grid(. ~ Regulation)
 
 
-ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/heart_ivld_10wpi_upregulated.png', width = 1000, height = 1023, units = "px", dpi = 72)
+ggsave(filename = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_definitive_plots/heart_ivld_10wpi_upregulated.png', width = 1000, height = 1023, units = 'px', dpi = 72)
+
+################################################################################################################################################
+################################################################################################################################################
+################################################################################################################################################
+################################################################################################################################################
+# Top 5 pathways ####
+## IV-LD ##
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_results_tables/heart_gsea_simplified_results_ivld_10wpi.RData')
+
+top5_high_nes_ivld <- 
+  as_tibble(heart_gsea_simplified_results_ivld_10wpi) %>%
+  filter(NES > 0) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
+  mutate(geneRatio = Count/setSize) %>% 
+  top_n(5, wt = Count) %>% 
+  arrange(p.adjust)
+
+
+lymphocyte_activation_ivld <- as.character(top5_high_nes_ivld[1, 'core_enrichment']) %>% strsplit(., '/') %>%  unlist()
+heart_development_ivld <- as.character(top5_high_nes_ivld[3, 'core_enrichment']) %>% strsplit(., '/') %>%  unlist()
+
+## EOMES ##
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_results_tables/heart_gsea_simplified_results_eomes_10wpi.RData')
+
+top5_high_nes_eomes <- 
+  as_tibble(heart_gsea_simplified_results_eomes_10wpi) %>%
+  filter(NES > 0) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
+  mutate(geneRatio = Count/setSize) %>% 
+  top_n(5, wt = Count) %>% 
+  arrange(p.adjust)
+
+heart_development_eomes <- as.character(top5_high_nes_eomes[2, 'core_enrichment']) %>% strsplit(., '/') %>%  unlist()
+
+## GATA3 ##
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/gsea_results_tables/heart_gsea_simplified_results_gata3_10wpi.RData')
+
+top5_high_nes_gata3 <- 
+  as_tibble(heart_gsea_simplified_results_gata3_10wpi) %>%
+  filter(NES > 0) %>% 
+  mutate(Count = sapply(strsplit(as.character(core_enrichment), '/'), length)) %>% 
+  mutate(geneRatio = Count/setSize) %>% 
+  top_n(5, wt = Count) %>% 
+  arrange(p.adjust)
+
+heart_development_gata3 <- as.character(top5_high_nes_gata3[2, 'core_enrichment']) %>% strsplit(., '/') %>%  unlist()
+
+### Venn diagram ##
+b <- list(
+  A = heart_development_ivld,
+  B = heart_development_eomes,
+  C = heart_development_gata3
+)
+
+# add treatment names
+names(b) <-
+  c('IV-LD', 'EOMES', 'GATA3')
+
+
+png('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/venn_diagrams/venn_heart.development_4wpc.png', width = 800, height = 800, res = 100)
+
+display_venn(
+  b,
+  fill = viridis(3),
+  lwd = 1,
+  cex = 1,
+  cat.cex = 1,
+  cat.fontfamily = 'serif',
+  # cat.fontface = 'bold',
+  cat.default.pos = 'outer',
+  title = 'heart development GO term',
+  title_y = .95,
+  title_size = 16
+)
+
+dev.off()
+colnames(top5_high_nes_ivld)
+
+
+ivld_top5_formatted <-
+  top5_high_nes_ivld %>% dplyr::select(ID, Description, NES, setSize, Count) %>% dplyr::rename('GO Term' = ID,
+                                                                                               'Gene ratio' = geneRatio) %>%
+  mutate(Treatment = 'IV-LD')
+
+ivld_top5_formatted <- dplyr::rename(top5_high_nes_ivld, 
+                                     'GO Term' = ID, 
+                                     'Gene ratio' = geneRatio)
+
+ivld_top5_formatted <- ivld_top5_formatted %>%
+  dplyr::select('GO Term', 'Description', 'NES', 'Gene ratio') %>%
+  mutate(across(where(is.numeric), ~ round(., 3))) %>% 
+  mutate(Treatment = 'IV-LD')
+
+
+eomes_top5_formatted <- dplyr::rename(top5_high_nes_eomes,
+                                      'GO Term' = ID,
+                                      'Gene ratio' = geneRatio)
+
+eomes_top5_formatted <- eomes_top5_formatted %>%
+  dplyr::select('GO Term', 'Description', 'NES', 'Gene ratio') %>%
+  mutate(across(where(is.numeric), ~ round(., 3))) %>% 
+  mutate(Treatment = 'EOMES')
 
 
 
+gata3_top5_formatted <- dplyr::rename(top5_high_nes_gata3,
+                                      'GO Term' = ID,
+                                      'Gene ratio' = geneRatio)
+
+gata3_top5_formatted <- gata3_top5_formatted %>%
+  dplyr::select('GO Term', 'Description', 'NES', 'Gene ratio') %>%
+  mutate(across(where(is.numeric), ~ round(., 3))) %>% 
+  mutate(Treatment = 'GATA-3')
 
 
+top5_goterms_heart_10wpi <- bind_rows(ivld_top5_formatted, eomes_top5_formatted, gata3_top5_formatted)
+
+library(writexl)
+library(flextable)
+library(officer)
+
+# Set default font for all flextables
+set_flextable_defaults(font.family = 'Times New Roman')
+
+# Convert to flextable
+ft <- flextable(top5_goterms_heart_10wpi) %>% 
+  font(fontname = 'Time New Roman', part = 'all') %>%  # Set font type
+  fontsize(size = 10, part = 'all') %>%  # Set font size
+  padding(padding = 2, part = 'all') %>%  # Reduce padding
+  align(align = 'center', part = 'all') %>% 
+  width(width = rep(1, ncol(top5_goterms_heart_10wpi))) %>% 
+  autofit()  # Adjust column widths to content
+
+# Save as Word document
+read_docx() %>%
+  body_add_flextable(ft) %>%
+  print(target = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/results/heart/results_10wpi/tables/top5_goterms_heart_10wpi.docx')
+
+# check gene counts per treatment
+kableExtra::kable((sapply(b, length)), col.names = c('count'))
+
+setdiff(heart_development_eomes, heart_development_ivld)
+
+intersect(heart_development_eomes, heart_development_ivld)
+
+length(heart_development_eomes)
+length(heart_development_ivld)
+
+# common genes
+common_genes_heartDevelopment <- intersect(intersect(heart_development_ivld, heart_development_eomes), heart_development_gata3)
+setdiff(heart_development_ivld, intersect(heart_development_gata3, heart_development_eomes))
+
+eomesGATA3 <- setdiff(intersect(heart_development_gata3, heart_development_eomes), heart_development_ivld)
+eomesGATA3 %>% length()
 
 
-
-
-
-
-
-
-
-
+str_detect('GIG', common_genes_heartDevelopment)
+str_detect('IGM', heart_development_gata3)
 
