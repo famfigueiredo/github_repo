@@ -141,6 +141,112 @@ collapsed_dds_10wpi <- collapseReplicates(dds_10wpi,
 ddsDGE_heartSpleen_10wpi <-
   DESeq(collapsed_dds_10wpi, parallel = T)
 
+resultsNames(ddsDGE_heartSpleen_10wpi)
+## Exploratory analysis ####
+# Plotting dispersion estimation to ensure that the assumption that most genes are not differentially expressed holds
+DESeq2::plotDispEsts(ddsDGE_heartSpleen_10wpi)
+
+# Transformation to stabilize variance across the mean through *variance stabilizing transformation*
+vst_counts <- vst(ddsDGE_heartSpleen_10wpi, blind = T)
+
+PCA <-
+  plotPCA(
+    vst_counts,
+    intgroup = c('treatment', 'tissue'),
+    returnData = T
+  )
+
+PCA <- PCA %>% 
+  filter(treatment != 'ptagrfp')  # removing all ptagRFP samples for the PCA
+
+
+percentVar <- round(100 * attr(PCA, "percentVar"))
+
+library(RSkittleBrewer)
+plotSkittles()
+wildberry <- RSkittleBrewer('wildberry')
+
+
+PCA$treatment <- factor(PCA$treatment,
+                        levels = c('conu', 'ivld', 'eomes', 'gata3'))
+
+
+PCA <- PCA %>% 
+  filter(name != '639_dnavaccine_1wpc_h')  # removing heart outlier
+
+## PCA
+
+heartSpleen_10wpi_dataset_pca <- PCA %>%
+  ggplot(.,
+         aes(
+           x = PC2,
+           y = PC1,
+           color = treatment,
+           shape = tissue,
+         )) +
+  geom_point(size = 2) +
+  # stat_ellipse() +
+  xlab(paste0("PC2: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC1: ", percentVar[2], "% variance")) +
+  coord_fixed(ratio = .7) +
+  ggtitle("Heart and Spleen PCA, treatment and tissue as factors") +
+  theme_linedraw(base_size = 14, base_family = 'Times New Roman') +
+  scale_color_manual(
+    name = 'treatment',
+    values = wildberry,
+    labels = c('conu', 'ivld', 'eomes', 'gata3')
+  ) +
+  # scale_shape_manual(
+  #   name = "tissue type",
+  #   # Custom legend title
+  #   values = c(16, 17, 18, 15),
+  #   labels = c("heart", "head-kidney", "liver", "spleen")  # Replace with actual tissue types
+  # ) +
+  theme(
+    plot.margin = grid::unit(c(2, 3, 2, 3), 'mm'),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = .5)
+  ) +
+  guides(color = guide_legend(order = 1), 
+         shape = guide_legend(order = 2))   
+
+ggsave(filename = '~/Desktop/PCAs_full-dataset/full_dataset_pca.png', plot = full_dataset_pca)
+
+spleen_pca <- PCA %>% subset(tissue == 's' & treatment %in% c('conu', 'eomes', 'ivld', 'ivhd', 'gata3')) %>% 
+  ggplot(., aes(x = PC2,
+                y = PC1,
+                color = treatment,
+                shape = samplingPoint,
+  )) +
+  geom_point(size = 2) +
+  xlab(paste0("PC2: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC1: ", percentVar[2], "% variance")) +
+  coord_fixed(ratio = 1.2) +
+  ggtitle("Spleen PCA, treatment and sampling point as factors") +
+  theme_linedraw(base_size = 14, base_family = 'Times New Roman') +
+  scale_color_manual(
+    name = 'treatment',
+    values = wildberry,
+    labels = c('conu', 'ivld', 'ivhd', 'eomes', 'gata3')
+  ) +
+  scale_shape_manual(
+    name = "sampling point",
+    # Custom legend title
+    values = c(16, 17, 18),
+    labels = c("10 wpi", "4 wpc", "6 wpc")  # Replace with actual tissue types
+  ) +
+  theme(
+    plot.margin = grid::unit(c(2, 3, 2, 3), 'mm'),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = .5)
+  ) +
+  guides(
+    color = guide_legend(order = 2),   # Ensure treatment legend is first
+    shape = guide_legend(order = 1)    # Ensure sampling point legend is second
+  )
+
+
+
 ## Exploratory analysis ####
 
 # Plotting dispersion estimation to ensure that the assumption that most genes are not differentially expressed holds
