@@ -423,7 +423,6 @@ levels(ddsDGE_ensembl_heart$treatment)
 ddsDGE_ensembl_heart <- relevel(ddsDGE_ensembl_heart$samplingPoint, ref = '10wpi')
 
 
-
 res_shrunk_eomes_10wpi <- lfcShrink(ddsDGE_ensembl_heart, coef = 'treatment_eomes_vs_conu', type = 'ashr', parallel = T)
 res_shrunk_gata3_10wpi <- lfcShrink(ddsDGE_ensembl_heart, coef = 'treatment_gata3_vs_conu', type = 'ashr', parallel = T)
 res_shrunk_ivld_10wpi <- lfcShrink(ddsDGE_ensembl_heart, coef = 'treatment_ivld_vs_conu', type = 'ashr', parallel = T)

@@ -6,6 +6,7 @@ library('org.Hs.eg.db')
 library('enrichplot')
 library('AnnotationDbi')
 library('ReactomePA')
+library('viridis')
 
 rm(list = setdiff(ls(), grep('res_', ls(), value = TRUE)))
 
@@ -486,8 +487,6 @@ display_venn(
 )
 
 dev.off()
-colnames(top5_high_nes_ivld)
-
 
 ivld_top5_formatted <-
   top5_high_nes_ivld %>% dplyr::select(ID, Description, NES, setSize, Count) %>% dplyr::rename('GO Term' = ID,
