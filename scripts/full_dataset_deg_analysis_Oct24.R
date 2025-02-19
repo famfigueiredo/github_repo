@@ -76,360 +76,122 @@ head(sampleTable, n = 1000) %>% filter(., lane == 'L4' | lane == 'L6')
 head(sampleTable, n = 100)
 
 save(sampleTable, file = '~/Documents/PhD/Papers/Paper III/data/RData/sampleTable.RData')
-# load(file = '~/Documents/PhD/Papers/Paper III/data/RData/sampleTable.RData')
+load(file = '~/Documents/PhD/Papers/Paper III/data/RData/sampleTable.RData')
 
-# Creating DESeqDataSet object and modelling with ~treatment * samplingPoint ####
+# Creating DESeqDataSet object and modelling with ~treatment + samplingPoint ####
 load('~/Documents/PhD/Papers/Paper III/data/RData/sampleTables/sampleTable.RData')
 
 sampleTable <- droplevels(sampleTable)
 table(sampleTable$treatment, sampleTable$samplingPoint, sampleTable$tissue)
 sampleTable_heart <- sampleTable %>% filter(tissue == 'h' & treatment %in% c('conu', 'ivld', 'eomes', 'gata3'))
+
 sampleTable_heart <- droplevels(sampleTable_heart)
-levels(sampleTable_heart$treatment)
-sampleTable$samplingPoint <- relevel(sampleTable$samplingPoint, ref = '10wpi')
-levels(sampleTable$samplingPoint)
+
+levels(sampleTable_heart$treatment) <- c('conu', 'ivld', 'eomes', 'gata3')
+levels(sampleTable_heart$samplingPoint) <- c('10wpi', '1wpc', '4wpc', '6wpc')
 
 dds <- DESeqDataSetFromHTSeqCount(
   sampleTable = sampleTable_heart,
   directory = directory,
-  design = ~ treatment * samplingPoint
+  design = ~ treatment
 )
 
-keep <-
-  rowSums(counts(dds)) >= 10  # removing low count genes (<10)
-dds <-
-  dds[keep, ]
-
-as.data.frame(colData(dds))
-
-collapsed_dds <- collapseReplicates(dds,
-                   groupby = dds$n,
-                   run = dds$lane)
-
-collapsed_dds$samplingPoint <- relevel(collapsed_dds$samplingPoint, ref = '10wpi')
-levels(collapsed_dds$samplingPoint)
-levels(collapsed_dds$treatment)
+dds_10wpi <- dds[, dds$samplingPoint == '10wpi']
 
 
-ddsDGE_ensembl_heart <-
-  DESeq(collapsed_dds, parallel = T)
-
-resultsNames(ddsDGE_ensembl_heart)
-
-save(ddsDGE_ensembl_heart, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/dds_DGE_ensembl_heart.RData')
-
-save(ddsDGE_ensembl_fulldataset, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_ensembl_fulldataset.RData')
-
-# Creating DESeqDataSet object and modelling with ~treatment * tissue at 10wpi ####
-sampleTable_heartSpleen <- sampleTable %>% filter(samplingPoint == '10wpi' & tissue %in% c('h', 's') & treatment %in% c('conu', 'ivld', 'eomes', 'gata3'))
-
-dds_10wpi <- DESeqDataSetFromHTSeqCount(
-  sampleTable = sampleTable_heartSpleen,
-  directory = directory,
-  design = ~ treatment * tissue
-)
-
-keep <-
-  rowSums(counts(dds_10wpi)) >= 10  # removing low count genes (<10)
-dds_10wpi <-
-  dds_10wpi[keep, ]
-
-as.data.frame(colData(dds_10wpi))
+design(dds_10wpi) <- ~ treatment
 
 collapsed_dds_10wpi <- collapseReplicates(dds_10wpi,
                                     groupby = dds_10wpi$n,
                                     run = dds_10wpi$lane)
 
-ddsDGE_heartSpleen_10wpi <-
-  DESeq(collapsed_dds_10wpi, parallel = T)
 
-resultsNames(ddsDGE_heartSpleen_10wpi)
-## Exploratory analysis ####
-# Plotting dispersion estimation to ensure that the assumption that most genes are not differentially expressed holds
-DESeq2::plotDispEsts(ddsDGE_heartSpleen_10wpi)
-
-# Transformation to stabilize variance across the mean through *variance stabilizing transformation*
-vst_counts <- vst(ddsDGE_heartSpleen_10wpi, blind = T)
-
-PCA <-
-  plotPCA(
-    vst_counts,
-    intgroup = c('treatment', 'tissue'),
-    returnData = T
-  )
-
-PCA <- PCA %>% 
-  filter(treatment != 'ptagrfp')  # removing all ptagRFP samples for the PCA
-
-
-percentVar <- round(100 * attr(PCA, "percentVar"))
-
-library(RSkittleBrewer)
-plotSkittles()
-wildberry <- RSkittleBrewer('wildberry')
-
-
-PCA$treatment <- factor(PCA$treatment,
-                        levels = c('conu', 'ivld', 'eomes', 'gata3'))
-
-
-PCA <- PCA %>% 
-  filter(name != '639_dnavaccine_1wpc_h')  # removing heart outlier
-
-## PCA
-
-heartSpleen_10wpi_dataset_pca <- PCA %>%
-  ggplot(.,
-         aes(
-           x = PC2,
-           y = PC1,
-           color = treatment,
-           shape = tissue,
-         )) +
-  geom_point(size = 2) +
-  # stat_ellipse() +
-  xlab(paste0("PC2: ", percentVar[1], "% variance")) +
-  ylab(paste0("PC1: ", percentVar[2], "% variance")) +
-  coord_fixed(ratio = .7) +
-  ggtitle("Heart and Spleen PCA, treatment and tissue as factors") +
-  theme_linedraw(base_size = 14, base_family = 'Times New Roman') +
-  scale_color_manual(
-    name = 'treatment',
-    values = wildberry,
-    labels = c('conu', 'ivld', 'eomes', 'gata3')
-  ) +
-  # scale_shape_manual(
-  #   name = "tissue type",
-  #   # Custom legend title
-  #   values = c(16, 17, 18, 15),
-  #   labels = c("heart", "head-kidney", "liver", "spleen")  # Replace with actual tissue types
-  # ) +
-  theme(
-    plot.margin = grid::unit(c(2, 3, 2, 3), 'mm'),
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(hjust = .5)
-  ) +
-  guides(color = guide_legend(order = 1), 
-         shape = guide_legend(order = 2))   
-
-ggsave(filename = '~/Desktop/PCAs_full-dataset/full_dataset_pca.png', plot = full_dataset_pca)
-
-spleen_pca <- PCA %>% subset(tissue == 's' & treatment %in% c('conu', 'ivld', 'eomes', 'gata3')) %>% 
-  ggplot(., aes(x = PC2,
-                y = PC1,
-                color = treatment
-  )) +
-  geom_point(size = 2) +
-  xlab(paste0("PC2: ", percentVar[1], "% variance")) +
-  ylab(paste0("PC1: ", percentVar[2], "% variance")) +
-  coord_fixed(ratio = 1.2) +
-  ggtitle("Spleen PCA, treatment and sampling point as factors") +
-  theme_linedraw(base_size = 14, base_family = 'Times New Roman') +
-  scale_color_manual(
-    name = 'treatment',
-    values = wildberry,
-    labels = c('conu', 'ivld', 'eomes', 'gata3')
-  ) +
-  # scale_shape_manual(
-  #   name = "sampling point",
-  #   # Custom legend title
-  #   values = c(16, 17, 18),
-  #   labels = c("10 wpi", "4 wpc", "6 wpc")  # Replace with actual tissue types
-  # ) +
-  theme(
-    plot.margin = grid::unit(c(2, 3, 2, 3), 'mm'),
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(hjust = .5)
-  ) +
-  guides(
-    color = guide_legend(order = 2),   # Ensure treatment legend is first
-    shape = guide_legend(order = 1)    # Ensure sampling point legend is second
-  )
-
-
-heart_pca <- PCA %>% subset(tissue == 'h' & treatment %in% c('conu', 'ivld', 'eomes', 'gata3')) %>% 
-  ggplot(., aes(x = PC2,
-                y = PC1,
-                color = treatment
-  )) +
-  geom_point(size = 2) +
-  xlab(paste0("PC2: ", percentVar[1], "% variance")) +
-  ylab(paste0("PC1: ", percentVar[2], "% variance")) +
-  coord_fixed(ratio = 1.2) +
-  ggtitle("Heart PCA, treatment as factor") +
-  theme_linedraw(base_size = 14, base_family = 'Times New Roman') +
-  scale_color_manual(
-    name = 'treatment',
-    values = wildberry,
-    labels = c('conu', 'ivld', 'eomes', 'gata3')
-  ) +
-  # scale_shape_manual(
-  #   name = "sampling point",
-  #   # Custom legend title
-  #   values = c(16, 17, 18),
-  #   labels = c("10 wpi", "4 wpc", "6 wpc")  # Replace with actual tissue types
-  # ) +
-  theme(
-    plot.margin = grid::unit(c(2, 3, 2, 3), 'mm'),
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(hjust = .5)
-  ) +
-  guides(
-    color = guide_legend(order = 2),   # Ensure treatment legend is first
-    shape = guide_legend(order = 1)    # Ensure sampling point legend is second
-  )
-
-
-
-# Creating DESeqDataSet object and modelling with ~treatment * tissue at 4wpc ####
-sampleTable_heartSpleen_4wpc <- sampleTable %>% filter(samplingPoint == '4wpc' & tissue %in% c('h', 's') & treatment %in% c('conu', 'ivld', 'eomes', 'gata3'))
-
-dds_4wpc <- DESeqDataSetFromHTSeqCount(
-  sampleTable = sampleTable_heartSpleen_4wpc,
-  directory = directory,
-  design = ~ treatment * tissue
-)
 
 keep <-
-  rowSums(counts(dds_4wpc)) >= 10  # removing low count genes (<10)
-dds_4wpc <-
-  dds_4wpc[keep, ]
+  rowSums(counts(collapsed_dds_10wpi)) >= 10  # removing low count genes (<10)
+collapsed_dds_10wpi <-
+  collapsed_dds_10wpi[keep, ]
 
-as.data.frame(colData(dds_4wpc))
+as.data.frame(colData(collapsed_dds_10wpi))
 
-collapsed_dds_4wpc <- collapseReplicates(dds_4wpc,
-                                          groupby = dds_4wpc$n,
-                                          run = dds_4wpc$lane)
-
-ddsDGE_heartSpleen_4wpc <-
-  DESeq(collapsed_dds_4wpc, parallel = T)
-
-resultsNames(ddsDGE_heartSpleen_4wpc)
-## Exploratory analysis ####
-# Plotting dispersion estimation to ensure that the assumption that most genes are not differentially expressed holds
-DESeq2::plotDispEsts(ddsDGE_heartSpleen_4wpc)
-
-# Transformation to stabilize variance across the mean through *variance stabilizing transformation*
-vst_counts <- vst(ddsDGE_heartSpleen_4wpc, blind = T)
-
-PCA <-
-  plotPCA(
-    vst_counts,
-    intgroup = c('treatment', 'tissue'),
-    returnData = T
-  )
-
-PCA <- PCA %>% 
-  filter(treatment != 'ptagrfp')  # removing all ptagRFP samples for the PCA
+levels(collapsed_dds_10wpi$samplingPoint)
+levels(collapsed_dds_10wpi$treatment)
 
 
-percentVar <- round(100 * attr(PCA, "percentVar"))
+ddsDGE_heart10wpi <-
+  DESeq(collapsed_dds_10wpi, parallel = T)
 
-library(RSkittleBrewer)
-plotSkittles()
-wildberry <- RSkittleBrewer('wildberry')
+resultsNames(ddsDGE_heart10wpi)
 
-
-PCA$treatment <- factor(PCA$treatment,
-                        levels = c('conu', 'ivld', 'eomes', 'gata3'))
-
-
-PCA <- PCA %>% 
-  filter(name != '639_dnavaccine_1wpc_h')  # removing heart outlier
-
-## PCA
-
-heartSpleen_10wpi_dataset_pca <- PCA %>%
-  ggplot(.,
-         aes(
-           x = PC2,
-           y = PC1,
-           color = treatment,
-           shape = tissue,
-         )) +
-  geom_point(size = 2) +
-  # stat_ellipse() +
-  xlab(paste0("PC2: ", percentVar[1], "% variance")) +
-  ylab(paste0("PC1: ", percentVar[2], "% variance")) +
-  coord_fixed(ratio = .7) +
-  ggtitle("Heart and Spleen PCA, treatment and tissue as factors") +
-  theme_linedraw(base_size = 14, base_family = 'Times New Roman') +
-  scale_color_manual(
-    name = 'treatment',
-    values = wildberry,
-    labels = c('conu', 'ivld', 'eomes', 'gata3')
-  ) +
-  # scale_shape_manual(
-  #   name = "tissue type",
-  #   # Custom legend title
-  #   values = c(16, 17, 18, 15),
-  #   labels = c("heart", "head-kidney", "liver", "spleen")  # Replace with actual tissue types
-  # ) +
-  theme(
-    plot.margin = grid::unit(c(2, 3, 2, 3), 'mm'),
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(hjust = .5)
-  ) +
-  guides(color = guide_legend(order = 1), 
-         shape = guide_legend(order = 2))   
-
-ggsave(filename = '~/Desktop/PCAs_full-dataset/full_dataset_pca.png', plot = full_dataset_pca)
-
-spleen_pca <- PCA %>% subset(tissue == 's' & treatment %in% c('conu', 'eomes', 'ivld', 'ivhd', 'gata3')) %>% 
-  ggplot(., aes(x = PC2,
-                y = PC1,
-                color = treatment,
-                shape = samplingPoint,
-  )) +
-  geom_point(size = 2) +
-  xlab(paste0("PC2: ", percentVar[1], "% variance")) +
-  ylab(paste0("PC1: ", percentVar[2], "% variance")) +
-  coord_fixed(ratio = 1.2) +
-  ggtitle("Spleen PCA, treatment and sampling point as factors") +
-  theme_linedraw(base_size = 14, base_family = 'Times New Roman') +
-  scale_color_manual(
-    name = 'treatment',
-    values = wildberry,
-    labels = c('conu', 'ivld', 'ivhd', 'eomes', 'gata3')
-  ) +
-  scale_shape_manual(
-    name = "sampling point",
-    # Custom legend title
-    values = c(16, 17, 18),
-    labels = c("10 wpi", "4 wpc", "6 wpc")  # Replace with actual tissue types
-  ) +
-  theme(
-    plot.margin = grid::unit(c(2, 3, 2, 3), 'mm'),
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(hjust = .5)
-  ) +
-  guides(
-    color = guide_legend(order = 2),   # Ensure treatment legend is first
-    shape = guide_legend(order = 1)    # Ensure sampling point legend is second
-  )
-
-
+save(ddsDGE_heart10wpi, file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/DGE_objects/ddsDGE_heart10wpi.RData')
 
 ########################################################################################################
 ########################################################################################################
 ########################################################################################################
 ########################################################################################################
-## Treatment contrasts within sampling points - HEART - 10wpi. Modelled with ~treatment * samplingPoint ----
+## Treatment contrasts within sampling points - HEART - 10wpi. Modelled with ~ treatment ----
 
-load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/dds_DGE_ensembl_heart.RData')
-resultsNames(ddsDGE_ensembl_heart)
-levels(ddsDGE_ensembl_heart$samplingPoint)
-levels(ddsDGE_ensembl_heart$treatment)
-ddsDGE_ensembl_heart <- relevel(ddsDGE_ensembl_heart$samplingPoint, ref = '10wpi')
+load('~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/DGE_objects/ddsDGE_heart10wpi.RData')
+resultsNames(ddsDGE_heart10wpi)
 
 
-res_shrunk_eomes_10wpi <- lfcShrink(ddsDGE_ensembl_heart, coef = 'treatment_eomes_vs_conu', type = 'ashr', parallel = T)
-res_shrunk_gata3_10wpi <- lfcShrink(ddsDGE_ensembl_heart, coef = 'treatment_gata3_vs_conu', type = 'ashr', parallel = T)
-res_shrunk_ivld_10wpi <- lfcShrink(ddsDGE_ensembl_heart, coef = 'treatment_ivld_vs_conu', type = 'ashr', parallel = T)
+res_shrunk_eomes_10wpi <- lfcShrink(ddsDGE_heart10wpi, coef = 'treatment_eomes_vs_conu', type = 'apeglm', parallel = T)
+res_shrunk_gata3_10wpi <- lfcShrink(ddsDGE_heart10wpi, coef = 'treatment_gata3_vs_conu', type = 'apeglm', parallel = T)
+res_shrunk_ivld_10wpi <- lfcShrink(ddsDGE_heart10wpi, coef = 'treatment_ivld_vs_conu', type = 'apeglm', parallel = T)
 
-res_shrunk_eomes_4wpc <- lfcShrink(ddsDGE_ensembl_heart, coef = 'treatmenteomes.samplingPoint4wpc', type = 'ashr', parallel = T)
-res_shrunk_gata3_4wpc <- lfcShrink(ddsDGE_ensembl_heart, coef = 'treatmentgata3.samplingPoint4wpc', type = 'ashr', parallel = T)
-res_shrunk_ivld_4wpc <- lfcShrink(ddsDGE_ensembl_heart, coef = 'treatmentivld.samplingPoint4wpc', type = 'ashr', parallel = T)
+
+res_unshrunk_eomes_10wpi <- results(ddsDGE_heart10wpi, contrast = c('treatment', 'eomes', 'conu'))
+res_unshrunk_gata3_10wpi <- results(ddsDGE_heart10wpi, contrast = c('treatment', 'gata3', 'conu'))
+res_unshrunk_ivld_10wpi <- results(ddsDGE_heart10wpi, contrast = c('treatment', 'ivld', 'conu'))
+
+
+# Convert DESeq2 results to a data frame
+res_df_ivld <- as.data.frame(res_shrunk_ivld_10wpi)
+res_df_ivld$gene <- rownames(res_df_ivld)  # Add gene names as a column
+
+padj_threshold <- 0.05
+log2FC_threshold <- 0.5
+
+# Add a column to indicate significance
+res_df_ivld$sig <- ifelse(res_df_ivld$padj < padj_threshold & abs(res_df_ivld$log2FoldChange) > log2FC_threshold, 
+                     "Significant", "Not Significant")
+
+
+orthologs <- gorth(
+  query = rownames(res_df_ivld),
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = TRUE
+)
+
+merged_df <- res_df_ivld %>%
+  left_join(orthologs, by = c('gene' = 'input')) %>%
+  dplyr::select(gene,
+                ortholog_name,
+                ortholog_ensg,
+                log2FoldChange,
+                padj,
+                description) %>%
+  na.omit()
+
+
+merged_df <- merged_df %>%
+  remove_rownames() %>%
+  mutate(ortholog_name = make.unique(as.character(ortholog_name))) %>%
+  column_to_rownames(var = 'ortholog_name')
+
+EnhancedVolcano(merged_df,
+                lab = rownames(merged_df),
+                x = 'log2FoldChange',
+                y = 'padj',
+                title = 'Volcano Plot',
+                pCutoff = padj_threshold,
+                FCcutoff = log2FC_threshold)
+
+merged_df %>% filter(row.names(merged_df) == 'KLF11.1')
+
+
 
 
 ########################################################################################################
@@ -729,16 +491,16 @@ sampleTable <- sampleTable %>%
 
 sampleTable_heart <- sampleTable %>%
   filter(tissue == 'h' &
-           treatment %in% c('conu', 'ptagrfp', 'ivld', 'ivhd', 'eomes', 'gata3'))
+           treatment %in% c('conu', 'ivld', 'eomes', 'gata3') & samplingPoint %in% c('10wpi', '4wpc', '6wpc'))
 
 sampleTable_heart %>%
   dplyr::mutate(group = paste(treatment, sep = '.', samplingPoint)) -> sampleTable_heart_group 
 
-# formatting variables
-sampleTable_heart_group$group <-
-  as.factor(sampleTable_heart_group$group)
-sampleTable_heart_group <-
-  droplevels(sampleTable_heart_group)  # dropping the reference
+sampleTable_heart_group <- droplevels(sampleTable_heart_group)
+levels(sampleTable_heart_group$treatment)
+levels(sampleTable_heart_group$samplingPoint)
+levels(sampleTable_heart_group$group)
+sampleTable_heart_group$group <- factor(sampleTable_heart_group$group)  # Ensure it's a factor
 
 # creating dds object
 ddsGroup_heart <-
@@ -809,17 +571,15 @@ save(sampleTable_spleen_group, file = '~/Documents/PhD/Papers/Paper III/data/RDa
 
 
 # Loading data ----
-load(file = '~/Documents/PhD/Papers/Paper III/data/RData/sampleTable_heart_group.RData')  # heart sampleTable
+load(file = '~/Documents/PhD/Papers/Paper III/data/RData/sampleTables/sampleTable_heart_group.RData')  # heart sampleTable
 load(file = '~/Documents/PhD/Papers/Paper III/data/RData/ddsDGE_group_spleen.RData')  # spleen sampleTable
 load(file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_group_heart.RData')  # heart DESeq model
 load(file = '~/Documents/PhD/Thesis/quantseq_dataAnalysis/deseq2_dataAnalysis_2024/RData/ddsDGE_group_spleen.RData')  # spleen DESeq model
 
 ## Treatment contrasts within sampling points - HEART - 10wpi ----
+resultsNames(ddsDGE_group_heart)
 ### IVLD
 heart_res_ivld_vs_conu_10wpi <- lfcShrink(ddsDGE_group_heart, contrast = c('group', 'ivld.10wpi', 'conu.10wpi'), type = 'ashr', parallel = T)
-
-### IVHD
-heart_res_ivhd_vs_conu_10wpi <- lfcShrink(ddsDGE_group_heart, contrast = c('group', 'ivhd.10wpi', 'conu.10wpi'), type = 'ashr', parallel = T)
 
 ### GATA3 
 heart_res_gata3_vs_conu_10wpi <- lfcShrink(ddsDGE_group_heart, contrast = c('group', 'gata3.10wpi', 'conu.10wpi'), type = 'ashr', parallel = T)
@@ -833,17 +593,24 @@ heart_res_eomes_vs_conu_10wpi <- lfcShrink(ddsDGE_group_heart, contrast = c('gro
 ### IVLD
 heart_res_ivld_vs_conu_4wpc <- lfcShrink(ddsDGE_group_heart, contrast = c('group', 'ivld.4wpc', 'conu.4wpc'), type = 'ashr', parallel = T)
 
-### IVHD
-heart_res_ivhd_vs_conu_4wpc <- lfcShrink(ddsDGE_group_heart, contrast = c('group', 'ivhd.4wpc', 'conu.4wpc'), type = 'ashr', parallel = T)
-
 ### GATA3 
 heart_res_gata3_vs_conu_4wpc <- lfcShrink(ddsDGE_group_heart, contrast = c('group', 'gata3.4wpc', 'conu.4wpc'), type = 'ashr', parallel = T)
 
 ### EOMES
 heart_res_eomes_vs_conu_4wpc <- lfcShrink(ddsDGE_group_heart, contrast = c('group', 'eomes.4wpc', 'conu.4wpc'), type = 'ashr', parallel = T)
 
-### GATA3 vs EOMES at 4wpc
-heart_res_gata3_vs_eomes_4wpc <- lfcShrink(ddsDGE_group_heart, contrast = c('group', 'gata3.4wpc', 'eomes.4wpc'), type = 'ashr', parallel = T)
+
+
+# Saving results files ----
+setwd(
+  '/Users/ffi007/Library/CloudStorage/OneDrive-UiTOffice365/Documents/PhD/Papers/Paper III/data/gsea_results/10 wpi'
+)
+
+obj <- ls(pattern = '^heart*.*_res_.*10wpi*')  # regex pattern matching files containing gsea
+for (i in 1:length(obj)) {
+  save(list = (obj[i]),
+       file = paste(obj[i], ".RData", sep = ""))
+}  
 
 ## Treatment contrasts within sampling points - HEART - 6wpc ----
 
