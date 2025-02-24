@@ -77,7 +77,7 @@ bottom10_nes_ivld <-
   top_n(10, wt = NES) %>% 
   arrange(NES)
 
-nes_ivld_10wpi <- bind_rows(top10_nes_ivld, bottom10_nes_ivld)
+nes_ivld_10wpi <- bind_rows(top10_nes_ivld, bottom10_nes_ivld) %>% mutate(Treatment = 'IV-LD') %>% dplyr::select(c('ID', 'Description', 'NES', 'geneRatio', 'Treatment'))
 
 # EOMES ####
 nrow(shrunk_gsea_results_eomes_10wpi)  # 2536 GO terms/pathways
@@ -101,7 +101,7 @@ bottom10_nes_eomes <-
   top_n(10, wt = NES) %>% 
   arrange(NES)
 
-nes_eomes_10wpi <- bind_rows(top10_nes_eomes, bottom10_nes_eomes)
+nes_eomes_10wpi <- bind_rows(top10_nes_eomes, bottom10_nes_eomes) %>% mutate(Treatment = 'EOMES') %>% dplyr::select(c('ID', 'Description', 'NES', 'geneRatio', 'Treatment'))
 
 # EOMES ####
 nrow(shrunk_gsea_results_gata3_10wpi)  # 2798 GO terms/pathways
@@ -125,14 +125,52 @@ bottom10_nes_gata3 <-
   top_n(10, wt = NES) %>% 
   arrange(NES)
 
-nes_gata3_10wpi <- bind_rows(top10_nes_gata3, bottom10_nes_gata3)
+nes_gata3_10wpi <- bind_rows(top10_nes_gata3, bottom10_nes_gata3) %>% mutate(Treatment = 'GATA3') %>% dplyr::select(c('ID', 'Description', 'NES', 'geneRatio', 'Treatment'))
 
-intersect(nes_gata3_10wpi$Description, nes_ivld_10wpi$Description)
+options(pillar.sigfig = 5)
+pathway_analysis_heart10wpi <- bind_rows(nes_ivld_10wpi, nes_eomes_10wpi, nes_gata3_10wpi)
+pathway_analysis_heart10wpi <- pathway_analysis_heart10wpi %>% mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+
+write.csv(as_tibble(pathway_analysis_heart10wpi), '~/Documents/PhD/Papers/Paper III/data/gsea_results/10 wpi/pathway_analysis_heart10wpi.csv', row.names = FALSE, quote = FALSE)
+
+library(flextable)
+library(officer)
+
+nes_ivld_10wpi <- nes_ivld_10wpi %>% mutate(across(where(is.numeric), ~ round(.x, 3)))
+nes_eomes_10wpi <- nes_eomes_10wpi %>% mutate(across(where(is.numeric), ~ round(.x, 3)))
+nes_gata3_10wpi <- nes_gata3_10wpi %>% mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+write.csv(as_tibble(nes_ivld_10wpi), '~/Documents/PhD/Papers/Paper III/data/gsea_results/10 wpi/nes_ivld_10wpi.csv', row.names = FALSE, quote = FALSE)
+write.csv(as_tibble(nes_eomes_10wpi), '~/Documents/PhD/Papers/Paper III/data/gsea_results/10 wpi/nes_eomes_10wpi.csv', row.names = FALSE, quote = FALSE)
+write.csv(as_tibble(nes_gata3_10wpi), '~/Documents/PhD/Papers/Paper III/data/gsea_results/10 wpi/nes_gata3_10wpi.csv', row.names = FALSE, quote = FALSE)
 
 
 
 
 
+
+
+
+
+
+
+# Set default font for all flextables
+set_flextable_defaults(font.family = 'Times New Roman')
+
+# Convert to flextable
+ft <- flextable(pathway_analysis_heart10wpi) %>% 
+  font(fontname = 'Time New Roman', part = 'all') %>%  # Set font type
+  fontsize(size = 10, part = 'all') %>%  # Set font size
+  padding(padding = 2, part = 'all') %>%  # Reduce padding
+  align(align = 'center', part = 'all') %>% 
+  width(width = rep(1, ncol(pathway_analysis_heart10wpi))) %>% 
+  autofit()  # Adjust column widths to content
+
+# Save as Word document
+read_docx() %>%
+  body_add_flextable(ft) %>%
+  print(target = '~/Documents/PhD/Papers/Paper III/data/gsea_results/10 wpi/pathway_analysis_heart10wpi.docx')
 
 
 

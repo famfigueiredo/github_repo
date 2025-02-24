@@ -568,3 +568,75 @@ eomesGATA3 %>% length()
 str_detect('GIG', common_genes_heartDevelopment)
 str_detect('IGM', heart_development_gata3)
 
+## Volcano plots ####
+
+### IV-LD #
+# Convert DESeq2 results to a data frame
+res_df_ivld <- as.data.frame(res_ivld_vs_conu_10wpi)
+res_df_ivld$gene <- rownames(res_ivld_vs_conu_10wpi)  # Add gene names as a column
+summary(res_ivld_vs_conu_10wpi)
+summary(res_shrunk_ivld_10wpi)
+padj_threshold <- 0.05
+log2FC_threshold <- 0.5
+
+# Add a column to indicate significance
+res_df_ivld$sig <- ifelse(res_df_ivld$padj < padj_threshold & abs(res_df_ivld$log2FoldChange) > log2FC_threshold, 
+                          "Significant", "Not Significant")
+
+
+orthologs <- gorth(
+  query = rownames(res_df_ivld),
+  source_organism = 'ssalar',
+  target_organism = 'hsapiens',
+  mthreshold = 1,
+  filter_na = TRUE
+)
+
+merged_df <- res_df_ivld %>%
+  left_join(orthologs, by = c('gene' = 'input')) %>%
+  dplyr::select(gene,
+                ortholog_name,
+                ortholog_ensg,
+                log2FoldChange,
+                padj,
+                description) %>%
+  na.omit()
+
+
+merged_df <- merged_df %>%
+  remove_rownames() %>%
+  mutate(ortholog_name = make.unique(as.character(ortholog_name))) %>%
+  column_to_rownames(var = 'ortholog_name')
+
+EnhancedVolcano(merged_df,
+                lab = rownames(merged_df),
+                x = 'log2FoldChange',
+                y = 'padj',
+                title = 'Volcano Plot',
+                pCutoff = padj_threshold,
+                FCcutoff = log2FC_threshold)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
