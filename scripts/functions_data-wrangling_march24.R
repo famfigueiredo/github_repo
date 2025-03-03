@@ -1,4 +1,4 @@
-# Loading functions ####
+# Loading functions ###
 # Significant genes grabs a DESeq2 result table, subsets the genes with padj < 0.05, and selects the ID, log2FoldChange, and padj columns. Also arranges log2FC in a descending manner.
 significant_genes <- function(results_files) {
   b <- as.data.frame(subset(results_files, padj < 0.1)) %>%
@@ -116,85 +116,117 @@ filter_rows_by_GO_term <- function(df1, df2, id_column_name) {
 }
 
 # running gsea starting from a DESeq results table
-gsea_formatting <-
-  function(results_table, tissue, treatment, sampling_point) {
-    # Install and load required packages
-    required_packages <-
-      c('dplyr', 'gprofiler2', 'clusterProfiler', 'org.Hs.eg.db')
-    installed_packages <- rownames(installed.packages())
-    
-    for (pkg in required_packages) {
-      if (!(pkg %in% installed_packages)) {
-        install.packages(pkg)
-      }
-      library(pkg, character.only = TRUE)
+gsea_formatting <- function(results_table, tissue, treatment, sampling_point) {
+  # Install and load required packages
+  required_packages <- c('dplyr', 'gprofiler2', 'clusterProfiler', 'org.Hs.eg.db', 'progress')
+  installed_packages <- rownames(installed.packages())
+  
+  for (pkg in required_packages) {
+    if (!(pkg %in% installed_packages)) {
+      install.packages(pkg)
     }
-    
-    # Convert rownames to column 'ensembl'
-    results_df <-
-      tibble::rownames_to_column(as.data.frame(results_table), var = 'ensembl')
-    
-    # Convert salmon genes to human orthologs
-    orthologs <- gorth(
+    library(pkg, character.only = TRUE)
+  }
+  
+  # Create a progress bar
+  pb <- progress::progress_bar$new(
+    total = 6,  # Total steps to complete
+    format = "  [:bar] :percent :eta", # Customize progress bar format
+    clear = FALSE
+  )
+  
+  # Step 1: Convert rownames to column 'ensembl'
+  results_df <- tibble::rownames_to_column(as.data.frame(results_table), var = 'ensembl')
+  pb$tick()  # Update progress bar
+  
+  # Step 2: Convert salmon genes to human orthologs
+  orthologs <- tryCatch({
+    gorth(
       query = rownames(results_table),
       source_organism = 'ssalar',
       target_organism = 'hsapiens',
       mthreshold = 1,
       filter_na = TRUE
     )
-    
-    # Select relevant variables and join with ortholog data
-    merged_df <- results_df %>%
-      left_join(orthologs, by = c('ensembl' = 'input')) %>%
-      dplyr::select(ensembl,
-                    ortholog_name,
-                    ortholog_ensg,
-                    log2FoldChange,
-                    padj,
-                    description) %>%
-      na.omit()
-    
-    # Order genes by fold change
-    ordered_df <- merged_df[order(-merged_df$log2FoldChange),]
-    
-    # Prepare matrix for GSEA
-    gene_list <- ordered_df$log2FoldChange
-    names(gene_list) <- ordered_df$ortholog_name
-    
-    # Prepare matrix for gsePathway
-    ordered_entrez <-
-      bitr(ordered_df$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)
-    entrez_genes <-
-      ordered_df %>% left_join(
-        ordered_entrez,
-        by = c('ortholog_name' = 'SYMBOL'),
-        relationship = 'many-to-many'
-      ) %>% dplyr::select(ENTREZID, log2FoldChange)
-    distinct_genes <-
-      entrez_genes %>% distinct(ENTREZID, .keep_all = T)
-    entrez_gene_list <<- distinct_genes$log2FoldChange
-    names(entrez_gene_list) <<- distinct_genes$ENTREZID
-    
-    # Run GSEA
-    gsea_results <- gseGO(
+  }, error = function(e) {
+    message("Error in gorth function: ", e)
+    return(NULL)
+  })
+  if (is.null(orthologs)) {
+    stop("Ortholog conversion failed, stopping execution.")
+  }
+  pb$tick()  # Update progress bar
+  
+  # Step 3: Merge with ortholog data
+  merged_df <- results_df %>%
+    left_join(orthologs, by = c('ensembl' = 'input')) %>%
+    dplyr::select(ensembl, ortholog_name, ortholog_ensg, log2FoldChange, padj, description) %>%
+    na.omit()
+  rm(results_df)  # Remove large intermediate object
+  pb$tick()  # Update progress bar
+  
+  # Step 4: Order genes by fold change
+  ordered_df <- merged_df[order(-merged_df$log2FoldChange),]
+  rm(merged_df)  # Remove large intermediate object
+  pb$tick()  # Update progress bar
+  
+  # Step 5: Prepare matrix for GSEA
+  gene_list <- ordered_df$log2FoldChange
+  names(gene_list) <- ordered_df$ortholog_name
+  
+  # Step 6: Prepare matrix for gsePathway (Entrez gene IDs)
+  ordered_entrez <- tryCatch({
+    bitr(ordered_df$ortholog_name, 'SYMBOL', 'ENTREZID', OrgDb = org.Hs.eg.db)
+  }, error = function(e) {
+    message("Error in bitr function: ", e)
+    return(NULL)
+  })
+  if (is.null(ordered_entrez)) {
+    stop("Gene ID conversion failed, stopping execution.")
+  }
+  
+  entrez_genes <- ordered_df %>% left_join(
+    ordered_entrez,
+    by = c('ortholog_name' = 'SYMBOL'),
+    relationship = 'many-to-many'
+  ) %>% dplyr::select(ENTREZID, log2FoldChange)
+  distinct_genes <- entrez_genes %>% distinct(ENTREZID, .keep_all = T)
+  rm(ordered_df, entrez_genes)  # Remove large intermediate objects
+  
+  entrez_gene_list <<- distinct_genes$log2FoldChange
+  names(entrez_gene_list) <<- distinct_genes$ENTREZID
+  pb$tick()  # Update progress bar
+  
+  # Step 7: Run GSEA
+  gsea_results <- tryCatch({
+    gseGO(
       gene_list,
       keyType = 'SYMBOL',
       OrgDb = org.Hs.eg.db,
       ont = 'BP',
       pvalueCutoff = 0.05,
       pAdjustMethod = 'BH',
-      verbose = T,
+      verbose = TRUE,
       eps = 1e-300,
       nPermSimple = 10000
     )
-    
-    # Assign the results to a variable including treatment and sampling_point in the name
-    results_name <-
-      paste0(tissue, '_', 'gsea_results_', treatment, '_', sampling_point)
-    assign(results_name, gsea_results, envir = .GlobalEnv)
-    
-    return(gsea_results)
+  }, error = function(e) {
+    message("Error in gseGO function: ", e)
+    return(NULL)
+  })
+  pb$tick()  # Final update to progress bar
+  
+  if (is.null(gsea_results)) {
+    stop("GSEA failed, stopping execution.")
   }
+  
+  # Step 8: Assign the results to a variable including treatment and sampling_point in the name
+  results_name <- paste0(tissue, '_', 'gsea_results_', treatment, '_', sampling_point)
+  assign(results_name, gsea_results, envir = .GlobalEnv)
+  
+  # Return the gsea_results
+  return(gsea_results)
+}
 
 # gsea formatting starting from a DESeq results table and using only significantly differentially regulated genes
 gsea_formatting_significant <-
